@@ -1,0 +1,179 @@
+---
+title: "Efficient simulation of individual-based population models"
+subtitle: "The `R` package `IBMPopSim`"
+author:
+  - name: Daphné Giorgi 
+    email: daphne.giorgi@sorbonne-universite.fr
+    url: https://perso.lpsm.paris/~giorgi/
+    affiliations:
+      - name: Sorbonne Université, CNRS
+        department: Laboratoire de Probabilités, Statistique et Modélisation
+        url: https://www.lpsm.paris/
+  - name: Vincent Lemaire 
+    corresponding: true
+    email: vincent.lemaire@sorbonne-universite.fr
+    url: https://perso.lpsm.paris/~vlemaire/
+    orcid: 0000-0002-0433-7722
+    affiliations:
+      - name: Sorbonne Université, CNRS
+        department: Laboratoire de Probabilités, Statistique et Modélisation
+        url: https://www.lpsm.paris/
+  - name: Sarah Kaakai
+    corresponding: true
+    email: sarah.kaakai@univ-lemans.fr
+    url: https://perso.univ-lemans.fr/~skaakai/
+    affiliations:
+      - name: Le Mans Université, CNRS, Institut du Risque et de l'Assurance 
+        department: Laboratoire Manceau de Mathématiques
+        url: https://lmm.univ-lemans.fr/fr/
+date: last-modified
+date-modified: last-modified
+description: |
+    TODO
+abstract: >+
+    The `R` Package `IBMPopSim` aims to simulate the random evolution of heterogeneous populations using stochastic Individual-Based Models (IBMs). The package enables users to simulate population evolution, in which individuals are characterized by their age and some characteristics, and the population is modified by different types of events, including births/arrivals, death/exit events, or changes of characteristics. The frequency at which an event can occur to an individual can depend on their age and characteristics, but also on the characteristics of other individuals (interactions). Such models have a wide range of applications in fields including  actuarial science, biology, ecology or epidemiology. `IBMPopSim` overcomes the limitations of time-consuming IBMs simulations by implementing new efficient algorithms  based on thinning methods, which are compiled using the `Rcpp` package while providing a user-friendly interface.
+keywords: [Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation]
+citation:
+  type: article-journal
+  container-title: "Computo"
+  doi: "xxxx"
+  url: https://computo.sfds.asso.fr/template-computo-quarto
+  publisher: "Société Française de Statistique"
+  issn: "2824-7795"
+bibliography: references.bib
+github-user: computorg
+repo: "ibmpopsim_computo"
+draft: true # set to false once the build is running
+published: false # will be set to true once accepted
+format:
+  computo-html: default
+  computo-pdf: default
+execute:
+  echo: true
+---
+
+# Introduction
+
+In various fields, advances in probability have contributed to the development of a new mathematical framework for so-called individual-based stochastic population dynamics, also called stochastic Individual-Based Models (IBMs).
+
+Stochastic IBMs allow the modeling in continuous time of populations dynamics structured by age and/or characteristics. In the field of mathematical biology and ecology, a large community has used this formalism for the study of the evolution of structured populations (see e.g. [@FerTra09; @collet2013rigorous; @BanMel15; @costa2016stochastic; @billiard2016effect; @lavallee2019stochastic; @meleard2019birth; @calvez2020horizontal]), after the pioneer works [@FouMel04; @champagnat2006unifying; @tran_2008].
+
+IBMs are also useful in demography and actuarial sciences, for the modeling of human populations dynamics (see e.g. [@Ben10; @Bou16; @karoui2021simulating]). They allow the modeling of heterogeneous and complex population dynamics, which can be used to compute demographic indicators or simulate the evolution of insurance portfolios in order to study the basis risk, compute cash flows for annuity products or pension schemes, or for a fine assessment of mortality models [@barrieu2012understanding]. There are other domains in which stochastic IBMs can be used, for example in epidemiology with stochastic compartmental models, neurosciences, cyber risk, or Agent-Based Models (ABMs) in economy and social sciences, which can be seen as IBMs.
+Many mathematical results have been obtained in the literature cited above, for quantifying the limit behaviors of IBMs in long time or in large population. In particular, pathwise representations of IBMs have been introduced in [@FouMel04] (and extended to age-structured populations in [@tran_2008]), as measure-valued pure jumps Markov processes, solutions of SDEs driven by Poisson measures. These pathwise representations are based on the *thinning* and projection of Poisson random measures defined on extended spaces. However, the simulation of large and interacting populations is often referred as computationally expensive.
+
+The aim of the `R` package `IBMPopSim` is to meet the needs of the various communities for efficient tools in order to simulate the evolution of stochastic IBMs. `IBMPopSim` provides a general framework for the simulation of a wide class of IBMs, where individuals are characterized by their age and/or a set of characteristics. Different types of events can be included in the modeling by users, depending on their needs: births, deaths, entry or exit in/to the population and changes of characteristics (swap events). Furthermore, the various events that can happen to individuals in the population can occur at a non-stationary frequency, depending on the individuals' characteristics and time, and also including potential interactions between individuals.
+
+We introduce a unified mathematical and simulation framework for this class of IBMs, generalizing the pathwise representation of IBMs by thinning of Poisson measures, as well as the associated population simulation algorithm, based on an acceptance/rejection procedure. In particular, we provide general sufficient conditions on the event intensities under which the simulation of a particular model is possible.
+
+We opted to implement the algorithms of the `IBMPopSim` package using the `Rcpp` package, a tool facilitating the seamless integration of high-performance `C++` code into easily callable `R` functions [@JSSv040i08]. With just a few lines of `C++` code, `IBMPopSim` offers user-friendly R functions for defining IBMs. Once events and their associated intensities are specified, an automated procedure creates the model. This involves integrating the user's source code into the primary `C++` code using a template mechanism. Subsequently, `Rcpp` is invoked to compile the model and integrate it into the `R` session. Following this process, the model becomes callable with varying parameters, enabling the generation of diverse population evolution scenarios. Combined with the design of the simulation algorithms, the package structure yields very competitive simulation runtimes for IBMs, while staying user-friendly for `R` users. Several outputs function are also implemented in `IBMPopSim`. For instance the package allows the construction and visualization of age pyramids, as well as the construction of death and exposures table from the censored individual data, compatible with `R` packages concerned with mortality modelling, such as [@Rdemography] or [@Rstmomo]. Several examples are provided in the form of `R` vignettes on the [website](https://daphnegiorgi.github.io/IBMPopSim/), and in recent works of [@karoui2021simulating] and [@roget2022positive].
+
+Designed for applications in social sciences, the `R` package `MicSim` [@Zin14] can be used for continuous time microsimulation. In continuous-time microsimulation, individual life-courses are usually specified by sequences of state transitions (events) and the time spans between these transitions. The state space is usually discrete and finite, which is no necessarily the case in `IBMPopSim`, where individuals can have continuous characteristics. But most importantly, microsimulation does not allow for interactions between individuals. Indeed, microsimulation produces separately the life courses of all individuals in the populations, based on the computation of the distribution functions of the waiting times in the distinct states of the state space, for each individual [@Zin14]. This can be slow in comparison to the simulation by thinning of event times occurring in the population, which is based on selecting event times among some competing proposed event times. Finally, `MicSim` simplifies the Mic-Core microsimulation tool implemented in Java [@zinn2009mic]. However, the implementation in `R` of simulation algorithms yields longer simulation run times than when using `Rcpp`. To the best of our knowledge, there are no other `R` packages currently available addressing the issue of IBMs efficient simulation.
+
+In @sec-IBM, we introduce the mathematical framework that characterizes the class of Stochastic Individual-Based Models (IBMs) that can be implemented in the `IBMPopSim` package. In particular, a general pathwise representation of IBMs is presented. The population dynamics is obtained as the solution of an SDE driven by Poisson measures, for which we obtain existence and uniqueness results in Theorem [1](#ThEqZ){reference-type="ref" reference="ThEqZ"}. Additionally, a succinct overview of the package is provided. In @sec-simulation the two main algorithms for simulating the population evolution of an IBM across the interval $[0, T]$ are detailed. In @sec-package we present the main functions of the `IBMPopSim` package, which allow for the definition of events and their intensities, the creation of a model, and the simulation of scenarios. Two examples are detailed in @sec-insurance-portfolio and sec-example-interaction, featuring applications involving an heterogeneous insurance portfolio characterized by entry and exit events, and an age and size-structured population with intricate interactions.
+
+# Stochastic Individual-Based Models (IBMs) in IBMPopSim {#sec-IBM}
+
+Stochastic Individual-Based Models (IBMs) represent a broad class of random population dynamics models, allowing the description of populations evolution on a microscopic scale. Informally, an IBM can be summarized by the description of the individuals constituting the population, the various types of events that can occur to these individuals, along with their respective frequencies. In `IBMPopSim`, individuals can be characterized by their age and/or a collection of discrete or continuous characteristics. Moreover, the package enables users to simulate efficiently populations in which one or more of the following event types may occur:
+
+-   **Birth event**: addition of an individual of age 0 to the
+    population.
+-   **Death event**: removal of an individual from the population.
+-   **Entry event**: arrival of an individual in the population.
+-   **Exit (emigration) event**: exit from the population (other than
+    death).
+-   **Swap event**: an individual changes characteristics.
+
+Each event type is linked to an associated event kernel, describing how the population is modified following the occurrence of the event. For some event types, the event kernel requires explicit specification. This is the case for entry events when a new individual joins the population. Then,the model should specify how the age and characteristics of this new individual are chosen. For instance, the characteristics of a new individual in the population can be chosen uniformly in the space of all characteristics, or can depend on the distribution of his parents or those of the other individuals composing the population.
+
+The last component of an IBM are the event intensities. Informally, an event intensity is a function $\lambda^e_t(I, Z)$ describing the frequency at which an event $e$ can occur to an individual $I$ in a population $Z$ at a time $t$. Given a history of the population $(\mathcal{F}_t)$, the probability of event $e$ occurring to individual $I$ during a small interval of time $(t,t+dt]$ is proportional to $\lambda^e(I,t)$:
+$$
+    \mathbb{P}(\text{event } e \text{ occurring to $I$ during } (t,t+dt] | \mathcal{F}_t) \simeq \lambda^e_t(I, Z)dt.
+$$
+The intensity function $\lambda^e$ can include dependency on the individual's $I$ age and characteristics, the time $t$, or the population composition $Z$ in the presence of interactions.
+
+## Brief package overview
+
+Prior to providing a detailed description of an Individual-Based Model (IBM), we present a simple model of birth and death in an age-structured _human_ population. We assume no interactions between individuals, and individuals are characterized by their gender, in addition to their age.
+In this simple model, all individuals, regardless of gender, can give birth when their age falls between 15 and 40 years, with a constant birth rate of 0.05. The death intensity is assumed to follow a Gompertz-type intensity depending on age. 
+The birth and death intensities are then given by  
+\begin{equation*}
+    \lambda^b(I, t) = 0.05 \times \mathbf{1}_{[15,40]}(a(I,t)), \quad \lambda^d(I,t) = \alpha\exp(\beta a(I,t)), 
+\end{equation*} 
+with $a(I,t)$ the age of individual $I$ at time $t$. 
+Birth events are also characterized with a kernel determining the gender of the newborn, who is male with probability $p_{male}$. 
+
+### Model creation 
+To implement this model in IBMPopSim, it is necessary to individually define each event type. In this example, the `mk_event_individual` function is used. The creation of an event involves  a few lines of `cpp` instructions defining the intensity and, if applicable, the kernel of the event. For a more in depth description of the event creation step and its parameters, we refer to @sec-package_events.
+
+The events of this simple model are for example defined through the following calls.
+```{r}
+#| echo: false
+
+library(IBMPopSim)
+```
+
+```{r}
+birth_event <- mk_event_individual(
+  type = "birth", 
+  intensity_code = "result = birth_rate(I.age(t));",
+  kernel_code = "newI.male = CUnif(0,1) < p_male;")
+
+death_event <- mk_event_individual(
+  type = "death",
+  intensity_code = "result = alpha * exp(beta * I.age(t));")
+```
+In the `cpp` codes, the names `birth_rate`, `p_male`, `alpha` and `beta` refer to the model parameters defined in the following list. 
+```{r}
+params <- list(
+  "alpha" = 0.008, "beta" = 0.02, 
+  "p_male" = 0.51,
+  "birth_rate" = stepfun(c(15, 40), c(0, 0.05, 0)))
+```
+
+In a second step, the model is created by calling the function `mk_model`. A `cpp` source code is automatically created through a template mechanism based on the events and parameters, subsequently compiled using the `sourceCpp` function from the `Rcpp` package.
+```{r}
+birth_death_model <- mk_model(
+  characteristics = c("male" = "bool"),
+  events = list(death_event, birth_event),
+  parameters = params)
+```
+
+### Simulation 
+Once the model is created and compiled, the `popsim` function is called to simulate the evolution of a population according to this model. To achieve this, an initial population must be defined. In this example, we extract a population from a dataset specified in the package (a sample of $100\,000$ individuals based on the population of England and Wales in 2014). It is also necessary to set bounds for the events intensities. In this example, they are obtained by assuming that the maximum age for an individual is 115 years. 
+```{r}
+a_max <- 115
+events_bounds = c(
+  "death" = params$alpha * exp(params$beta * a_max),
+  "birth" = max(params$birth_rate))
+```
+The function `popsim` can now be called to simulate the population starting from the initial population `population(EW_pop_14$sample)` up to time $T = 30$. 
+```{r}
+sim_out <- popsim(
+  birth_death_model, 
+  population(EW_pop_14$sample), 
+  events_bounds, 
+  parameters = params, age_max = a_max, 
+  time = 30)
+```
+The data frame `sim_out$population` contains the information (birth, death, gender) on individuals who lived in the population over the period $[0,30]$. Functions of the package allows to provide aggregated information on the population.
+
+In the remainder of this section,  we define rigorously the class of IBMs that can be simulated in `IBMPopSim`, along with the assumptions that are required in order for the population to be simulatable. The representation of age-structured IBMs based on measure-valued processes, as introduced in [@tran_2008], is generalized to a wider class of abstract population dynamics. The modeling differs slightly here, since individuals are _kept in the population_ after their death (or exit), by including the death/exit date as an individual trait. 
+
+## Population {#sec-population}
+## Events {#sec-events}
+## Events intensity {#sec-event-intensity}
+## Pathwise representation
+## Thinning of Poisson measure {#sec-thinning}
+
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Session information {.appendix .unnumbered}
+
+```{r session-info}
+sessionInfo()
+```
+
