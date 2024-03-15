@@ -49,7 +49,8 @@ format:
   computo-html: default
   computo-pdf: default
 execute:
-  echo: true
+    eval: false
+    echo: true
 ---
 
 # Introduction
@@ -75,13 +76,11 @@ In @sec-IBM, we introduce the mathematical framework that characterizes the clas
 
 Stochastic Individual-Based Models (IBMs) represent a broad class of random population dynamics models, allowing the description of populations evolution on a microscopic scale. Informally, an IBM can be summarized by the description of the individuals constituting the population, the various types of events that can occur to these individuals, along with their respective frequencies. In `IBMPopSim`, individuals can be characterized by their age and/or a collection of discrete or continuous characteristics. Moreover, the package enables users to simulate efficiently populations in which one or more of the following event types may occur:
 
--   **Birth event**: addition of an individual of age 0 to the
-    population.
--   **Death event**: removal of an individual from the population.
--   **Entry event**: arrival of an individual in the population.
--   **Exit (emigration) event**: exit from the population (other than
-    death).
--   **Swap event**: an individual changes characteristics.
+- **Birth event**: addition of an individual of age 0 to the population.
+- **Death event**: removal of an individual from the population.
+- **Entry event**: arrival of an individual in the population.
+- **Exit (emigration) event**: exit from the population (other than death).
+- **Swap event**: an individual changes characteristics.
 
 Each event type is linked to an associated event kernel, describing how the population is modified following the occurrence of the event. For some event types, the event kernel requires explicit specification. This is the case for entry events when a new individual joins the population. Then,the model should specify how the age and characteristics of this new individual are chosen. For instance, the characteristics of a new individual in the population can be chosen uniformly in the space of all characteristics, or can depend on the distribution of his parents or those of the other individuals composing the population.
 
@@ -160,8 +159,95 @@ The data frame `sim_out$population` contains the information (birth, death, gend
 In the remainder of this section,  we define rigorously the class of IBMs that can be simulated in `IBMPopSim`, along with the assumptions that are required in order for the population to be simulatable. The representation of age-structured IBMs based on measure-valued processes, as introduced in [@tran_2008], is generalized to a wider class of abstract population dynamics. The modeling differs slightly here, since individuals are _kept in the population_ after their death (or exit), by including the death/exit date as an individual trait. 
 
 ## Population {#sec-population}
+
+### Notations
+
+In the remainder of the paper, the filtered probability space is denoted by $(\Omega,\{\mathcal{F}_t \},{\mathbb{P}})$, under the usual assumptions. All processes are assumed to be càdlàg and adapted to the filtration $\{\mathcal{F}_t \}$ (for instance the history of the population) on a time interval $[0,T]$. For a càdlàg process $X$, we denote $X_{t^-} := \lim_{\genfrac{}{}{0pt}{2}{s\to t}{s<t}} X_s$.
+
+### Individuals
+
+An individual is represented by a triplet $I = (\tau^b, \tau^d, x) \in \mathcal{I}= {\mathbb{R}}\times \bar {\mathbb{R}}\times {\mathcal{X}}$ with:
+
+- $\tau^b \in {\mathbb{R}}$ the date of birth,
+- $\tau^d \in \bar {\mathbb{R}}$ the death date, with $\tau^d = \infty$ if the individual is still alive,
+- a collection $x \in {\mathcal{X}}$ of characteristics where ${\mathcal{X}}$ is the space of characteristics.
+
+Note that in IBMs, individuals are usually characterized by their age $a(t) =t-\tau^b$ instead of their date of birth $\tau^b$. However, using the latter is actually easier for the simulation, as it remains constant over time.
+
+### Population process
+
+The population at a given time $t$ is a random set
+$$
+    Z_t=\{ I_k \in \mathcal{I}; \; k= 1,\dots, N_t\},
+$$
+composed of all individuals (alive or dead) who have lived in the population before time $t$. As a random set, $Z_t$ can be represented by a random counting measure on $\mathcal{I}$ , that is an integer-valued measure $Z: \Omega \times \mathcal{I}\to \bar {\mathbb{N}}$ where for $A \in \mathcal{I}$, $Z(A)$ is the (random) number of individuals $I$ in the subset $A$. With this representation: 
+$$
+\begin{aligned}
+    Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &= \sum_{k=1}^{N_t} \delta_{I_k} (\tau^b, \tau^d,x), \nonumber \\
+    \text{ with }  \int_{\mathcal{I}} f(\tau^b, \tau^d, x) Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &= \sum_{k=1}^{N_t} f(I_k).
+\end{aligned}
+$$ {#eq-popZ}
+
+The number of individuals present in the population *before time* $t$ is obtained by taking $f\equiv 1$:
+$$
+    N_t =  \int_{\mathcal{I}}  Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \boldsymbol{1}_{\mathcal{I}} (I_k).
+$$
+Note that $(N_t)_{t\geq 0}$ is an increasing process since dead/exited individuals are kept in the population $Z$. The number of alive individuals in the population at time $t$ is: 
+$$
+    N_t^a =  \int_{\mathcal{I}}  \mathsf{1}_{\{\tau^d > t \} }Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \mathsf{1}_{\{\tau^d_k > t \} }.
+$$ {#eq-Nta}
+Another example is the number of alive individuals of age over $a$ is
+$$
+    N_t([a,+\infty)) :=  \int_{\mathcal{I}}  \boldsymbol{1}_{[a,+\infty)}(t-\tau^b)\mathsf{1}_{]t,\infty]}(\tau^d) Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t}  \boldsymbol{1}_{\{ t -\tau_k^b \geq a \}}\mathsf{1}_{\{\tau^d_k \geq t \} }.
+$$
+
+
 ## Events {#sec-events}
+
+The population composition changes at random dates following different types of events. `IBMPopSim` allows the simulation of IBMs with the following events types:
+
+- A **birth** event at time $t$ is the addition of a new individual $I'=(t,\infty, X)$ of age $0$ to the population. Their date of birth is $\tau^b =t$, and characteristics is $X$, a random variable of distribution defined by the birth kernel $k^b(t,I,\mathrm{d}x)$ on ${\mathcal{X}}$, depending on $t$ and its parent $I$. The population size becomes $N_t = N_{t^-} + 1$, and the population composition after the event is $$Z_t  = Z_{t^-} +  \delta_{(t,\infty, X)}.$$
+
+- An **entry** event at time $t$ is also the addition of an individual $I'$ in the population. However, this individual is not of age $0$. The date of birth and characteristics of the new individual $I'= (\tau^b, \infty, X)$ are random variables of probability distribution defined by the entry kernel $k^{en}(t, \mathrm{d}s, \mathrm{d}x)$ on ${\mathbb{R}}\times {\mathcal{X}}$. The population size becomes $N_t = N_{t^-} + 1$, and the population composition after the event is: 
+$$
+    Z_t  = Z_{t^-} +  \delta_{(\tau^b, \infty, X)}.
+$$
+
+- A **death** or **exit** event of an individual $I= (\tau^b,\infty, x)\in Z_{t^-}$ at time $t$ is the modification of its death date $\tau^d$ from $+\infty$ to $t$. This event results in the simultaneous addition of the individual $(\tau^b,t,x)$ and removal of the individual $I$ from the population. The population size is not modified, and the population composition after the event is 
+$$
+    Z_t  = Z_{t^-} +\delta_{(\tau^b,t,x)}- \delta_{I}.
+$$
+
+- A **swap** event (change of characteristics) results in the simultaneous addition and removal of an individual. If an individual $I= (\tau^b,\infty, x) \in Z_{t^-}$ changes of characteristics at time $t$, then it is removed from the population and replaced by $I' = (\tau^b,\infty, X)$. The new characteristics $X$ is a random variable of distribution $k^s(t, I,\mathrm{d}x)$ on ${\mathcal{X}}$, depending on time, the individual's age and previous characteristics $x$. In this case, the population size is not modified and the population becomes:
+$$
+    Z_t  = Z_{t^-}   +  \delta_{(\tau^b,  \infty, X)} -  \delta_{(\tau^b, \infty, x)}.
+$$
+
+To summarize, the space of event types is $E = \{ b, en, d, s \}$, and the jump $\Delta Z_t = Z_t - Z_{t^-}$ (change in the population composition) generated by an event of type $e \in \{ b, en, d, s \}$ is denoted by $\phi^e(t, I)$. We thus have the following rules summarized in the table @tbl-event-action.
+
+Event | Type | $\phi^e(t, I)$ | New individual
+------|:----:|----------------|---------------
+Birth | $b$ | $\delta_{(t, \infty,  X)}$ | $\tau^b =t, \; X \sim k^b(t,I,\mathrm{d}x)$ 
+Entry | $en$ | $\delta_{(\tau^b, \infty,  X)}$ | $(\tau^b, X) \sim k^{en}(t,\mathrm{d}s, \mathrm{d}x)$ 
+Death/Exit | $d$ | $\delta_{(\tau^b, t,x)} - \delta_{(\tau^b, \infty, x)}$ | $\tau^d = t$
+Swap | $s$ | $\delta_{(\tau^b, \infty , X)} - \delta_{(\tau^b, \infty, x)}$ | $X \sim k^s(t,I,\mathrm{d}x)$
+: Action in the population for a given event name {#tbl-event-action}
+
+::: {#rem-popfinale}
+
+## Composition of the population 
+
+- At time $T$, the population $Z_T$ contains all individuals who lived in the population before $T$, including dead/exited individuals. If there are no swap events, or entries,the population state $Z_t$ for any time $t\leq T$ can be obtained from $Z_T$. Indeed, if $Z_T = \sum_{k=1}^{N_T}  \delta_{I_k}$, then the population at time $t\leq T$ is simply composed of the individuals born before $t$: $$
+    Z_t = \sum_{k=1}^{N_T} \boldsymbol{1}_{\{\tau^b_k \leq t \}} \delta_{I_k}.
+$$
+- In the presence of entries (open population), a characteristic $x$ can track the individuals' entry dates. Then, the previous equation can be easily modified in order to obtain the population $Z_t$ at time $t\leq T$ from $Z_T$.
+
+:::
+
 ## Events intensity {#sec-event-intensity}
+
+
+
 ## Pathwise representation
 ## Thinning of Poisson measure {#sec-thinning}
 
