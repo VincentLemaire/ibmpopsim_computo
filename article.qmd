@@ -48,6 +48,9 @@ published: false # will be set to true once accepted
 format:
   computo-html: default
   computo-pdf: default
+crossref:
+    cnj-title: Assumption
+    cnj-prefix: Assumption 
 execute:
     eval: false
     echo: true
@@ -96,7 +99,8 @@ Prior to providing a detailed description of an Individual-Based Model (IBM), we
 In this simple model, all individuals, regardless of gender, can give birth when their age falls between 15 and 40 years, with a constant birth rate of 0.05. The death intensity is assumed to follow a Gompertz-type intensity depending on age. 
 The birth and death intensities are then given by  
 \begin{equation*}
-    \lambda^b(I, t) = 0.05 \times \mathbf{1}_{[15,40]}(a(I,t)), \quad \lambda^d(I,t) = \alpha\exp(\beta a(I,t)), 
+    \lambda^b(t, I) = 0.05 \times \mathbf{1}_{[15,40]}(a(I,t)), \quad 
+    \lambda^d(t, I) = \alpha\exp(\beta a(I,t)), 
 \end{equation*} 
 with $a(I,t)$ the age of individual $I$ at time $t$. 
 Birth events are also characterized with a kernel determining the gender of the newborn, who is male with probability $p_{male}$. 
@@ -246,9 +250,129 @@ $$
 
 ## Events intensity {#sec-event-intensity}
 
+Once the different event types have been defined in the population model, the frequency at which each event occur in the population $e$ have to be specified.
+Informally, the intensity $\Lambda^e_t(Z_t)$ at which an event $e$ can occur is defined by
+$$
+    \mathbb P\big( \text{event } e \text { occurs in the population }  Z_t  \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \Lambda^e_t (Z_t)\mathrm{d}t.
+$$
+For a more formal definition of stochastic intensities, we refer to [@bremaud1981point] or [@KaaElK20]. The form of the intensity function $(\Lambda^e_t (Z_t))$ determines the population simulation algorithm in `IBMPopSim`:
 
+- When the event intensity does not depend on the population state, 
+$$
+    \big(\Lambda^e_t (Z_t)\big)_{t\in [0,T]} = \big(\mu^e(t)\big)_{t \in [0,T]},
+$$ {#eq-poisson-intensity}
+with $\mu^e$ a deterministic function, the events of type $e$ occur at the jump times of an inhomogeneous Poisson process of intensity function $(\mu^e(t))_{t \in [0,T]}$. When such an event occurs, the individual to whom the event happens to is drawn uniformly among alive individuals in the population.
+In a given model, the set of events $e\in E$ with Poisson intensities will be denoted by $\mathcal{P}$.
+- Otherwise, we assume that the global intensity $\Lambda^e_t(Z_t)$ at which the events of type $e$ occur in the population can be written as the sum of individual intensities $\lambda^e_t(I,Z_t)$:
+$$
+\begin{aligned}
+    &\Lambda^e_t (Z_t) = \sum_{k=1}^{N_t} \lambda^e_t ( I_k,Z_t),  \\
+    & \nonumber \text{with } \mathbb P\big( \text{event } e \text { occurs to an individual } I \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \lambda^e_t (I,Z_t)\mathrm{d}t.
+\end{aligned}
+$$ {#eq-global-intensity}
+
+Obviously, nothing can happen to dead or exited individuals, i.e. individuals $I= (\tau^b, \tau^d, x)$ with $\tau^d \leq t$. Thus, individual event intensities are assumed to be null for dead/exited individuals:
+$$
+    \lambda^e_t ( I,Z_t) = 0, \text{ if }\tau^d \leq t, \text{ so that } \Lambda^e_t (Z_t) = \sum_{k=1}^{N_t^a} \lambda^e_t ( I_k,Z_t),
+$$
+with $N^a_t$ the number of alive individuals at time $t$.
+
+The event's individual intensity $\lambda^e_t (I,Z_t)$ can depend on time (for instance when there is a mortality reduction over time), on the individual's age $t-\tau^b$ and characteristics, but also on the population composition $Z_t$. The dependence of $\lambda^e$ on the population $Z$ models interactions between individuals in the populations. Hence, two types of individual intensity functions can be implemented in `IBMPopSim`:
+
+1. *No interactions:* The intensity function $\lambda^e$ does not depend on the population composition. The intensity at which the event of type $e$ occur to an individual $I$ only depends on its date of birth and characteristics: 
+$$
+    \lambda^e_t (I,Z_t) = \lambda^e(t, I),
+$$ {#eq-intensity-no-interaction}
+where $\lambda^e: \mathbb{R}_+ \times \mathcal{I}\to {\mathbb{R}}^+$ is a deterministic function. In a given model, we denote by $\mathcal{E}$ the set of event types with individual intensity @eq-intensity-no-interaction.
+
+2. *"Quadratic" interactions:* The intensity at which an event of type $e$ occurs to an individual $I$ depends on $I$ and on the population composition, through an interaction function $W^e$. The quantity $W^e(t, I,J)$ describes the intensity of interactions between two alive individuals $I$ and $J$ at time $t$, for instance in the presence of competition or cooperation. In this case, we have
+$$
+    \lambda^e_t(I,Z_t)=\sum_{j=1}^{N_t} W^e(t, I, I_j) = \int_{\mathcal{I}} W^e(t, I, (\tau^b,\tau^d,x)) Z_t (\mathrm{d}\tau^b,\mathrm{d}\tau^d, \mathrm{d}x),
+$$ {#eq-intensity-interaction}
+where $W^e(t, I, (\tau^b,\tau^d,x))  = 0$ if the individual $J =(\tau^b,\tau^d,x)$ is dead, i.e. $\tau^d \leq t$.\ In a given model, we denote by $\mathcal{E}_W$ the set of event types with individual intensity @eq-intensity-interaction.
+
+To summarize, an individual intensity in IBMPopSim can be written as:
+$$
+    \lambda^e_t(I,Z_t) = \lambda^e(t, I) \mathbf{1}_{\{e \in \mathcal{E}\}} + \biggl( \sum_{j=1}^{N_t} W^e(t, I, I_j) \biggr) \mathbf{1}_{\{e \in \mathcal{E}_W\}}.
+$$ {#eq-indiviual-intensity}
+
+::: {#exm-popfinale}
+
+1. An example of death intensity without interaction for an individual $I=(\tau^b, \tau^d, x)$ alive at time $t$, $t < \tau^d$, is:
+$$
+    \lambda^d(t,I) =  \alpha_x \exp(\beta_x a(I,t)), \text{ where }  a(I,t) = t-\tau^b
+$$
+is the age of the individual $I$ at time $t$. In this classical case, the death rate of an individual $I$ is an exponential (Gompertz) function of the individual's age, with coefficients depending on the individual's characteristics $x$.
+
+2. In the presence of competition between individuals, the death intensity of an individual $I$ also depend on other individuals $J$ in the population. For example, if $I=(\tau^b,\tau^d, x)$, with $x$ its size, then we can have: 
+$$
+    W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J > t\}}, \quad \forall \; J=(\tau^b_J,\tau^d_J , x_J).
+$$ {#eq-ex-interation}
+This can be interpreted as follows: if the individual $I$ meets randomly an individual $J$ alive at time $t$, and of bigger size $x_J > x$, then he can die at the intensity $x_J-x$. If $J$ is smaller than $I$, then he cannot kill $I$. The bigger is the size $x$ of $I$, the lower is his death intensity $\lambda^d_t(I,Z_t)$ defined by 
+$$
+    \lambda^d_t(I,Z_t) = \sum_{\genfrac{}{}{0pt}{2}{J\in Z_t,}{x_J > x}} (x_J -x)\mathbf{1}_{\{\tau^d_J > t\}}.
+$$
+
+3. `IBMPopSim` can simulate IBMs that include intensities expressed as a sum of Poisson intensities and individual intensities of the form $\Lambda^e(Z_t) =\mu^e_t + \sum_{k=1}^{N_t} \lambda^e(I_k, Z_t)$. Other examples are provided in @sec-insurance-portfolio and @sec-example-interaction.
+Finally, the global intensity at which an event can occur in the population is defined by: 
+$$
+    \Lambda_t(Z_t) = \sum_{e\in \mathcal{P}} \mu^e(t) + \sum_{e \in \mathcal E} \Big(\sum_{k=1}^{N_t} \lambda^e(t, I_k)\Big) + \sum_{e \in \mathcal E_W} \Big(\sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)\Big).
+$$ {#eq-global-ev-intensity}
+An important point is that for events $e \in \mathcal E$ without interactions, the global event intensity $\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t} \lambda^e(t, I_k)$ is _of order_ $N_t^a$ defined in @eq-Nta (number of alive individuals at time $t$). On the other hand, for events $e \in \mathcal{E}_W$ with interactions, $\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)$ is of order $(N_t^a)^2$. 
+Informally, this means that when the population size increases, events with interaction are more costly to simulate. Furthermore, the numerous computations of the interaction kernel $W^e$ can also be quite costly. The randomized Algorithm [\[algo::rzndomized\]](#algo::rzndomized){reference-type="ref" reference="algo::rzndomized"}, detailed in Section [2.3](#sec::simulation_algo_randomized){reference-type="ref" reference="sec::simulation_algo_randomized"}, allows us to overcome these limitations.
+
+:::
+
+### Events intensity bounds
+
+The simulation algorithms implemented in `IBMPopSim` are based on an acceptance/rejection procedure, which requires to specify bounds for the various events intensities $\Lambda^e_t(Z_t)$. These bounds are defined differently depending on the expression of the intensity.
+
+::: {#cnj-intensity-poisson} 
+For all events $e \in \mathcal{P}$ with Poisson intensity @eq-poisson-intensity, the intensity is assumed to be bounded on $[0,T]$:
+$$
+    \forall t \in [0,T], \quad \Lambda^e_t(Z_t) = \mu^e(t) \leq \bar \mu^e.
+$$
+:::
+
+When $e \in \mathcal{E} \cup \mathcal{E}_W$, $\Lambda^e_t(Z_t) =\sum_{k=1}^{N_t} \lambda^e_t(I_k,Z_t)$, assuming that $\Lambda^e_t(Z_t)$ is uniformly bounded is too restrictive since the event intensity depends on the population size. In this case, the assumption is made on the individual intensity $\lambda^e$ or on the interaction function $W^e$, depending on the situation.
+
+::: {#cnj-intensity1}
+For all event types $e \in \mathcal{E}$, the associated individual event intensity $\lambda^e$ with no interactions, _i.e._ $\lambda^e$ verifies @eq-intensity-no-interaction, is assumed to be uniformly bounded:
+$$
+    \lambda^e(t, I) \leq \bar \lambda^e, \quad \forall \;  t\in [0, T],  \;   I \in \mathcal{I}.
+$$
+In particular, 
+$$
+    \forall t \in [0,T], \quad \Lambda^e_t (Z_t) = \sum_{k=1}^{N_t} \lambda^e(t, I) \leq \bar \lambda^e  N_t .
+$$ {#eq-def-bar-Lambda}
+:::
+
+::: {#cnj-intensity2}
+For all event types $e \in \mathcal{E}_W$, the associated interaction function $W^e$ is assumed to be uniformly bounded:
+$$
+    W^e(t, I, J) \leq \bar W^e, \quad \forall \; t\in [0,T], \;   I, J \in \mathcal{I}.
+$$
+In particular, $\forall t \in [0,T]$,
+$$
+    \lambda^e_t (I,Z_t) = \sum_{j=1}^{N_t} W^e(t, I, I_j)  \leq  \bar W^e N_t, \quad \text{and} \quad \Lambda^e_t (Z_t) \leq \bar W^e (N_t)^2.
+$$
+:::
+
+@cnj-intensity-poisson, @cnj-intensity1 and @cnj-intensity2 yield that events in the population occur with the global event intensity $\Lambda_t(Z_t)$, given in @eq-global-ev-intensity, which is dominated by a polynomial function in the population size: 
+$$
+    \Lambda_t(Z_t) \leq \bar \Lambda(N_t), \quad \text{with }  \bar \Lambda (n) = \sum_{e \in \mathcal{P}} \bar \mu^e + \sum_{e\in \mathcal{E}}\bar \lambda^e  n + \sum_{e \in \mathcal E_W} \bar W^e n^2.
+$$ {#eq-def-bar-Lambda}
+This bound is linear in the population size if there are no interactions, and quadratic if there at least is an event including interactions. This assumption is the key to the algorithms implemented in `IBMPopSim`. Before presenting the simulation algorithm, we close this section with a rigorous definition of an IBM, based on the pathwise representation of its dynamics a Stochastic Differential Equation (SDE) driven by Poisson random measures.
 
 ## Pathwise representation
+
+Since the seminal paper of [@FouMel04], it has been shown in many examples that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. In the following, we introduce a unified framework for the pathwise representation of the class of stochastic IBMs introduced above. 
+Some recalls on Poisson random measures are presented in the Appendix @sec-recall-poisson, and for more details on these representations on particular examples, we refer to the abundant literature on the subject.
+
+In the following we consider an individual-based stochastic population $(Z_t)_{t\in [0,T]}$, keeping the notations introduced in @sec-events and @sec-event-intensity for the events and their intensities.
+In particular, the set of events types that define the population evolution is denoted by $\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E$, with $\mathcal{P}$ the set of events types with Poisson intensity verifying @cnj-intensity-poisson, $\mathcal{E}$ the set of events types with individual intensity and no interaction, verifying @cnj-intensity1 and finally $\mathcal{E}_W$ the set of event types with interactions, verifying @cnj-intensity2.
+
+
 ## Thinning of Poisson measure {#sec-thinning}
 
 

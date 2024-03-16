@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Daphné Giorgi">
+<meta name="author" content="Vincent Lemaire">
+<meta name="author" content="Sarah Kaakai">
+<meta name="dcterms.date" content="2024-03-16">
+<meta name="keywords" content="Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation">
+<meta name="description" content="TODO">
+
+<title>Efficient simulation of individual-based population models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="article_files/libs/clipboard/clipboard.min.js"></script>
+<script src="article_files/libs/quarto-html/quarto.js"></script>
+<script src="article_files/libs/quarto-html/popper.min.js"></script>
+<script src="article_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="article_files/libs/quarto-html/anchor.min.js"></script>
+<link href="article_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="article_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="article_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="article_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="article_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<style>
+
+      .quarto-title-block .quarto-title-banner h1,
+      .quarto-title-block .quarto-title-banner h2,
+      .quarto-title-block .quarto-title-banner h3,
+      .quarto-title-block .quarto-title-banner h4,
+      .quarto-title-block .quarto-title-banner h5,
+      .quarto-title-block .quarto-title-banner h6
+      {
+        color: #FFFFFF;
+      }
+
+      .quarto-title-block .quarto-title-banner {
+        color: #FFFFFF;
+background: #034E79;
+      }
+</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title"><a href="https://computo.sfds.asso.fr">
+        <img src="https://computo.sfds.asso.fr/assets/img/logo_notext_white.png" height="60px">
+      </a> &nbsp; Efficient simulation of individual-based population models</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> source</button></div></div>
+            <p class="subtitle lead">The <code>R</code> package <code>IBMPopSim</code></p>
+            <p><a href="http://creativecommons.org/licenses/by/4.0/"><img src="https://i.creativecommons.org/l/by/4.0/80x15.png" alt="Creative Commons BY License"></a>
+ISSN 2824-7795</p>
+            <div>
+        <div class="description">
+          <p>TODO</p>
+        </div>
+      </div>
+                </div>
+  </div>
+    
+    <div class="quarto-title-meta-author">
+      <div class="quarto-title-meta-heading">Authors</div>
+      <div class="quarto-title-meta-heading">Affiliations</div>
+          
+          <div class="quarto-title-meta-contents">
+        <a href="https://perso.lpsm.paris/~giorgi/">Daphné Giorgi</a> 
+      </div>
+          
+          <div class="quarto-title-meta-contents">
+              <p class="affiliation">
+                  <a href="https://www.lpsm.paris/">
+                  Sorbonne Université, CNRS
+                  </a>
+                </p>
+            </div>
+            <div class="quarto-title-meta-contents">
+        <a href="https://perso.lpsm.paris/~vlemaire/">Vincent Lemaire</a> <a href="https://orcid.org/0000-0002-0433-7722" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a>
+      </div>
+          
+          <div class="quarto-title-meta-contents">
+              <p class="affiliation">
+                  <a href="https://www.lpsm.paris/">
+                  Sorbonne Université, CNRS
+                  </a>
+                </p>
+            </div>
+            <div class="quarto-title-meta-contents">
+        <a href="https://perso.univ-lemans.fr/~skaakai/">Sarah Kaakai</a> 
+      </div>
+          
+          <div class="quarto-title-meta-contents">
+              <p class="affiliation">
+                  <a href="https://lmm.univ-lemans.fr/fr/">
+                  Le Mans Université, CNRS, Institut du Risque et de l’Assurance
+                  </a>
+                </p>
+            </div>
+        </div>
+                    
+  <div class="quarto-title-meta">
+                                
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 16, 2024</p>
+      </div>
+    </div>
+                                    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">March 16, 2024</p>
+      </div>
+    </div>
+      
+                  
+      <div>
+      <div class="quarto-title-meta-heading">Keywords</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation</p>
+      </div>
+    </div>
+    
+    <div>
+      <div class="quarto-title-meta-heading">Status</div>
+      <div class="quarto-title-meta-contents">
+              <p class="date">draft</p>
+                  </div>
+    </div>
+
+  </div>
+                                                
+  <div>
+    <div class="abstract">
+    <div class="abstract-title">Abstract</div>
+      <p>The <code>R</code> Package <code>IBMPopSim</code> aims to simulate the random evolution of heterogeneous populations using stochastic Individual-Based Models (IBMs). The package enables users to simulate population evolution, in which individuals are characterized by their age and some characteristics, and the population is modified by different types of events, including births/arrivals, death/exit events, or changes of characteristics. The frequency at which an event can occur to an individual can depend on their age and characteristics, but also on the characteristics of other individuals (interactions). Such models have a wide range of applications in fields including actuarial science, biology, ecology or epidemiology. <code>IBMPopSim</code> overcomes the limitations of time-consuming IBMs simulations by implementing new efficient algorithms based on thinning methods, which are compiled using the <code>Rcpp</code> package while providing a user-friendly interface.</p>
+    </div>
+  </div>
+
+  </header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#sec-IBM" id="toc-sec-IBM" class="nav-link" data-scroll-target="#sec-IBM"><span class="header-section-number">2</span> Stochastic Individual-Based Models (IBMs) in IBMPopSim</a>
+  <ul class="collapse">
+  <li><a href="#brief-package-overview" id="toc-brief-package-overview" class="nav-link" data-scroll-target="#brief-package-overview"><span class="header-section-number">2.1</span> Brief package overview</a>
+  <ul class="collapse">
+  <li><a href="#model-creation" id="toc-model-creation" class="nav-link" data-scroll-target="#model-creation"><span class="header-section-number">2.1.1</span> Model creation</a></li>
+  <li><a href="#simulation" id="toc-simulation" class="nav-link" data-scroll-target="#simulation"><span class="header-section-number">2.1.2</span> Simulation</a></li>
+  </ul></li>
+  <li><a href="#sec-population" id="toc-sec-population" class="nav-link" data-scroll-target="#sec-population"><span class="header-section-number">2.2</span> Population</a>
+  <ul class="collapse">
+  <li><a href="#notations" id="toc-notations" class="nav-link" data-scroll-target="#notations"><span class="header-section-number">2.2.1</span> Notations</a></li>
+  <li><a href="#individuals" id="toc-individuals" class="nav-link" data-scroll-target="#individuals"><span class="header-section-number">2.2.2</span> Individuals</a></li>
+  <li><a href="#population-process" id="toc-population-process" class="nav-link" data-scroll-target="#population-process"><span class="header-section-number">2.2.3</span> Population process</a></li>
+  </ul></li>
+  <li><a href="#sec-events" id="toc-sec-events" class="nav-link" data-scroll-target="#sec-events"><span class="header-section-number">2.3</span> Events</a></li>
+  <li><a href="#sec-event-intensity" id="toc-sec-event-intensity" class="nav-link" data-scroll-target="#sec-event-intensity"><span class="header-section-number">2.4</span> Events intensity</a>
+  <ul class="collapse">
+  <li><a href="#events-intensity-bounds" id="toc-events-intensity-bounds" class="nav-link" data-scroll-target="#events-intensity-bounds"><span class="header-section-number">2.4.1</span> Events intensity bounds</a></li>
+  </ul></li>
+  <li><a href="#pathwise-representation" id="toc-pathwise-representation" class="nav-link" data-scroll-target="#pathwise-representation"><span class="header-section-number">2.5</span> Pathwise representation</a></li>
+  <li><a href="#sec-thinning" id="toc-sec-thinning" class="nav-link" data-scroll-target="#sec-thinning"><span class="header-section-number">2.6</span> Thinning of Poisson measure</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="article.pdf"><i class="bi bi-file-pdf"></i>PDF (computo)</a></li></ul></div></nav>
+</div>
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>In various fields, advances in probability have contributed to the development of a new mathematical framework for so-called individual-based stochastic population dynamics, also called stochastic Individual-Based Models (IBMs).</p>
+<p>Stochastic IBMs allow the modeling in continuous time of populations dynamics structured by age and/or characteristics. In the field of mathematical biology and ecology, a large community has used this formalism for the study of the evolution of structured populations (see e.g. <span class="citation" data-cites="FerTra09 collet2013rigorous BanMel15 costa2016stochastic billiard2016effect lavallee2019stochastic meleard2019birth calvez2020horizontal">(<a href="#ref-FerTra09" role="doc-biblioref">Ferrière and Tran 2009</a>; <a href="#ref-collet2013rigorous" role="doc-biblioref">Collet, Méléard, and Metz 2013</a>; <a href="#ref-BanMel15" role="doc-biblioref">Bansaye and Méléard 2015</a>; <a href="#ref-costa2016stochastic" role="doc-biblioref">Costa et al. 2016</a>; <a href="#ref-billiard2016effect" role="doc-biblioref">Billiard et al. 2016</a>; <a href="#ref-lavallee2019stochastic" role="doc-biblioref">Lavallée et al. 2019</a>; <a href="#ref-meleard2019birth" role="doc-biblioref">Méléard, Rera, and Roget 2019</a>; <a href="#ref-calvez2020horizontal" role="doc-biblioref">Calvez et al. 2020</a>)</span>), after the pioneer works&nbsp;<span class="citation" data-cites="FouMel04 champagnat2006unifying tran_2008">(<a href="#ref-FouMel04" role="doc-biblioref">Fournier and Méléard 2004</a>; <a href="#ref-champagnat2006unifying" role="doc-biblioref">Champagnat, Ferrière, and Méléard 2006</a>; <a href="#ref-tran_2008" role="doc-biblioref">Tran 2008</a>)</span>.</p>
+<p>IBMs are also useful in demography and actuarial sciences, for the modeling of human populations dynamics (see e.g. <span class="citation" data-cites="Ben10 Bou16 karoui2021simulating">(<a href="#ref-Ben10" role="doc-biblioref">Bensusan 2010</a>; <a href="#ref-Bou16" role="doc-biblioref">Boumezoued 2016</a>; <a href="#ref-karoui2021simulating" role="doc-biblioref">El Karoui, Hadji, and Kaakai 2021</a>)</span>). They allow the modeling of heterogeneous and complex population dynamics, which can be used to compute demographic indicators or simulate the evolution of insurance portfolios in order to study the basis risk, compute cash flows for annuity products or pension schemes, or for a fine assessment of mortality models <span class="citation" data-cites="barrieu2012understanding">(<a href="#ref-barrieu2012understanding" role="doc-biblioref">Barrieu et al. 2012</a>)</span>. There are other domains in which stochastic IBMs can be used, for example in epidemiology with stochastic compartmental models, neurosciences, cyber risk, or Agent-Based Models (ABMs) in economy and social sciences, which can be seen as IBMs. Many mathematical results have been obtained in the literature cited above, for quantifying the limit behaviors of IBMs in long time or in large population. In particular, pathwise representations of IBMs have been introduced in <span class="citation" data-cites="FouMel04">(<a href="#ref-FouMel04" role="doc-biblioref">Fournier and Méléard 2004</a>)</span> (and extended to age-structured populations in <span class="citation" data-cites="tran_2008">(<a href="#ref-tran_2008" role="doc-biblioref">Tran 2008</a>)</span>), as measure-valued pure jumps Markov processes, solutions of SDEs driven by Poisson measures. These pathwise representations are based on the <em>thinning</em> and projection of Poisson random measures defined on extended spaces. However, the simulation of large and interacting populations is often referred as computationally expensive.</p>
+<p>The aim of the <code>R</code> package <code>IBMPopSim</code> is to meet the needs of the various communities for efficient tools in order to simulate the evolution of stochastic IBMs. <code>IBMPopSim</code> provides a general framework for the simulation of a wide class of IBMs, where individuals are characterized by their age and/or a set of characteristics. Different types of events can be included in the modeling by users, depending on their needs: births, deaths, entry or exit in/to the population and changes of characteristics (swap events). Furthermore, the various events that can happen to individuals in the population can occur at a non-stationary frequency, depending on the individuals’ characteristics and time, and also including potential interactions between individuals.</p>
+<p>We introduce a unified mathematical and simulation framework for this class of IBMs, generalizing the pathwise representation of IBMs by thinning of Poisson measures, as well as the associated population simulation algorithm, based on an acceptance/rejection procedure. In particular, we provide general sufficient conditions on the event intensities under which the simulation of a particular model is possible.</p>
+<p>We opted to implement the algorithms of the <code>IBMPopSim</code> package using the <code>Rcpp</code> package, a tool facilitating the seamless integration of high-performance <code>C++</code> code into easily callable <code>R</code> functions <span class="citation" data-cites="JSSv040i08">(<a href="#ref-JSSv040i08" role="doc-biblioref">Eddelbuettel and Francois 2011</a>)</span>. With just a few lines of <code>C++</code> code, <code>IBMPopSim</code> offers user-friendly R functions for defining IBMs. Once events and their associated intensities are specified, an automated procedure creates the model. This involves integrating the user’s source code into the primary <code>C++</code> code using a template mechanism. Subsequently, <code>Rcpp</code> is invoked to compile the model and integrate it into the <code>R</code> session. Following this process, the model becomes callable with varying parameters, enabling the generation of diverse population evolution scenarios. Combined with the design of the simulation algorithms, the package structure yields very competitive simulation runtimes for IBMs, while staying user-friendly for <code>R</code> users. Several outputs function are also implemented in <code>IBMPopSim</code>. For instance the package allows the construction and visualization of age pyramids, as well as the construction of death and exposures table from the censored individual data, compatible with <code>R</code> packages concerned with mortality modelling, such as <span class="citation" data-cites="Rdemography">(<a href="#ref-Rdemography" role="doc-biblioref">Hyndman et al. 2023</a>)</span> or <span class="citation" data-cites="Rstmomo">(<a href="#ref-Rstmomo" role="doc-biblioref">Villegas, Millossovich, and Kaishev Hyndman 2018</a>)</span>. Several examples are provided in the form of <code>R</code> vignettes on the <a href="https://daphnegiorgi.github.io/IBMPopSim/">website</a>, and in recent works of <span class="citation" data-cites="karoui2021simulating">(<a href="#ref-karoui2021simulating" role="doc-biblioref">El Karoui, Hadji, and Kaakai 2021</a>)</span> and <span class="citation" data-cites="roget2022positive">(<a href="#ref-roget2022positive" role="doc-biblioref">Roget et al. 2022</a>)</span>.</p>
+<p>Designed for applications in social sciences, the <code>R</code> package <code>MicSim</code>&nbsp;<span class="citation" data-cites="Zin14">(<a href="#ref-Zin14" role="doc-biblioref">Zinn 2014</a>)</span> can be used for continuous time microsimulation. In continuous-time microsimulation, individual life-courses are usually specified by sequences of state transitions (events) and the time spans between these transitions. The state space is usually discrete and finite, which is no necessarily the case in <code>IBMPopSim</code>, where individuals can have continuous characteristics. But most importantly, microsimulation does not allow for interactions between individuals. Indeed, microsimulation produces separately the life courses of all individuals in the populations, based on the computation of the distribution functions of the waiting times in the distinct states of the state space, for each individual <span class="citation" data-cites="Zin14">(<a href="#ref-Zin14" role="doc-biblioref">Zinn 2014</a>)</span>. This can be slow in comparison to the simulation by thinning of event times occurring in the population, which is based on selecting event times among some competing proposed event times. Finally, <code>MicSim</code> simplifies the Mic-Core microsimulation tool implemented in Java <span class="citation" data-cites="zinn2009mic">(<a href="#ref-zinn2009mic" role="doc-biblioref">Zinn et al. 2009</a>)</span>. However, the implementation in <code>R</code> of simulation algorithms yields longer simulation run times than when using <code>Rcpp</code>. To the best of our knowledge, there are no other <code>R</code> packages currently available addressing the issue of IBMs efficient simulation.</p>
+<p>In <a href="#sec-IBM" class="quarto-xref">Section&nbsp;2</a>, we introduce the mathematical framework that characterizes the class of Stochastic Individual-Based Models (IBMs) that can be implemented in the <code>IBMPopSim</code> package. In particular, a general pathwise representation of IBMs is presented. The population dynamics is obtained as the solution of an SDE driven by Poisson measures, for which we obtain existence and uniqueness results in Theorem&nbsp;<a href="#ThEqZ" data-reference-type="ref" data-reference="ThEqZ">1</a>. Additionally, a succinct overview of the package is provided. In <strong>?@sec-simulation</strong> the two main algorithms for simulating the population evolution of an IBM across the interval <span class="math inline">[0, T]</span> are detailed. In <strong>?@sec-package</strong> we present the main functions of the <code>IBMPopSim</code> package, which allow for the definition of events and their intensities, the creation of a model, and the simulation of scenarios. Two examples are detailed in <strong>?@sec-insurance-portfolio</strong> and sec-example-interaction, featuring applications involving an heterogeneous insurance portfolio characterized by entry and exit events, and an age and size-structured population with intricate interactions.</p>
+</section>
+<section id="sec-IBM" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Stochastic Individual-Based Models (IBMs) in IBMPopSim</h1>
+<p>Stochastic Individual-Based Models (IBMs) represent a broad class of random population dynamics models, allowing the description of populations evolution on a microscopic scale. Informally, an IBM can be summarized by the description of the individuals constituting the population, the various types of events that can occur to these individuals, along with their respective frequencies. In <code>IBMPopSim</code>, individuals can be characterized by their age and/or a collection of discrete or continuous characteristics. Moreover, the package enables users to simulate efficiently populations in which one or more of the following event types may occur:</p>
+<ul>
+<li><strong>Birth event</strong>: addition of an individual of age 0 to the population.</li>
+<li><strong>Death event</strong>: removal of an individual from the population.</li>
+<li><strong>Entry event</strong>: arrival of an individual in the population.</li>
+<li><strong>Exit (emigration) event</strong>: exit from the population (other than death).</li>
+<li><strong>Swap event</strong>: an individual changes characteristics.</li>
+</ul>
+<p>Each event type is linked to an associated event kernel, describing how the population is modified following the occurrence of the event. For some event types, the event kernel requires explicit specification. This is the case for entry events when a new individual joins the population. Then,the model should specify how the age and characteristics of this new individual are chosen. For instance, the characteristics of a new individual in the population can be chosen uniformly in the space of all characteristics, or can depend on the distribution of his parents or those of the other individuals composing the population.</p>
+<p>The last component of an IBM are the event intensities. Informally, an event intensity is a function <span class="math inline">\lambda^e_t(I, Z)</span> describing the frequency at which an event <span class="math inline">e</span> can occur to an individual <span class="math inline">I</span> in a population <span class="math inline">Z</span> at a time <span class="math inline">t</span>. Given a history of the population <span class="math inline">(\mathcal{F}_t)</span>, the probability of event <span class="math inline">e</span> occurring to individual <span class="math inline">I</span> during a small interval of time <span class="math inline">(t,t+dt]</span> is proportional to <span class="math inline">\lambda^e(I,t)</span>: <span class="math display">
+    \mathbb{P}(\text{event } e \text{ occurring to $I$ during } (t,t+dt] | \mathcal{F}_t) \simeq \lambda^e_t(I, Z)dt.
+</span> The intensity function <span class="math inline">\lambda^e</span> can include dependency on the individual’s <span class="math inline">I</span> age and characteristics, the time <span class="math inline">t</span>, or the population composition <span class="math inline">Z</span> in the presence of interactions.</p>
+<section id="brief-package-overview" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="brief-package-overview"><span class="header-section-number">2.1</span> Brief package overview</h2>
+<p>Prior to providing a detailed description of an Individual-Based Model (IBM), we present a simple model of birth and death in an age-structured <em>human</em> population. We assume no interactions between individuals, and individuals are characterized by their gender, in addition to their age. In this simple model, all individuals, regardless of gender, can give birth when their age falls between 15 and 40 years, with a constant birth rate of 0.05. The death intensity is assumed to follow a Gompertz-type intensity depending on age. The birth and death intensities are then given by<br>
+<span class="math display">\begin{equation*}
+    \lambda^b(t, I) = 0.05 \times \mathbf{1}_{[15,40]}(a(I,t)), \quad
+    \lambda^d(t, I) = \alpha\exp(\beta a(I,t)),
+\end{equation*}</span> with <span class="math inline">a(I,t)</span> the age of individual <span class="math inline">I</span> at time <span class="math inline">t</span>. Birth events are also characterized with a kernel determining the gender of the newborn, who is male with probability <span class="math inline">p_{male}</span>.</p>
+<section id="model-creation" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="model-creation"><span class="header-section-number">2.1.1</span> Model creation</h3>
+<p>To implement this model in IBMPopSim, it is necessary to individually define each event type. In this example, the <code>mk_event_individual</code> function is used. The creation of an event involves a few lines of <code>cpp</code> instructions defining the intensity and, if applicable, the kernel of the event. For a more in depth description of the event creation step and its parameters, we refer to <strong>?@sec-package_events</strong>.</p>
+<p>The events of this simple model are for example defined through the following calls.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Hide/Show the code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>birth_event <span class="ot">&lt;-</span> <span class="fu">mk_event_individual</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"birth"</span>, </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">intensity_code =</span> <span class="st">"result = birth_rate(I.age(t));"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel_code =</span> <span class="st">"newI.male = CUnif(0,1) &lt; p_male;"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>death_event <span class="ot">&lt;-</span> <span class="fu">mk_event_individual</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"death"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">intensity_code =</span> <span class="st">"result = alpha * exp(beta * I.age(t));"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In the <code>cpp</code> codes, the names <code>birth_rate</code>, <code>p_male</code>, <code>alpha</code> and <code>beta</code> refer to the model parameters defined in the following list.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Hide/Show the code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"alpha"</span> <span class="ot">=</span> <span class="fl">0.008</span>, <span class="st">"beta"</span> <span class="ot">=</span> <span class="fl">0.02</span>, </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"p_male"</span> <span class="ot">=</span> <span class="fl">0.51</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"birth_rate"</span> <span class="ot">=</span> <span class="fu">stepfun</span>(<span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">40</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.05</span>, <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In a second step, the model is created by calling the function <code>mk_model</code>. A <code>cpp</code> source code is automatically created through a template mechanism based on the events and parameters, subsequently compiled using the <code>sourceCpp</code> function from the <code>Rcpp</code> package.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Hide/Show the code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>birth_death_model <span class="ot">&lt;-</span> <span class="fu">mk_model</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">characteristics =</span> <span class="fu">c</span>(<span class="st">"male"</span> <span class="ot">=</span> <span class="st">"bool"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">events =</span> <span class="fu">list</span>(death_event, birth_event),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters =</span> params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="simulation" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="simulation"><span class="header-section-number">2.1.2</span> Simulation</h3>
+<p>Once the model is created and compiled, the <code>popsim</code> function is called to simulate the evolution of a population according to this model. To achieve this, an initial population must be defined. In this example, we extract a population from a dataset specified in the package (a sample of <span class="math inline">100\,000</span> individuals based on the population of England and Wales in 2014). It is also necessary to set bounds for the events intensities. In this example, they are obtained by assuming that the maximum age for an individual is 115 years.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Hide/Show the code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>a_max <span class="ot">&lt;-</span> <span class="dv">115</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>events_bounds <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"death"</span> <span class="ot">=</span> params<span class="sc">$</span>alpha <span class="sc">*</span> <span class="fu">exp</span>(params<span class="sc">$</span>beta <span class="sc">*</span> a_max),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"birth"</span> <span class="ot">=</span> <span class="fu">max</span>(params<span class="sc">$</span>birth_rate))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The function <code>popsim</code> can now be called to simulate the population starting from the initial population <code>population(EW_pop_14$sample)</code> up to time <span class="math inline">T = 30</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Hide/Show the code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sim_out <span class="ot">&lt;-</span> <span class="fu">popsim</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  birth_death_model, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">population</span>(EW_pop_14<span class="sc">$</span>sample), </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  events_bounds, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters =</span> params, <span class="at">age_max =</span> a_max, </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The data frame <code>sim_out$population</code> contains the information (birth, death, gender) on individuals who lived in the population over the period <span class="math inline">[0,30]</span>. Functions of the package allows to provide aggregated information on the population.</p>
+<p>In the remainder of this section, we define rigorously the class of IBMs that can be simulated in <code>IBMPopSim</code>, along with the assumptions that are required in order for the population to be simulatable. The representation of age-structured IBMs based on measure-valued processes, as introduced in <span class="citation" data-cites="tran_2008">(<a href="#ref-tran_2008" role="doc-biblioref">Tran 2008</a>)</span>, is generalized to a wider class of abstract population dynamics. The modeling differs slightly here, since individuals are <em>kept in the population</em> after their death (or exit), by including the death/exit date as an individual trait.</p>
+</section>
+</section>
+<section id="sec-population" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="sec-population"><span class="header-section-number">2.2</span> Population</h2>
+<section id="notations" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="notations"><span class="header-section-number">2.2.1</span> Notations</h3>
+<p>In the remainder of the paper, the filtered probability space is denoted by <span class="math inline">(\Omega,\{\mathcal{F}_t \},{\mathbb{P}})</span>, under the usual assumptions. All processes are assumed to be càdlàg and adapted to the filtration <span class="math inline">\{\mathcal{F}_t \}</span> (for instance the history of the population) on a time interval <span class="math inline">[0,T]</span>. For a càdlàg process <span class="math inline">X</span>, we denote <span class="math inline">X_{t^-} := \lim_{\genfrac{}{}{0pt}{2}{s\to t}{s&lt;t}} X_s</span>.</p>
+</section>
+<section id="individuals" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="individuals"><span class="header-section-number">2.2.2</span> Individuals</h3>
+<p>An individual is represented by a triplet <span class="math inline">I = (\tau^b, \tau^d, x) \in \mathcal{I}= {\mathbb{R}}\times \bar {\mathbb{R}}\times {\mathcal{X}}</span> with:</p>
+<ul>
+<li><span class="math inline">\tau^b \in {\mathbb{R}}</span> the date of birth,</li>
+<li><span class="math inline">\tau^d \in \bar {\mathbb{R}}</span> the death date, with <span class="math inline">\tau^d = \infty</span> if the individual is still alive,</li>
+<li>a collection <span class="math inline">x \in {\mathcal{X}}</span> of characteristics where <span class="math inline">{\mathcal{X}}</span> is the space of characteristics.</li>
+</ul>
+<p>Note that in IBMs, individuals are usually characterized by their age <span class="math inline">a(t) =t-\tau^b</span> instead of their date of birth <span class="math inline">\tau^b</span>. However, using the latter is actually easier for the simulation, as it remains constant over time.</p>
+</section>
+<section id="population-process" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="population-process"><span class="header-section-number">2.2.3</span> Population process</h3>
+<p>The population at a given time <span class="math inline">t</span> is a random set <span class="math display">
+    Z_t=\{ I_k \in \mathcal{I}; \; k= 1,\dots, N_t\},
+</span> composed of all individuals (alive or dead) who have lived in the population before time <span class="math inline">t</span>. As a random set, <span class="math inline">Z_t</span> can be represented by a random counting measure on <span class="math inline">\mathcal{I}</span> , that is an integer-valued measure <span class="math inline">Z: \Omega \times \mathcal{I}\to \bar {\mathbb{N}}</span> where for <span class="math inline">A \in \mathcal{I}</span>, <span class="math inline">Z(A)</span> is the (random) number of individuals <span class="math inline">I</span> in the subset <span class="math inline">A</span>. With this representation: <span id="eq-popZ"><span class="math display">
+\begin{aligned}
+    Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &amp;= \sum_{k=1}^{N_t} \delta_{I_k} (\tau^b, \tau^d,x), \nonumber \\
+    \text{ with }  \int_{\mathcal{I}} f(\tau^b, \tau^d, x) Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &amp;= \sum_{k=1}^{N_t} f(I_k).
+\end{aligned}
+\tag{1}</span></span></p>
+<p>The number of individuals present in the population <em>before time</em> <span class="math inline">t</span> is obtained by taking <span class="math inline">f\equiv 1</span>: <span class="math display">
+    N_t =  \int_{\mathcal{I}}  Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \boldsymbol{1}_{\mathcal{I}} (I_k).
+</span> Note that <span class="math inline">(N_t)_{t\geq 0}</span> is an increasing process since dead/exited individuals are kept in the population <span class="math inline">Z</span>. The number of alive individuals in the population at time <span class="math inline">t</span> is: <span id="eq-Nta"><span class="math display">
+    N_t^a =  \int_{\mathcal{I}}  \mathsf{1}_{\{\tau^d &gt; t \} }Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \mathsf{1}_{\{\tau^d_k &gt; t \} }.
+\tag{2}</span></span> Another example is the number of alive individuals of age over <span class="math inline">a</span> is <span class="math display">
+    N_t([a,+\infty)) :=  \int_{\mathcal{I}}  \boldsymbol{1}_{[a,+\infty)}(t-\tau^b)\mathsf{1}_{]t,\infty]}(\tau^d) Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t}  \boldsymbol{1}_{\{ t -\tau_k^b \geq a \}}\mathsf{1}_{\{\tau^d_k \geq t \} }.
+</span></p>
+</section>
+</section>
+<section id="sec-events" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="sec-events"><span class="header-section-number">2.3</span> Events</h2>
+<p>The population composition changes at random dates following different types of events. <code>IBMPopSim</code> allows the simulation of IBMs with the following events types:</p>
+<ul>
+<li><p>A <strong>birth</strong> event at time <span class="math inline">t</span> is the addition of a new individual <span class="math inline">I'=(t,\infty, X)</span> of age <span class="math inline">0</span> to the population. Their date of birth is <span class="math inline">\tau^b =t</span>, and characteristics is <span class="math inline">X</span>, a random variable of distribution defined by the birth kernel <span class="math inline">k^b(t,I,\mathrm{d}x)</span> on <span class="math inline">{\mathcal{X}}</span>, depending on <span class="math inline">t</span> and its parent <span class="math inline">I</span>. The population size becomes <span class="math inline">N_t = N_{t^-} + 1</span>, and the population composition after the event is <span class="math display">Z_t  = Z_{t^-} +  \delta_{(t,\infty, X)}.</span></p></li>
+<li><p>An <strong>entry</strong> event at time <span class="math inline">t</span> is also the addition of an individual <span class="math inline">I'</span> in the population. However, this individual is not of age <span class="math inline">0</span>. The date of birth and characteristics of the new individual <span class="math inline">I'= (\tau^b, \infty, X)</span> are random variables of probability distribution defined by the entry kernel <span class="math inline">k^{en}(t, \mathrm{d}s, \mathrm{d}x)</span> on <span class="math inline">{\mathbb{R}}\times {\mathcal{X}}</span>. The population size becomes <span class="math inline">N_t = N_{t^-} + 1</span>, and the population composition after the event is: <span class="math display">
+  Z_t  = Z_{t^-} +  \delta_{(\tau^b, \infty, X)}.
+</span></p></li>
+<li><p>A <strong>death</strong> or <strong>exit</strong> event of an individual <span class="math inline">I= (\tau^b,\infty, x)\in Z_{t^-}</span> at time <span class="math inline">t</span> is the modification of its death date <span class="math inline">\tau^d</span> from <span class="math inline">+\infty</span> to <span class="math inline">t</span>. This event results in the simultaneous addition of the individual <span class="math inline">(\tau^b,t,x)</span> and removal of the individual <span class="math inline">I</span> from the population. The population size is not modified, and the population composition after the event is <span class="math display">
+  Z_t  = Z_{t^-} +\delta_{(\tau^b,t,x)}- \delta_{I}.
+</span></p></li>
+<li><p>A <strong>swap</strong> event (change of characteristics) results in the simultaneous addition and removal of an individual. If an individual <span class="math inline">I= (\tau^b,\infty, x) \in Z_{t^-}</span> changes of characteristics at time <span class="math inline">t</span>, then it is removed from the population and replaced by <span class="math inline">I' = (\tau^b,\infty, X)</span>. The new characteristics <span class="math inline">X</span> is a random variable of distribution <span class="math inline">k^s(t, I,\mathrm{d}x)</span> on <span class="math inline">{\mathcal{X}}</span>, depending on time, the individual’s age and previous characteristics <span class="math inline">x</span>. In this case, the population size is not modified and the population becomes: <span class="math display">
+  Z_t  = Z_{t^-}   +  \delta_{(\tau^b,  \infty, X)} -  \delta_{(\tau^b, \infty, x)}.
+</span></p></li>
+</ul>
+<p>To summarize, the space of event types is <span class="math inline">E = \{ b, en, d, s \}</span>, and the jump <span class="math inline">\Delta Z_t = Z_t - Z_{t^-}</span> (change in the population composition) generated by an event of type <span class="math inline">e \in \{ b, en, d, s \}</span> is denoted by <span class="math inline">\phi^e(t, I)</span>. We thus have the following rules summarized in the table <a href="#tbl-event-action" class="quarto-xref">Table&nbsp;1</a>.</p>
+<div id="tbl-event-action" class="quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-event-action-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Action in the population for a given event name
+</figcaption>
+<div aria-describedby="tbl-event-action-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 37%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Event</th>
+<th style="text-align: center;">Type</th>
+<th><span class="math inline">\phi^e(t, I)</span></th>
+<th>New individual</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Birth</td>
+<td style="text-align: center;"><span class="math inline">b</span></td>
+<td><span class="math inline">\delta_{(t, \infty,  X)}</span></td>
+<td><span class="math inline">\tau^b =t, \; X \sim k^b(t,I,\mathrm{d}x)</span></td>
+</tr>
+<tr class="even">
+<td>Entry</td>
+<td style="text-align: center;"><span class="math inline">en</span></td>
+<td><span class="math inline">\delta_{(\tau^b, \infty,  X)}</span></td>
+<td><span class="math inline">(\tau^b, X) \sim k^{en}(t,\mathrm{d}s, \mathrm{d}x)</span></td>
+</tr>
+<tr class="odd">
+<td>Death/Exit</td>
+<td style="text-align: center;"><span class="math inline">d</span></td>
+<td><span class="math inline">\delta_{(\tau^b, t,x)} - \delta_{(\tau^b, \infty, x)}</span></td>
+<td><span class="math inline">\tau^d = t</span></td>
+</tr>
+<tr class="even">
+<td>Swap</td>
+<td style="text-align: center;"><span class="math inline">s</span></td>
+<td><span class="math inline">\delta_{(\tau^b, \infty , X)} - \delta_{(\tau^b, \infty, x)}</span></td>
+<td><span class="math inline">X \sim k^s(t,I,\mathrm{d}x)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="rem-popfinale" class="proof remark">
+<p><span class="proof-title"><em>Remark 1</em> (Composition of the population). </span></p>
+<ul>
+<li>At time <span class="math inline">T</span>, the population <span class="math inline">Z_T</span> contains all individuals who lived in the population before <span class="math inline">T</span>, including dead/exited individuals. If there are no swap events, or entries,the population state <span class="math inline">Z_t</span> for any time <span class="math inline">t\leq T</span> can be obtained from <span class="math inline">Z_T</span>. Indeed, if <span class="math inline">Z_T = \sum_{k=1}^{N_T}  \delta_{I_k}</span>, then the population at time <span class="math inline">t\leq T</span> is simply composed of the individuals born before <span class="math inline">t</span>: <span class="math display">
+  Z_t = \sum_{k=1}^{N_T} \boldsymbol{1}_{\{\tau^b_k \leq t \}} \delta_{I_k}.
+</span></li>
+<li>In the presence of entries (open population), a characteristic <span class="math inline">x</span> can track the individuals’ entry dates. Then, the previous equation can be easily modified in order to obtain the population <span class="math inline">Z_t</span> at time <span class="math inline">t\leq T</span> from <span class="math inline">Z_T</span>.</li>
+</ul>
+</div>
+</section>
+<section id="sec-event-intensity" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="sec-event-intensity"><span class="header-section-number">2.4</span> Events intensity</h2>
+<p>Once the different event types have been defined in the population model, the frequency at which each event occur in the population <span class="math inline">e</span> have to be specified. Informally, the intensity <span class="math inline">\Lambda^e_t(Z_t)</span> at which an event <span class="math inline">e</span> can occur is defined by <span class="math display">
+    \mathbb P\big( \text{event } e \text { occurs in the population }  Z_t  \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \Lambda^e_t (Z_t)\mathrm{d}t.
+</span> For a more formal definition of stochastic intensities, we refer to <span class="citation" data-cites="bremaud1981point">(<a href="#ref-bremaud1981point" role="doc-biblioref">Brémaud 1981</a>)</span> or <span class="citation" data-cites="KaaElK20">(<a href="#ref-KaaElK20" role="doc-biblioref">Kaakai and El Karoui 2023</a>)</span>. The form of the intensity function <span class="math inline">(\Lambda^e_t (Z_t))</span> determines the population simulation algorithm in <code>IBMPopSim</code>:</p>
+<ul>
+<li>When the event intensity does not depend on the population state, <span id="eq-poisson-intensity"><span class="math display">
+  \big(\Lambda^e_t (Z_t)\big)_{t\in [0,T]} = \big(\mu^e(t)\big)_{t \in [0,T]},
+\tag{3}</span></span> with <span class="math inline">\mu^e</span> a deterministic function, the events of type <span class="math inline">e</span> occur at the jump times of an inhomogeneous Poisson process of intensity function <span class="math inline">(\mu^e(t))_{t \in [0,T]}</span>. When such an event occurs, the individual to whom the event happens to is drawn uniformly among alive individuals in the population. In a given model, the set of events <span class="math inline">e\in E</span> with Poisson intensities will be denoted by <span class="math inline">\mathcal{P}</span>.</li>
+<li>Otherwise, we assume that the global intensity <span class="math inline">\Lambda^e_t(Z_t)</span> at which the events of type <span class="math inline">e</span> occur in the population can be written as the sum of individual intensities <span class="math inline">\lambda^e_t(I,Z_t)</span>: <span id="eq-global-intensity"><span class="math display">
+\begin{aligned}
+  &amp;\Lambda^e_t (Z_t) = \sum_{k=1}^{N_t} \lambda^e_t ( I_k,Z_t),  \\
+  &amp; \nonumber \text{with } \mathbb P\big( \text{event } e \text { occurs to an individual } I \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \lambda^e_t (I,Z_t)\mathrm{d}t.
+\end{aligned}
+\tag{4}</span></span></li>
+</ul>
+<p>Obviously, nothing can happen to dead or exited individuals, i.e.&nbsp;individuals <span class="math inline">I= (\tau^b, \tau^d, x)</span> with <span class="math inline">\tau^d \leq t</span>. Thus, individual event intensities are assumed to be null for dead/exited individuals: <span class="math display">
+    \lambda^e_t ( I,Z_t) = 0, \text{ if }\tau^d \leq t, \text{ so that } \Lambda^e_t (Z_t) = \sum_{k=1}^{N_t^a} \lambda^e_t ( I_k,Z_t),
+</span> with <span class="math inline">N^a_t</span> the number of alive individuals at time <span class="math inline">t</span>.</p>
+<p>The event’s individual intensity <span class="math inline">\lambda^e_t (I,Z_t)</span> can depend on time (for instance when there is a mortality reduction over time), on the individual’s age <span class="math inline">t-\tau^b</span> and characteristics, but also on the population composition <span class="math inline">Z_t</span>. The dependence of <span class="math inline">\lambda^e</span> on the population <span class="math inline">Z</span> models interactions between individuals in the populations. Hence, two types of individual intensity functions can be implemented in <code>IBMPopSim</code>:</p>
+<ol type="1">
+<li><p><em>No interactions:</em> The intensity function <span class="math inline">\lambda^e</span> does not depend on the population composition. The intensity at which the event of type <span class="math inline">e</span> occur to an individual <span class="math inline">I</span> only depends on its date of birth and characteristics: <span id="eq-intensity-no-interaction"><span class="math display">
+\lambda^e_t (I,Z_t) = \lambda^e(t, I),
+\tag{5}</span></span> where <span class="math inline">\lambda^e: \mathbb{R}_+ \times \mathcal{I}\to {\mathbb{R}}^+</span> is a deterministic function. In a given model, we denote by <span class="math inline">\mathcal{E}</span> the set of event types with individual intensity <a href="#eq-intensity-no-interaction" class="quarto-xref">Equation&nbsp;5</a>.</p></li>
+<li><p><em>“Quadratic” interactions:</em> The intensity at which an event of type <span class="math inline">e</span> occurs to an individual <span class="math inline">I</span> depends on <span class="math inline">I</span> and on the population composition, through an interaction function <span class="math inline">W^e</span>. The quantity <span class="math inline">W^e(t, I,J)</span> describes the intensity of interactions between two alive individuals <span class="math inline">I</span> and <span class="math inline">J</span> at time <span class="math inline">t</span>, for instance in the presence of competition or cooperation. In this case, we have <span id="eq-intensity-interaction"><span class="math display">
+\lambda^e_t(I,Z_t)=\sum_{j=1}^{N_t} W^e(t, I, I_j) = \int_{\mathcal{I}} W^e(t, I, (\tau^b,\tau^d,x)) Z_t (\mathrm{d}\tau^b,\mathrm{d}\tau^d, \mathrm{d}x),
+\tag{6}</span></span> where <span class="math inline">W^e(t, I, (\tau^b,\tau^d,x))  = 0</span> if the individual <span class="math inline">J =(\tau^b,\tau^d,x)</span> is dead, i.e.&nbsp;<span class="math inline">\tau^d \leq t</span>.&nbsp;In a given model, we denote by <span class="math inline">\mathcal{E}_W</span> the set of event types with individual intensity <a href="#eq-intensity-interaction" class="quarto-xref">Equation&nbsp;6</a>.</p></li>
+</ol>
+<p>To summarize, an individual intensity in IBMPopSim can be written as: <span id="eq-indiviual-intensity"><span class="math display">
+    \lambda^e_t(I,Z_t) = \lambda^e(t, I) \mathbf{1}_{\{e \in \mathcal{E}\}} + \biggl( \sum_{j=1}^{N_t} W^e(t, I, I_j) \biggr) \mathbf{1}_{\{e \in \mathcal{E}_W\}}.
+\tag{7}</span></span></p>
+<div id="exm-popfinale" class="theorem example">
+<p><span class="theorem-title"><strong>Example 1</strong></span> &nbsp;</p>
+<ol type="1">
+<li><p>An example of death intensity without interaction for an individual <span class="math inline">I=(\tau^b, \tau^d, x)</span> alive at time <span class="math inline">t</span>, <span class="math inline">t &lt; \tau^d</span>, is: <span class="math display">
+\lambda^d(t,I) =  \alpha_x \exp(\beta_x a(I,t)), \text{ where }  a(I,t) = t-\tau^b
+</span> is the age of the individual <span class="math inline">I</span> at time <span class="math inline">t</span>. In this classical case, the death rate of an individual <span class="math inline">I</span> is an exponential (Gompertz) function of the individual’s age, with coefficients depending on the individual’s characteristics <span class="math inline">x</span>.</p></li>
+<li><p>In the presence of competition between individuals, the death intensity of an individual <span class="math inline">I</span> also depend on other individuals <span class="math inline">J</span> in the population. For example, if <span class="math inline">I=(\tau^b,\tau^d, x)</span>, with <span class="math inline">x</span> its size, then we can have: <span id="eq-ex-interation"><span class="math display">
+W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J &gt; t\}}, \quad \forall \; J=(\tau^b_J,\tau^d_J , x_J).
+\tag{8}</span></span> This can be interpreted as follows: if the individual <span class="math inline">I</span> meets randomly an individual <span class="math inline">J</span> alive at time <span class="math inline">t</span>, and of bigger size <span class="math inline">x_J &gt; x</span>, then he can die at the intensity <span class="math inline">x_J-x</span>. If <span class="math inline">J</span> is smaller than <span class="math inline">I</span>, then he cannot kill <span class="math inline">I</span>. The bigger is the size <span class="math inline">x</span> of <span class="math inline">I</span>, the lower is his death intensity <span class="math inline">\lambda^d_t(I,Z_t)</span> defined by <span class="math display">
+\lambda^d_t(I,Z_t) = \sum_{\genfrac{}{}{0pt}{2}{J\in Z_t,}{x_J &gt; x}} (x_J -x)\mathbf{1}_{\{\tau^d_J &gt; t\}}.
+</span></p></li>
+<li><p><code>IBMPopSim</code> can simulate IBMs that include intensities expressed as a sum of Poisson intensities and individual intensities of the form <span class="math inline">\Lambda^e(Z_t) =\mu^e_t + \sum_{k=1}^{N_t} \lambda^e(I_k, Z_t)</span>. Other examples are provided in <strong>?@sec-insurance-portfolio</strong> and <strong>?@sec-example-interaction</strong>. Finally, the global intensity at which an event can occur in the population is defined by: <span id="eq-global-ev-intensity"><span class="math display">
+\Lambda_t(Z_t) = \sum_{e\in \mathcal{P}} \mu^e(t) + \sum_{e \in \mathcal E} \Big(\sum_{k=1}^{N_t} \lambda^e(t, I_k)\Big) + \sum_{e \in \mathcal E_W} \Big(\sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)\Big).
+\tag{9}</span></span> An important point is that for events <span class="math inline">e \in \mathcal E</span> without interactions, the global event intensity <span class="math inline">\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t} \lambda^e(t, I_k)</span> is <em>of order</em> <span class="math inline">N_t^a</span> defined in <a href="#eq-Nta" class="quarto-xref">Equation&nbsp;2</a> (number of alive individuals at time <span class="math inline">t</span>). On the other hand, for events <span class="math inline">e \in \mathcal{E}_W</span> with interactions, <span class="math inline">\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)</span> is of order <span class="math inline">(N_t^a)^2</span>. Informally, this means that when the population size increases, events with interaction are more costly to simulate. Furthermore, the numerous computations of the interaction kernel <span class="math inline">W^e</span> can also be quite costly. The randomized Algorithm <a href="#algo::rzndomized" data-reference-type="ref" data-reference="algo::rzndomized">[algo::rzndomized]</a>, detailed in Section <a href="#sec::simulation_algo_randomized" data-reference-type="ref" data-reference="sec::simulation_algo_randomized">2.3</a>, allows us to overcome these limitations.</p></li>
+</ol>
+</div>
+<section id="events-intensity-bounds" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="events-intensity-bounds"><span class="header-section-number">2.4.1</span> Events intensity bounds</h3>
+<p>The simulation algorithms implemented in <code>IBMPopSim</code> are based on an acceptance/rejection procedure, which requires to specify bounds for the various events intensities <span class="math inline">\Lambda^e_t(Z_t)</span>. These bounds are defined differently depending on the expression of the intensity.</p>
+<div id="cnj-intensity-poisson" class="theorem conjecture">
+<p><span class="theorem-title"><strong>Assumption 1</strong></span> For all events <span class="math inline">e \in \mathcal{P}</span> with Poisson intensity <a href="#eq-poisson-intensity" class="quarto-xref">Equation&nbsp;3</a>, the intensity is assumed to be bounded on <span class="math inline">[0,T]</span>: <span class="math display">
+    \forall t \in [0,T], \quad \Lambda^e_t(Z_t) = \mu^e(t) \leq \bar \mu^e.
+</span></p>
+</div>
+<p>When <span class="math inline">e \in \mathcal{E} \cup \mathcal{E}_W</span>, <span class="math inline">\Lambda^e_t(Z_t) =\sum_{k=1}^{N_t} \lambda^e_t(I_k,Z_t)</span>, assuming that <span class="math inline">\Lambda^e_t(Z_t)</span> is uniformly bounded is too restrictive since the event intensity depends on the population size. In this case, the assumption is made on the individual intensity <span class="math inline">\lambda^e</span> or on the interaction function <span class="math inline">W^e</span>, depending on the situation.</p>
+<div id="cnj-intensity1" class="theorem conjecture">
+<p><span class="theorem-title"><strong>Assumption 2</strong></span> For all event types <span class="math inline">e \in \mathcal{E}</span>, the associated individual event intensity <span class="math inline">\lambda^e</span> with no interactions, <em>i.e.</em> <span class="math inline">\lambda^e</span> verifies <a href="#eq-intensity-no-interaction" class="quarto-xref">Equation&nbsp;5</a>, is assumed to be uniformly bounded: <span class="math display">
+    \lambda^e(t, I) \leq \bar \lambda^e, \quad \forall \;  t\in [0, T],  \;   I \in \mathcal{I}.
+</span> In particular, <span id="eq-def-bar-Lambda"><span class="math display">
+    \forall t \in [0,T], \quad \Lambda^e_t (Z_t) = \sum_{k=1}^{N_t} \lambda^e(t, I) \leq \bar \lambda^e  N_t .
+\tag{10}</span></span></p>
+</div>
+<div id="cnj-intensity2" class="theorem conjecture">
+<p><span class="theorem-title"><strong>Assumption 3</strong></span> For all event types <span class="math inline">e \in \mathcal{E}_W</span>, the associated interaction function <span class="math inline">W^e</span> is assumed to be uniformly bounded: <span class="math display">
+    W^e(t, I, J) \leq \bar W^e, \quad \forall \; t\in [0,T], \;   I, J \in \mathcal{I}.
+</span> In particular, <span class="math inline">\forall t \in [0,T]</span>, <span class="math display">
+    \lambda^e_t (I,Z_t) = \sum_{j=1}^{N_t} W^e(t, I, I_j)  \leq  \bar W^e N_t, \quad \text{and} \quad \Lambda^e_t (Z_t) \leq \bar W^e (N_t)^2.
+</span></p>
+</div>
+<p><a href="#cnj-intensity-poisson" class="quarto-xref">Assumption&nbsp;1</a>, <a href="#cnj-intensity1" class="quarto-xref">Assumption&nbsp;2</a> and <a href="#cnj-intensity2" class="quarto-xref">Assumption&nbsp;3</a> yield that events in the population occur with the global event intensity&nbsp;<span class="math inline">\Lambda_t(Z_t)</span>, given in <a href="#eq-global-ev-intensity" class="quarto-xref">Equation&nbsp;9</a>, which is dominated by a polynomial function in the population size: <span id="eq-def-bar-Lambda"><span class="math display">
+    \Lambda_t(Z_t) \leq \bar \Lambda(N_t), \quad \text{with }  \bar \Lambda (n) = \sum_{e \in \mathcal{P}} \bar \mu^e + \sum_{e\in \mathcal{E}}\bar \lambda^e  n + \sum_{e \in \mathcal E_W} \bar W^e n^2.
+\tag{11}</span></span> This bound is linear in the population size if there are no interactions, and quadratic if there at least is an event including interactions. This assumption is the key to the algorithms implemented in <code>IBMPopSim</code>. Before presenting the simulation algorithm, we close this section with a rigorous definition of an IBM, based on the pathwise representation of its dynamics a Stochastic Differential Equation (SDE) driven by Poisson random measures.</p>
+</section>
+</section>
+<section id="pathwise-representation" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="pathwise-representation"><span class="header-section-number">2.5</span> Pathwise representation</h2>
+<p>Since the seminal paper of <span class="citation" data-cites="FouMel04">(<a href="#ref-FouMel04" role="doc-biblioref">Fournier and Méléard 2004</a>)</span>, it has been shown in many examples that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. In the following, we introduce a unified framework for the pathwise representation of the class of stochastic IBMs introduced above. Some recalls on Poisson random measures are presented in the Appendix <strong>?@sec-recall-poisson</strong>, and for more details on these representations on particular examples, we refer to the abundant literature on the subject.</p>
+<p>In the following we consider an individual-based stochastic population <span class="math inline">(Z_t)_{t\in [0,T]}</span>, keeping the notations introduced in <a href="#sec-events" class="quarto-xref">Section&nbsp;2.3</a> and <a href="#sec-event-intensity" class="quarto-xref">Section&nbsp;2.4</a> for the events and their intensities. In particular, the set of events types that define the population evolution is denoted by <span class="math inline">\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E</span>, with <span class="math inline">\mathcal{P}</span> the set of events types with Poisson intensity verifying <a href="#cnj-intensity-poisson" class="quarto-xref">Assumption&nbsp;1</a>, <span class="math inline">\mathcal{E}</span> the set of events types with individual intensity and no interaction, verifying <a href="#cnj-intensity1" class="quarto-xref">Assumption&nbsp;2</a> and finally <span class="math inline">\mathcal{E}_W</span> the set of event types with interactions, verifying <a href="#cnj-intensity2" class="quarto-xref">Assumption&nbsp;3</a>.</p>
+</section>
+<section id="sec-thinning" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="sec-thinning"><span class="header-section-number">2.6</span> Thinning of Poisson measure</h2>
+</section>
+</section>
+<section id="references" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-BanMel15" class="csl-entry" role="listitem">
+Bansaye, Vincent, and Sylvie Méléard. 2015. <em>Stochastic Models for Structured Populations</em>. Springer International Publishing.
+</div>
+<div id="ref-barrieu2012understanding" class="csl-entry" role="listitem">
+Barrieu, Pauline, Harry Bensusan, Nicole El Karoui, Caroline Hillairet, Stéphane Loisel, Claudia Ravanelli, and Yahia Salhi. 2012. <span>“Understanding, Modelling and Managing Longevity Risk: Key Issues and Main Challenges.”</span> <em>Scandinavian Actuarial Journal</em> 2012 (3): 203–31.
+</div>
+<div id="ref-Ben10" class="csl-entry" role="listitem">
+Bensusan, Harry. 2010. <span>“<span class="nocase">Interest rate and longevity risk: dynamic model and applications to derivative products and life insurance</span>.”</span> Theses, <span>Ecole Polytechnique X</span>.
+</div>
+<div id="ref-billiard2016effect" class="csl-entry" role="listitem">
+Billiard, Sylvain, Pierre Collet, Régis Ferrière, Sylvie Méléard, and Viet Chi Tran. 2016. <span>“The Effect of Competition and Horizontal Trait Inheritance on Invasion, Fixation, and Polymorphism.”</span> <em>Journal of Theoretical Biology</em> 411: 48–58.
+</div>
+<div id="ref-Bou16" class="csl-entry" role="listitem">
+Boumezoued, Alexandre. 2016. <span>“<span class="nocase">Micro-macro analysis of heterogenous age-structured populations dynamics.Application to self-exciting processes and demography.</span>”</span> Theses, <span>Universit<span>é</span> Pierre et Marie Curie</span>.
+</div>
+<div id="ref-bremaud1981point" class="csl-entry" role="listitem">
+Brémaud, Pierre. 1981. <em>Point Processes and Queues: Martingale Dynamics</em>. Vol. 66. Springer.
+</div>
+<div id="ref-calvez2020horizontal" class="csl-entry" role="listitem">
+Calvez, Vincent, Susely Figueroa Iglesias, Hélène Hivert, Sylvie Méléard, Anna Melnykova, and Samuel Nordmann. 2020. <span>“Horizontal Gene Transfer: Numerical Comparison Between Stochastic and Deterministic Approaches.”</span> <em>ESAIM: Proceedings and Surveys</em> 67: 135–60.
+</div>
+<div id="ref-champagnat2006unifying" class="csl-entry" role="listitem">
+Champagnat, Nicolas, Régis Ferrière, and Sylvie Méléard. 2006. <span>“Unifying Evolutionary Dynamics: From Individual Stochastic Processes to Macroscopic Models.”</span> <em>Theoretical Population Biology</em> 69 (3): 297–321.
+</div>
+<div id="ref-collet2013rigorous" class="csl-entry" role="listitem">
+Collet, Pierre, Sylvie Méléard, and Johan AJ Metz. 2013. <span>“A Rigorous Model Study of the Adaptive Dynamics of Mendelian Diploids.”</span> <em>Journal of Mathematical Biology</em> 67: 569–607.
+</div>
+<div id="ref-costa2016stochastic" class="csl-entry" role="listitem">
+Costa, Manon, Céline Hauzy, Nicolas Loeuille, and Sylvie Méléard. 2016. <span>“Stochastic Eco-Evolutionary Model of a Prey-Predator Community.”</span> <em>Journal of Mathematical Biology</em> 72: 573–622.
+</div>
+<div id="ref-JSSv040i08" class="csl-entry" role="listitem">
+Eddelbuettel, Dirk, and Romain Francois. 2011. <span>“Rcpp: Seamless r and c++ Integration.”</span> <em>Journal of Statistical Software</em> 40 (8): 1–18. <a href="https://doi.org/10.18637/jss.v040.i08">https://doi.org/10.18637/jss.v040.i08</a>.
+</div>
+<div id="ref-karoui2021simulating" class="csl-entry" role="listitem">
+El Karoui, Nicole, Kaouther Hadji, and Sarah Kaakai. 2021. <span>“Simulating Long-Term Impacts of Mortality Shocks: Learning from the Cholera Pandemic.”</span> <em>arXiv Preprint arXiv:2111.08338</em>.
+</div>
+<div id="ref-FerTra09" class="csl-entry" role="listitem">
+Ferrière, Régis, and Viet Chi Tran. 2009. <span>“Stochastic and Deterministic Models for Age-Structured Populations with Genetically Variable Traits.”</span> In, 27:289–310. ESAIM Proc. EDP Sci., Les Ulis.
+</div>
+<div id="ref-FouMel04" class="csl-entry" role="listitem">
+Fournier, Nicolas, and Sylvie Méléard. 2004. <span>“A Microscopic Probabilistic Description of a Locally Regulated Population and Macroscopic Approximations.”</span> <em>Ann. Appl. Probab.</em> 14 (4): 1880–1919.
+</div>
+<div id="ref-Rdemography" class="csl-entry" role="listitem">
+Hyndman, Rob, Heather Booth Booth, Leonie Tickle Tickle, John Maindonald, Simon Wood Wood, and R Core Team. 2023. <em><span class="nocase">demography</span>: Forecasting Mortality, Fertility, Migration and Population Data</em>. <a href="https://cran.r-project.org/package=demography">https://cran.r-project.org/package=demography</a>.
+</div>
+<div id="ref-KaaElK20" class="csl-entry" role="listitem">
+Kaakai, Sarah, and Nicole El Karoui. 2023. <span>“Birth Death Swap Population in Random Environment and Aggregation with Two Timescales.”</span> <em>Stochastic Processes and Their Applications</em> 162: 218–48. https://doi.org/<a href="https://doi.org/10.1016/j.spa.2023.04.017">https://doi.org/10.1016/j.spa.2023.04.017</a>.
+</div>
+<div id="ref-lavallee2019stochastic" class="csl-entry" role="listitem">
+Lavallée, François, Charline Smadi, Isabelle Alvarez, Björn Reineking, François-Marie Martin, Fanny Dommanget, and Sophie Martin. 2019. <span>“A Stochastic Individual-Based Model for the Growth of a Stand of Japanese Knotweed Including Mowing as a Management Technique.”</span> <em>Ecological Modelling</em> 413: 108828.
+</div>
+<div id="ref-meleard2019birth" class="csl-entry" role="listitem">
+Méléard, Sylvie, Michael Rera, and Tristan Roget. 2019. <span>“A Birth–Death Model of Ageing: From Individual-Based Dynamics to Evolutive Differential Inclusions.”</span> <em>Journal of Mathematical Biology</em> 79: 901–39.
+</div>
+<div id="ref-roget2022positive" class="csl-entry" role="listitem">
+Roget, Tristan, Pierre Jolivet, Sylvie Méléard, and Michael Rera. 2022. <span>“Positive Selection of Senescence Through Increased Evolvability: Ageing Is Not a by-Product of Evolution.”</span> <em>bioRxiv</em>, 2022–03.
+</div>
+<div id="ref-tran_2008" class="csl-entry" role="listitem">
+Tran, Viet Chi. 2008. <span>“Large Population Limit and Time Behaviour of a Stochastic Particle Model Describing an Age-Structured Population.”</span> <em>ESAIM: Probability and Statistics</em> 12: 345–86. <a href="https://doi.org/10.1051/ps:2007052">https://doi.org/10.1051/ps:2007052</a>.
+</div>
+<div id="ref-Rstmomo" class="csl-entry" role="listitem">
+Villegas, Andres, Pietro Millossovich, and Vladimir Kaishev Hyndman. 2018. <em><span>StMoMo</span>: Stochastic Mortality Modelling</em>. <a href="https://cran.r-project.org/package=StMoMo">https://cran.r-project.org/package=StMoMo</a>.
+</div>
+<div id="ref-Zin14" class="csl-entry" role="listitem">
+Zinn, Sabine. 2014. <span>“<span class="nocase">The MicSim package of R: an entry-level toolkit for continuous-time microsimulation</span>.”</span> <em>International Journal of Microsimulation</em> 7 (3): 3–32.
+</div>
+<div id="ref-zinn2009mic" class="csl-entry" role="listitem">
+Zinn, Sabine, Jutta Gampe, Jan Himmelspach, and Adelinde M Uhrmacher. 2009. <span>“MIC-CORE: A Tool for Microsimulation.”</span> In <em>Proceedings of the 2009 Winter Simulation Conference (WSC)</em>, 992–1002. IEEE.
+</div>
+</div>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="session-information" class="level1 appendix unnumbered"><h2 class="anchored quarto-appendix-heading">Session information</h2><div class="quarto-appendix-contents">
+
+<div class="cell">
+<details class="code-fold">
+<summary>Hide/Show the code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<!-- -->
+
+</div></section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@article{giorgi2024,
+  author = {Giorgi, Daphné and Lemaire, Vincent and Kaakai, Sarah},
+  publisher = {Société Française de Statistique},
+  title = {Efficient Simulation of Individual-Based Population Models},
+  journal = {Computo},
+  date = {2024-03-16},
+  url = {https://computo.sfds.asso.fr/template-computo-quarto},
+  doi = {xxxx},
+  issn = {2824-7795},
+  langid = {en},
+  abstract = {The `R` Package `IBMPopSim` aims to simulate the random
+    evolution of heterogeneous populations using stochastic
+    Individual-Based Models (IBMs). The package enables users to
+    simulate population evolution, in which individuals are
+    characterized by their age and some characteristics, and the
+    population is modified by different types of events, including
+    births/arrivals, death/exit events, or changes of characteristics.
+    The frequency at which an event can occur to an individual can
+    depend on their age and characteristics, but also on the
+    characteristics of other individuals (interactions). Such models
+    have a wide range of applications in fields including actuarial
+    science, biology, ecology or epidemiology. `IBMPopSim` overcomes the
+    limitations of time-consuming IBMs simulations by implementing new
+    efficient algorithms based on thinning methods, which are compiled
+    using the `Rcpp` package while providing a user-friendly interface.}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-giorgi2024" class="csl-entry quarto-appendix-citeas" role="listitem">
+Giorgi, Daphné, Vincent Lemaire, and Sarah Kaakai. 2024.
+<span>“Efficient Simulation of Individual-Based Population
+Models.”</span> <em>Computo</em>, March. <a href="https://doi.org/xxxx">https://doi.org/xxxx</a>.
+</div></div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Efficient simulation of individual-based population models"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The `R` package `IBMPopSim`"</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">  - name: Daphné Giorgi </span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">    email: daphne.giorgi@sorbonne-universite.fr</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">    url: https://perso.lpsm.paris/~giorgi/</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">    affiliations:</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">      - name: Sorbonne Université, CNRS</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">        department: Laboratoire de Probabilités, Statistique et Modélisation</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">        url: https://www.lpsm.paris/</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">  - name: Vincent Lemaire </span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">    corresponding: true</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">    email: vincent.lemaire@sorbonne-universite.fr</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">    url: https://perso.lpsm.paris/~vlemaire/</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">    orcid: 0000-0002-0433-7722</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">    affiliations:</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">      - name: Sorbonne Université, CNRS</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">        department: Laboratoire de Probabilités, Statistique et Modélisation</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">        url: https://www.lpsm.paris/</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">  - name: Sarah Kaakai</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">    corresponding: true</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">    email: sarah.kaakai@univ-lemans.fr</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">    url: https://perso.univ-lemans.fr/~skaakai/</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">    affiliations:</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">      - name: Le Mans Université, CNRS, Institut du Risque et de l'Assurance </span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co">        department: Laboratoire Manceau de Mathématiques</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co">        url: https://lmm.univ-lemans.fr/fr/</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> last-modified</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="an">date-modified:</span><span class="co"> last-modified</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> |</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co">    TODO</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="an">abstract:</span><span class="co"> &gt;+</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="co">    The `R` Package `IBMPopSim` aims to simulate the random evolution of heterogeneous populations using stochastic Individual-Based Models (IBMs). The package enables users to simulate population evolution, in which individuals are characterized by their age and some characteristics, and the population is modified by different types of events, including births/arrivals, death/exit events, or changes of characteristics. The frequency at which an event can occur to an individual can depend on their age and characteristics, but also on the characteristics of other individuals (interactions). Such models have a wide range of applications in fields including  actuarial science, biology, ecology or epidemiology. `IBMPopSim` overcomes the limitations of time-consuming IBMs simulations by implementing new efficient algorithms  based on thinning methods, which are compiled using the `Rcpp` package while providing a user-friendly interface.</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="an">keywords:</span><span class="co"> [Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation]</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="an">citation:</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="co">  type: article-journal</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="co">  container-title: "Computo"</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="co">  doi: "xxxx"</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="co">  url: https://computo.sfds.asso.fr/template-computo-quarto</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="co">  publisher: "Société Française de Statistique"</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="co">  issn: "2824-7795"</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="an">bibliography:</span><span class="co"> references.bib</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="an">github-user:</span><span class="co"> VincentLemaire</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="an">repo:</span><span class="co"> "ibmpopsim_computo"</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="an">draft:</span><span class="co"> true # set to false once the build is running</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="an">published:</span><span class="co"> false # will be set to true once accepted</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="co">  computo-html: default</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="co">  computo-pdf: default</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="an">crossref:</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="co">    cnj-title: Assumption</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="co">    cnj-prefix: Assumption </span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="co">    eval: false</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="co">    echo: true</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="fu"># Introduction</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>In various fields, advances in probability have contributed to the development of a new mathematical framework for so-called individual-based stochastic population dynamics, also called stochastic Individual-Based Models (IBMs).</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>Stochastic IBMs allow the modeling in continuous time of populations dynamics structured by age and/or characteristics. In the field of mathematical biology and ecology, a large community has used this formalism for the study of the evolution of structured populations (see e.g. <span class="co">[</span><span class="ot">@FerTra09; @collet2013rigorous; @BanMel15; @costa2016stochastic; @billiard2016effect; @lavallee2019stochastic; @meleard2019birth; @calvez2020horizontal</span><span class="co">]</span>), after the pioneer works&nbsp;<span class="co">[</span><span class="ot">@FouMel04; @champagnat2006unifying; @tran_2008</span><span class="co">]</span>.</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>IBMs are also useful in demography and actuarial sciences, for the modeling of human populations dynamics (see e.g. <span class="co">[</span><span class="ot">@Ben10; @Bou16; @karoui2021simulating</span><span class="co">]</span>). They allow the modeling of heterogeneous and complex population dynamics, which can be used to compute demographic indicators or simulate the evolution of insurance portfolios in order to study the basis risk, compute cash flows for annuity products or pension schemes, or for a fine assessment of mortality models <span class="co">[</span><span class="ot">@barrieu2012understanding</span><span class="co">]</span>. There are other domains in which stochastic IBMs can be used, for example in epidemiology with stochastic compartmental models, neurosciences, cyber risk, or Agent-Based Models (ABMs) in economy and social sciences, which can be seen as IBMs.</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>Many mathematical results have been obtained in the literature cited above, for quantifying the limit behaviors of IBMs in long time or in large population. In particular, pathwise representations of IBMs have been introduced in <span class="co">[</span><span class="ot">@FouMel04</span><span class="co">]</span> (and extended to age-structured populations in <span class="co">[</span><span class="ot">@tran_2008</span><span class="co">]</span>), as measure-valued pure jumps Markov processes, solutions of SDEs driven by Poisson measures. These pathwise representations are based on the *thinning* and projection of Poisson random measures defined on extended spaces. However, the simulation of large and interacting populations is often referred as computationally expensive.</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>The aim of the <span class="in">`R`</span> package <span class="in">`IBMPopSim`</span> is to meet the needs of the various communities for efficient tools in order to simulate the evolution of stochastic IBMs. <span class="in">`IBMPopSim`</span> provides a general framework for the simulation of a wide class of IBMs, where individuals are characterized by their age and/or a set of characteristics. Different types of events can be included in the modeling by users, depending on their needs: births, deaths, entry or exit in/to the population and changes of characteristics (swap events). Furthermore, the various events that can happen to individuals in the population can occur at a non-stationary frequency, depending on the individuals' characteristics and time, and also including potential interactions between individuals.</span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>We introduce a unified mathematical and simulation framework for this class of IBMs, generalizing the pathwise representation of IBMs by thinning of Poisson measures, as well as the associated population simulation algorithm, based on an acceptance/rejection procedure. In particular, we provide general sufficient conditions on the event intensities under which the simulation of a particular model is possible.</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>We opted to implement the algorithms of the <span class="in">`IBMPopSim`</span> package using the <span class="in">`Rcpp`</span> package, a tool facilitating the seamless integration of high-performance <span class="in">`C++`</span> code into easily callable <span class="in">`R`</span> functions <span class="co">[</span><span class="ot">@JSSv040i08</span><span class="co">]</span>. With just a few lines of <span class="in">`C++`</span> code, <span class="in">`IBMPopSim`</span> offers user-friendly R functions for defining IBMs. Once events and their associated intensities are specified, an automated procedure creates the model. This involves integrating the user's source code into the primary <span class="in">`C++`</span> code using a template mechanism. Subsequently, <span class="in">`Rcpp`</span> is invoked to compile the model and integrate it into the <span class="in">`R`</span> session. Following this process, the model becomes callable with varying parameters, enabling the generation of diverse population evolution scenarios. Combined with the design of the simulation algorithms, the package structure yields very competitive simulation runtimes for IBMs, while staying user-friendly for <span class="in">`R`</span> users. Several outputs function are also implemented in <span class="in">`IBMPopSim`</span>. For instance the package allows the construction and visualization of age pyramids, as well as the construction of death and exposures table from the censored individual data, compatible with <span class="in">`R`</span> packages concerned with mortality modelling, such as <span class="co">[</span><span class="ot">@Rdemography</span><span class="co">]</span> or <span class="co">[</span><span class="ot">@Rstmomo</span><span class="co">]</span>. Several examples are provided in the form of <span class="in">`R`</span> vignettes on the <span class="co">[</span><span class="ot">website</span><span class="co">](https://daphnegiorgi.github.io/IBMPopSim/)</span>, and in recent works of <span class="co">[</span><span class="ot">@karoui2021simulating</span><span class="co">]</span> and <span class="co">[</span><span class="ot">@roget2022positive</span><span class="co">]</span>.</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>Designed for applications in social sciences, the <span class="in">`R`</span> package <span class="in">`MicSim`</span>&nbsp;<span class="co">[</span><span class="ot">@Zin14</span><span class="co">]</span> can be used for continuous time microsimulation. In continuous-time microsimulation, individual life-courses are usually specified by sequences of state transitions (events) and the time spans between these transitions. The state space is usually discrete and finite, which is no necessarily the case in <span class="in">`IBMPopSim`</span>, where individuals can have continuous characteristics. But most importantly, microsimulation does not allow for interactions between individuals. Indeed, microsimulation produces separately the life courses of all individuals in the populations, based on the computation of the distribution functions of the waiting times in the distinct states of the state space, for each individual <span class="co">[</span><span class="ot">@Zin14</span><span class="co">]</span>. This can be slow in comparison to the simulation by thinning of event times occurring in the population, which is based on selecting event times among some competing proposed event times. Finally, <span class="in">`MicSim`</span> simplifies the Mic-Core microsimulation tool implemented in Java <span class="co">[</span><span class="ot">@zinn2009mic</span><span class="co">]</span>. However, the implementation in <span class="in">`R`</span> of simulation algorithms yields longer simulation run times than when using <span class="in">`Rcpp`</span>. To the best of our knowledge, there are no other <span class="in">`R`</span> packages currently available addressing the issue of IBMs efficient simulation.</span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a>In @sec-IBM, we introduce the mathematical framework that characterizes the class of Stochastic Individual-Based Models (IBMs) that can be implemented in the <span class="in">`IBMPopSim`</span> package. In particular, a general pathwise representation of IBMs is presented. The population dynamics is obtained as the solution of an SDE driven by Poisson measures, for which we obtain existence and uniqueness results in Theorem&nbsp;<span class="co">[</span><span class="ot">1</span><span class="co">](#ThEqZ)</span>{reference-type="ref" reference="ThEqZ"}. Additionally, a succinct overview of the package is provided. In @sec-simulation the two main algorithms for simulating the population evolution of an IBM across the interval $<span class="co">[</span><span class="ot">0, T</span><span class="co">]</span>$ are detailed. In @sec-package we present the main functions of the <span class="in">`IBMPopSim`</span> package, which allow for the definition of events and their intensities, the creation of a model, and the simulation of scenarios. Two examples are detailed in @sec-insurance-portfolio and sec-example-interaction, featuring applications involving an heterogeneous insurance portfolio characterized by entry and exit events, and an age and size-structured population with intricate interactions.</span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a><span class="fu"># Stochastic Individual-Based Models (IBMs) in IBMPopSim {#sec-IBM}</span></span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>Stochastic Individual-Based Models (IBMs) represent a broad class of random population dynamics models, allowing the description of populations evolution on a microscopic scale. Informally, an IBM can be summarized by the description of the individuals constituting the population, the various types of events that can occur to these individuals, along with their respective frequencies. In <span class="in">`IBMPopSim`</span>, individuals can be characterized by their age and/or a collection of discrete or continuous characteristics. Moreover, the package enables users to simulate efficiently populations in which one or more of the following event types may occur:</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Birth event**: addition of an individual of age 0 to the population.</span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Death event**: removal of an individual from the population.</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Entry event**: arrival of an individual in the population.</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Exit (emigration) event**: exit from the population (other than death).</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Swap event**: an individual changes characteristics.</span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a>Each event type is linked to an associated event kernel, describing how the population is modified following the occurrence of the event. For some event types, the event kernel requires explicit specification. This is the case for entry events when a new individual joins the population. Then,the model should specify how the age and characteristics of this new individual are chosen. For instance, the characteristics of a new individual in the population can be chosen uniformly in the space of all characteristics, or can depend on the distribution of his parents or those of the other individuals composing the population.</span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>The last component of an IBM are the event intensities. Informally, an event intensity is a function $\lambda^e_t(I, Z)$ describing the frequency at which an event $e$ can occur to an individual $I$ in a population $Z$ at a time $t$. Given a history of the population $(\mathcal{F}_t)$, the probability of event $e$ occurring to individual $I$ during a small interval of time $(t,t+dt]$ is proportional to $\lambda^e(I,t)$:</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>    \mathbb{P}(\text{event } e \text{ occurring to $I$ during } (t,t+dt] | \mathcal{F}_t) \simeq \lambda^e_t(I, Z)dt.</span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a>The intensity function $\lambda^e$ can include dependency on the individual's $I$ age and characteristics, the time $t$, or the population composition $Z$ in the presence of interactions.</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a><span class="fu">## Brief package overview</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>Prior to providing a detailed description of an Individual-Based Model (IBM), we present a simple model of birth and death in an age-structured _human_ population. We assume no interactions between individuals, and individuals are characterized by their gender, in addition to their age.</span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>In this simple model, all individuals, regardless of gender, can give birth when their age falls between 15 and 40 years, with a constant birth rate of 0.05. The death intensity is assumed to follow a Gompertz-type intensity depending on age. </span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>The birth and death intensities are then given by  </span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>\begin{equation*}</span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>    \lambda^b(t, I) = 0.05 \times \mathbf{1}_{<span class="co">[</span><span class="ot">15,40</span><span class="co">]</span>}(a(I,t)), \quad </span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>    \lambda^d(t, I) = \alpha\exp(\beta a(I,t)), </span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>\end{equation*} </span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>with $a(I,t)$ the age of individual $I$ at time $t$. </span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a>Birth events are also characterized with a kernel determining the gender of the newborn, who is male with probability $p_{male}$. </span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a><span class="fu">### Model creation </span></span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>To implement this model in IBMPopSim, it is necessary to individually define each event type. In this example, the <span class="in">`mk_event_individual`</span> function is used. The creation of an event involves  a few lines of <span class="in">`cpp`</span> instructions defining the intensity and, if applicable, the kernel of the event. For a more in depth description of the event creation step and its parameters, we refer to @sec-package_events.</span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>The events of this simple model are for example defined through the following calls.</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(IBMPopSim)</span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>birth_event <span class="ot">&lt;-</span> <span class="fu">mk_event_individual</span>(</span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"birth"</span>, </span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a>  <span class="at">intensity_code =</span> <span class="st">"result = birth_rate(I.age(t));"</span>,</span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel_code =</span> <span class="st">"newI.male = CUnif(0,1) &lt; p_male;"</span>)</span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a>death_event <span class="ot">&lt;-</span> <span class="fu">mk_event_individual</span>(</span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"death"</span>,</span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a>  <span class="at">intensity_code =</span> <span class="st">"result = alpha * exp(beta * I.age(t));"</span>)</span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a>In the <span class="in">`cpp`</span> codes, the names <span class="in">`birth_rate`</span>, <span class="in">`p_male`</span>, <span class="in">`alpha`</span> and <span class="in">`beta`</span> refer to the model parameters defined in the following list. </span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>  <span class="st">"alpha"</span> <span class="ot">=</span> <span class="fl">0.008</span>, <span class="st">"beta"</span> <span class="ot">=</span> <span class="fl">0.02</span>, </span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a>  <span class="st">"p_male"</span> <span class="ot">=</span> <span class="fl">0.51</span>,</span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a>  <span class="st">"birth_rate"</span> <span class="ot">=</span> <span class="fu">stepfun</span>(<span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">40</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.05</span>, <span class="dv">0</span>)))</span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>In a second step, the model is created by calling the function <span class="in">`mk_model`</span>. A <span class="in">`cpp`</span> source code is automatically created through a template mechanism based on the events and parameters, subsequently compiled using the <span class="in">`sourceCpp`</span> function from the <span class="in">`Rcpp`</span> package.</span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>birth_death_model <span class="ot">&lt;-</span> <span class="fu">mk_model</span>(</span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>  <span class="at">characteristics =</span> <span class="fu">c</span>(<span class="st">"male"</span> <span class="ot">=</span> <span class="st">"bool"</span>),</span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a>  <span class="at">events =</span> <span class="fu">list</span>(death_event, birth_event),</span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters =</span> params)</span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a><span class="fu">### Simulation </span></span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a>Once the model is created and compiled, the <span class="in">`popsim`</span> function is called to simulate the evolution of a population according to this model. To achieve this, an initial population must be defined. In this example, we extract a population from a dataset specified in the package (a sample of $100\,000$ individuals based on the population of England and Wales in 2014). It is also necessary to set bounds for the events intensities. In this example, they are obtained by assuming that the maximum age for an individual is 115 years. </span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a>a_max <span class="ot">&lt;-</span> <span class="dv">115</span></span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a>events_bounds <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb7-159"><a href="#cb7-159" aria-hidden="true" tabindex="-1"></a>  <span class="st">"death"</span> <span class="ot">=</span> params<span class="sc">$</span>alpha <span class="sc">*</span> <span class="fu">exp</span>(params<span class="sc">$</span>beta <span class="sc">*</span> a_max),</span>
+<span id="cb7-160"><a href="#cb7-160" aria-hidden="true" tabindex="-1"></a>  <span class="st">"birth"</span> <span class="ot">=</span> <span class="fu">max</span>(params<span class="sc">$</span>birth_rate))</span>
+<span id="cb7-161"><a href="#cb7-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-162"><a href="#cb7-162" aria-hidden="true" tabindex="-1"></a>The function <span class="in">`popsim`</span> can now be called to simulate the population starting from the initial population <span class="in">`population(EW_pop_14$sample)`</span> up to time $T = 30$. </span>
+<span id="cb7-165"><a href="#cb7-165" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb7-166"><a href="#cb7-166" aria-hidden="true" tabindex="-1"></a>sim_out <span class="ot">&lt;-</span> <span class="fu">popsim</span>(</span>
+<span id="cb7-167"><a href="#cb7-167" aria-hidden="true" tabindex="-1"></a>  birth_death_model, </span>
+<span id="cb7-168"><a href="#cb7-168" aria-hidden="true" tabindex="-1"></a>  <span class="fu">population</span>(EW_pop_14<span class="sc">$</span>sample), </span>
+<span id="cb7-169"><a href="#cb7-169" aria-hidden="true" tabindex="-1"></a>  events_bounds, </span>
+<span id="cb7-170"><a href="#cb7-170" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters =</span> params, <span class="at">age_max =</span> a_max, </span>
+<span id="cb7-171"><a href="#cb7-171" aria-hidden="true" tabindex="-1"></a>  <span class="at">time =</span> <span class="dv">30</span>)</span>
+<span id="cb7-172"><a href="#cb7-172" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-173"><a href="#cb7-173" aria-hidden="true" tabindex="-1"></a>The data frame <span class="in">`sim_out$population`</span> contains the information (birth, death, gender) on individuals who lived in the population over the period $<span class="co">[</span><span class="ot">0,30</span><span class="co">]</span>$. Functions of the package allows to provide aggregated information on the population.</span>
+<span id="cb7-174"><a href="#cb7-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-175"><a href="#cb7-175" aria-hidden="true" tabindex="-1"></a>In the remainder of this section,  we define rigorously the class of IBMs that can be simulated in <span class="in">`IBMPopSim`</span>, along with the assumptions that are required in order for the population to be simulatable. The representation of age-structured IBMs based on measure-valued processes, as introduced in <span class="co">[</span><span class="ot">@tran_2008</span><span class="co">]</span>, is generalized to a wider class of abstract population dynamics. The modeling differs slightly here, since individuals are _kept in the population_ after their death (or exit), by including the death/exit date as an individual trait. </span>
+<span id="cb7-176"><a href="#cb7-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-177"><a href="#cb7-177" aria-hidden="true" tabindex="-1"></a><span class="fu">## Population {#sec-population}</span></span>
+<span id="cb7-178"><a href="#cb7-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-179"><a href="#cb7-179" aria-hidden="true" tabindex="-1"></a><span class="fu">### Notations</span></span>
+<span id="cb7-180"><a href="#cb7-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-181"><a href="#cb7-181" aria-hidden="true" tabindex="-1"></a>In the remainder of the paper, the filtered probability space is denoted by $(\Omega,<span class="sc">\{</span>\mathcal{F}_t \},{\mathbb{P}})$, under the usual assumptions. All processes are assumed to be càdlàg and adapted to the filtration $\{\mathcal{F}_t \}$ (for instance the history of the population) on a time interval $[0,T]$. For a càdlàg process $X$, we denote $X_{t^-} := \lim_{\genfrac{}{}{0pt}{2}{s\to t}{s&lt;t}} X_s$.</span>
+<span id="cb7-182"><a href="#cb7-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a><span class="fu">### Individuals</span></span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a>An individual is represented by a triplet $I = (\tau^b, \tau^d, x) \in \mathcal{I}= {\mathbb{R}}\times \bar {\mathbb{R}}\times {\mathcal{X}}$ with:</span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\tau^b \in {\mathbb{R}}$ the date of birth,</span>
+<span id="cb7-188"><a href="#cb7-188" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\tau^d \in \bar {\mathbb{R}}$ the death date, with $\tau^d = \infty$ if the individual is still alive,</span>
+<span id="cb7-189"><a href="#cb7-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>a collection $x \in {\mathcal{X}}$ of characteristics where ${\mathcal{X}}$ is the space of characteristics.</span>
+<span id="cb7-190"><a href="#cb7-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-191"><a href="#cb7-191" aria-hidden="true" tabindex="-1"></a>Note that in IBMs, individuals are usually characterized by their age $a(t) =t-\tau^b$ instead of their date of birth $\tau^b$. However, using the latter is actually easier for the simulation, as it remains constant over time.</span>
+<span id="cb7-192"><a href="#cb7-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-193"><a href="#cb7-193" aria-hidden="true" tabindex="-1"></a><span class="fu">### Population process</span></span>
+<span id="cb7-194"><a href="#cb7-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-195"><a href="#cb7-195" aria-hidden="true" tabindex="-1"></a>The population at a given time $t$ is a random set</span>
+<span id="cb7-196"><a href="#cb7-196" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-197"><a href="#cb7-197" aria-hidden="true" tabindex="-1"></a>    Z_t=<span class="sc">\{</span> I_k \in \mathcal{I}; \; k= 1,\dots, N_t<span class="sc">\}</span>,</span>
+<span id="cb7-198"><a href="#cb7-198" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-199"><a href="#cb7-199" aria-hidden="true" tabindex="-1"></a>composed of all individuals (alive or dead) who have lived in the population before time $t$. As a random set, $Z_t$ can be represented by a random counting measure on $\mathcal{I}$ , that is an integer-valued measure $Z: \Omega \times \mathcal{I}\to \bar {\mathbb{N}}$ where for $A \in \mathcal{I}$, $Z(A)$ is the (random) number of individuals $I$ in the subset $A$. With this representation: </span>
+<span id="cb7-200"><a href="#cb7-200" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-201"><a href="#cb7-201" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb7-202"><a href="#cb7-202" aria-hidden="true" tabindex="-1"></a>    Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &amp;= \sum_{k=1}^{N_t} \delta_{I_k} (\tau^b, \tau^d,x), \nonumber <span class="sc">\\</span></span>
+<span id="cb7-203"><a href="#cb7-203" aria-hidden="true" tabindex="-1"></a>    \text{ with }  \int_{\mathcal{I}} f(\tau^b, \tau^d, x) Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &amp;= \sum_{k=1}^{N_t} f(I_k).</span>
+<span id="cb7-204"><a href="#cb7-204" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb7-205"><a href="#cb7-205" aria-hidden="true" tabindex="-1"></a>$$ {#eq-popZ}</span>
+<span id="cb7-206"><a href="#cb7-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-207"><a href="#cb7-207" aria-hidden="true" tabindex="-1"></a>The number of individuals present in the population *before time* $t$ is obtained by taking $f\equiv 1$:</span>
+<span id="cb7-208"><a href="#cb7-208" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-209"><a href="#cb7-209" aria-hidden="true" tabindex="-1"></a>    N_t =  \int_{\mathcal{I}}  Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \boldsymbol{1}_{\mathcal{I}} (I_k).</span>
+<span id="cb7-210"><a href="#cb7-210" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-211"><a href="#cb7-211" aria-hidden="true" tabindex="-1"></a>Note that $(N_t)_{t\geq 0}$ is an increasing process since dead/exited individuals are kept in the population $Z$. The number of alive individuals in the population at time $t$ is: </span>
+<span id="cb7-212"><a href="#cb7-212" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-213"><a href="#cb7-213" aria-hidden="true" tabindex="-1"></a>    N_t^a =  \int_{\mathcal{I}}  \mathsf{1}_{\{\tau^d &gt; t \} }Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \mathsf{1}_{<span class="sc">\{</span>\tau^d_k &gt; t <span class="sc">\}</span> }.</span>
+<span id="cb7-214"><a href="#cb7-214" aria-hidden="true" tabindex="-1"></a>$$ {#eq-Nta}</span>
+<span id="cb7-215"><a href="#cb7-215" aria-hidden="true" tabindex="-1"></a>Another example is the number of alive individuals of age over $a$ is</span>
+<span id="cb7-216"><a href="#cb7-216" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-217"><a href="#cb7-217" aria-hidden="true" tabindex="-1"></a>    N_t(<span class="co">[</span><span class="ot">a,+\infty)) :=  \int_{\mathcal{I}}  \boldsymbol{1}_{[a,+\infty)}(t-\tau^b)\mathsf{1}_{]t,\infty</span><span class="co">]</span>}(\tau^d) Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t}  \boldsymbol{1}_{\{ t -\tau_k^b \geq a \}}\mathsf{1}_{<span class="sc">\{</span>\tau^d_k \geq t <span class="sc">\}</span> }.</span>
+<span id="cb7-218"><a href="#cb7-218" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-219"><a href="#cb7-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-220"><a href="#cb7-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-221"><a href="#cb7-221" aria-hidden="true" tabindex="-1"></a><span class="fu">## Events {#sec-events}</span></span>
+<span id="cb7-222"><a href="#cb7-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-223"><a href="#cb7-223" aria-hidden="true" tabindex="-1"></a>The population composition changes at random dates following different types of events. <span class="in">`IBMPopSim`</span> allows the simulation of IBMs with the following events types:</span>
+<span id="cb7-224"><a href="#cb7-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-225"><a href="#cb7-225" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **birth** event at time $t$ is the addition of a new individual $I'=(t,\infty, X)$ of age $0$ to the population. Their date of birth is $\tau^b =t$, and characteristics is $X$, a random variable of distribution defined by the birth kernel $k^b(t,I,\mathrm{d}x)$ on ${\mathcal{X}}$, depending on $t$ and its parent $I$. The population size becomes $N_t = N_{t^-} + 1$, and the population composition after the event is $$Z_t  = Z_{t^-} +  \delta_{(t,\infty, X)}.$$</span>
+<span id="cb7-226"><a href="#cb7-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-227"><a href="#cb7-227" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>An **entry** event at time $t$ is also the addition of an individual $I'$ in the population. However, this individual is not of age $0$. The date of birth and characteristics of the new individual $I'= (\tau^b, \infty, X)$ are random variables of probability distribution defined by the entry kernel $k^{en}(t, \mathrm{d}s, \mathrm{d}x)$ on ${\mathbb{R}}\times {\mathcal{X}}$. The population size becomes $N_t = N_{t^-} + 1$, and the population composition after the event is: </span>
+<span id="cb7-228"><a href="#cb7-228" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-229"><a href="#cb7-229" aria-hidden="true" tabindex="-1"></a>    Z_t  = Z_{t^-} +  \delta_{(\tau^b, \infty, X)}.</span>
+<span id="cb7-230"><a href="#cb7-230" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-231"><a href="#cb7-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-232"><a href="#cb7-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **death** or **exit** event of an individual $I= (\tau^b,\infty, x)\in Z_{t^-}$ at time $t$ is the modification of its death date $\tau^d$ from $+\infty$ to $t$. This event results in the simultaneous addition of the individual $(\tau^b,t,x)$ and removal of the individual $I$ from the population. The population size is not modified, and the population composition after the event is </span>
+<span id="cb7-233"><a href="#cb7-233" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-234"><a href="#cb7-234" aria-hidden="true" tabindex="-1"></a>    Z_t  = Z_{t^-} +\delta_{(\tau^b,t,x)}- \delta_{I}.</span>
+<span id="cb7-235"><a href="#cb7-235" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-236"><a href="#cb7-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-237"><a href="#cb7-237" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **swap** event (change of characteristics) results in the simultaneous addition and removal of an individual. If an individual $I= (\tau^b,\infty, x) \in Z_{t^-}$ changes of characteristics at time $t$, then it is removed from the population and replaced by $I' = (\tau^b,\infty, X)$. The new characteristics $X$ is a random variable of distribution $k^s(t, I,\mathrm{d}x)$ on ${\mathcal{X}}$, depending on time, the individual's age and previous characteristics $x$. In this case, the population size is not modified and the population becomes:</span>
+<span id="cb7-238"><a href="#cb7-238" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-239"><a href="#cb7-239" aria-hidden="true" tabindex="-1"></a>    Z_t  = Z_{t^-}   +  \delta_{(\tau^b,  \infty, X)} -  \delta_{(\tau^b, \infty, x)}.</span>
+<span id="cb7-240"><a href="#cb7-240" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-241"><a href="#cb7-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-242"><a href="#cb7-242" aria-hidden="true" tabindex="-1"></a>To summarize, the space of event types is $E = <span class="sc">\{</span> b, en, d, s <span class="sc">\}</span>$, and the jump $\Delta Z_t = Z_t - Z_{t^-}$ (change in the population composition) generated by an event of type $e \in <span class="sc">\{</span> b, en, d, s <span class="sc">\}</span>$ is denoted by $\phi^e(t, I)$. We thus have the following rules summarized in the table @tbl-event-action.</span>
+<span id="cb7-243"><a href="#cb7-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-244"><a href="#cb7-244" aria-hidden="true" tabindex="-1"></a>Event | Type | $\phi^e(t, I)$ | New individual</span>
+<span id="cb7-245"><a href="#cb7-245" aria-hidden="true" tabindex="-1"></a>------|:----:|----------------|---------------</span>
+<span id="cb7-246"><a href="#cb7-246" aria-hidden="true" tabindex="-1"></a>Birth | $b$ | $\delta_{(t, \infty,  X)}$ | $\tau^b =t, \; X \sim k^b(t,I,\mathrm{d}x)$ </span>
+<span id="cb7-247"><a href="#cb7-247" aria-hidden="true" tabindex="-1"></a>Entry | $en$ | $\delta_{(\tau^b, \infty,  X)}$ | $(\tau^b, X) \sim k^{en}(t,\mathrm{d}s, \mathrm{d}x)$ </span>
+<span id="cb7-248"><a href="#cb7-248" aria-hidden="true" tabindex="-1"></a>Death/Exit | $d$ | $\delta_{(\tau^b, t,x)} - \delta_{(\tau^b, \infty, x)}$ | $\tau^d = t$</span>
+<span id="cb7-249"><a href="#cb7-249" aria-hidden="true" tabindex="-1"></a>Swap | $s$ | $\delta_{(\tau^b, \infty , X)} - \delta_{(\tau^b, \infty, x)}$ | $X \sim k^s(t,I,\mathrm{d}x)$</span>
+<span id="cb7-250"><a href="#cb7-250" aria-hidden="true" tabindex="-1"></a>: Action in the population for a given event name {#tbl-event-action}</span>
+<span id="cb7-251"><a href="#cb7-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-252"><a href="#cb7-252" aria-hidden="true" tabindex="-1"></a>::: {#rem-popfinale}</span>
+<span id="cb7-253"><a href="#cb7-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-254"><a href="#cb7-254" aria-hidden="true" tabindex="-1"></a><span class="fu">## Composition of the population </span></span>
+<span id="cb7-255"><a href="#cb7-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-256"><a href="#cb7-256" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>At time $T$, the population $Z_T$ contains all individuals who lived in the population before $T$, including dead/exited individuals. If there are no swap events, or entries,the population state $Z_t$ for any time $t\leq T$ can be obtained from $Z_T$. Indeed, if $Z_T = \sum_{k=1}^{N_T}  \delta_{I_k}$, then the population at time $t\leq T$ is simply composed of the individuals born before $t$: $$</span>
+<span id="cb7-257"><a href="#cb7-257" aria-hidden="true" tabindex="-1"></a>    Z_t = \sum_{k=1}^{N_T} \boldsymbol{1}_{\{\tau^b_k \leq t \}} \delta_{I_k}.</span>
+<span id="cb7-258"><a href="#cb7-258" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-259"><a href="#cb7-259" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>In the presence of entries (open population), a characteristic $x$ can track the individuals' entry dates. Then, the previous equation can be easily modified in order to obtain the population $Z_t$ at time $t\leq T$ from $Z_T$.</span>
+<span id="cb7-260"><a href="#cb7-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-261"><a href="#cb7-261" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-262"><a href="#cb7-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-263"><a href="#cb7-263" aria-hidden="true" tabindex="-1"></a><span class="fu">## Events intensity {#sec-event-intensity}</span></span>
+<span id="cb7-264"><a href="#cb7-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-265"><a href="#cb7-265" aria-hidden="true" tabindex="-1"></a>Once the different event types have been defined in the population model, the frequency at which each event occur in the population $e$ have to be specified.</span>
+<span id="cb7-266"><a href="#cb7-266" aria-hidden="true" tabindex="-1"></a>Informally, the intensity $\Lambda^e_t(Z_t)$ at which an event $e$ can occur is defined by</span>
+<span id="cb7-267"><a href="#cb7-267" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-268"><a href="#cb7-268" aria-hidden="true" tabindex="-1"></a>    \mathbb P\big( \text{event } e \text { occurs in the population }  Z_t  \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \Lambda^e_t (Z_t)\mathrm{d}t.</span>
+<span id="cb7-269"><a href="#cb7-269" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-270"><a href="#cb7-270" aria-hidden="true" tabindex="-1"></a>For a more formal definition of stochastic intensities, we refer to <span class="co">[</span><span class="ot">@bremaud1981point</span><span class="co">]</span> or <span class="co">[</span><span class="ot">@KaaElK20</span><span class="co">]</span>. The form of the intensity function $(\Lambda^e_t (Z_t))$ determines the population simulation algorithm in <span class="in">`IBMPopSim`</span>:</span>
+<span id="cb7-271"><a href="#cb7-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-272"><a href="#cb7-272" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>When the event intensity does not depend on the population state, </span>
+<span id="cb7-273"><a href="#cb7-273" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-274"><a href="#cb7-274" aria-hidden="true" tabindex="-1"></a>    \big(\Lambda^e_t (Z_t)\big)_{t\in [0,T]} = \big(\mu^e(t)\big)_{t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>},</span>
+<span id="cb7-275"><a href="#cb7-275" aria-hidden="true" tabindex="-1"></a>$$ {#eq-poisson-intensity}</span>
+<span id="cb7-276"><a href="#cb7-276" aria-hidden="true" tabindex="-1"></a>with $\mu^e$ a deterministic function, the events of type $e$ occur at the jump times of an inhomogeneous Poisson process of intensity function $(\mu^e(t))_{t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>}$. When such an event occurs, the individual to whom the event happens to is drawn uniformly among alive individuals in the population.</span>
+<span id="cb7-277"><a href="#cb7-277" aria-hidden="true" tabindex="-1"></a>In a given model, the set of events $e\in E$ with Poisson intensities will be denoted by $\mathcal{P}$.</span>
+<span id="cb7-278"><a href="#cb7-278" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Otherwise, we assume that the global intensity $\Lambda^e_t(Z_t)$ at which the events of type $e$ occur in the population can be written as the sum of individual intensities $\lambda^e_t(I,Z_t)$:</span>
+<span id="cb7-279"><a href="#cb7-279" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-280"><a href="#cb7-280" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb7-281"><a href="#cb7-281" aria-hidden="true" tabindex="-1"></a>    &amp;\Lambda^e_t (Z_t) = \sum_{k=1}^{N_t} \lambda^e_t ( I_k,Z_t),  <span class="sc">\\</span></span>
+<span id="cb7-282"><a href="#cb7-282" aria-hidden="true" tabindex="-1"></a>    &amp; \nonumber \text{with } \mathbb P\big( \text{event } e \text { occurs to an individual } I \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \lambda^e_t (I,Z_t)\mathrm{d}t.</span>
+<span id="cb7-283"><a href="#cb7-283" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb7-284"><a href="#cb7-284" aria-hidden="true" tabindex="-1"></a>$$ {#eq-global-intensity}</span>
+<span id="cb7-285"><a href="#cb7-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-286"><a href="#cb7-286" aria-hidden="true" tabindex="-1"></a>Obviously, nothing can happen to dead or exited individuals, i.e. individuals $I= (\tau^b, \tau^d, x)$ with $\tau^d \leq t$. Thus, individual event intensities are assumed to be null for dead/exited individuals:</span>
+<span id="cb7-287"><a href="#cb7-287" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-288"><a href="#cb7-288" aria-hidden="true" tabindex="-1"></a>    \lambda^e_t ( I,Z_t) = 0, \text{ if }\tau^d \leq t, \text{ so that } \Lambda^e_t (Z_t) = \sum_{k=1}^{N_t^a} \lambda^e_t ( I_k,Z_t),</span>
+<span id="cb7-289"><a href="#cb7-289" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-290"><a href="#cb7-290" aria-hidden="true" tabindex="-1"></a>with $N^a_t$ the number of alive individuals at time $t$.</span>
+<span id="cb7-291"><a href="#cb7-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-292"><a href="#cb7-292" aria-hidden="true" tabindex="-1"></a>The event's individual intensity $\lambda^e_t (I,Z_t)$ can depend on time (for instance when there is a mortality reduction over time), on the individual's age $t-\tau^b$ and characteristics, but also on the population composition $Z_t$. The dependence of $\lambda^e$ on the population $Z$ models interactions between individuals in the populations. Hence, two types of individual intensity functions can be implemented in <span class="in">`IBMPopSim`</span>:</span>
+<span id="cb7-293"><a href="#cb7-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-294"><a href="#cb7-294" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>*No interactions:* The intensity function $\lambda^e$ does not depend on the population composition. The intensity at which the event of type $e$ occur to an individual $I$ only depends on its date of birth and characteristics: </span>
+<span id="cb7-295"><a href="#cb7-295" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-296"><a href="#cb7-296" aria-hidden="true" tabindex="-1"></a>    \lambda^e_t (I,Z_t) = \lambda^e(t, I),</span>
+<span id="cb7-297"><a href="#cb7-297" aria-hidden="true" tabindex="-1"></a>$$ {#eq-intensity-no-interaction}</span>
+<span id="cb7-298"><a href="#cb7-298" aria-hidden="true" tabindex="-1"></a>where $\lambda^e: \mathbb{R}_+ \times \mathcal{I}\to {\mathbb{R}}^+$ is a deterministic function. In a given model, we denote by $\mathcal{E}$ the set of event types with individual intensity @eq-intensity-no-interaction.</span>
+<span id="cb7-299"><a href="#cb7-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-300"><a href="#cb7-300" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>*"Quadratic" interactions:* The intensity at which an event of type $e$ occurs to an individual $I$ depends on $I$ and on the population composition, through an interaction function $W^e$. The quantity $W^e(t, I,J)$ describes the intensity of interactions between two alive individuals $I$ and $J$ at time $t$, for instance in the presence of competition or cooperation. In this case, we have</span>
+<span id="cb7-301"><a href="#cb7-301" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-302"><a href="#cb7-302" aria-hidden="true" tabindex="-1"></a>    \lambda^e_t(I,Z_t)=\sum_{j=1}^{N_t} W^e(t, I, I_j) = \int_{\mathcal{I}} W^e(t, I, (\tau^b,\tau^d,x)) Z_t (\mathrm{d}\tau^b,\mathrm{d}\tau^d, \mathrm{d}x),</span>
+<span id="cb7-303"><a href="#cb7-303" aria-hidden="true" tabindex="-1"></a>$$ {#eq-intensity-interaction}</span>
+<span id="cb7-304"><a href="#cb7-304" aria-hidden="true" tabindex="-1"></a>where $W^e(t, I, (\tau^b,\tau^d,x))  = 0$ if the individual $J =(\tau^b,\tau^d,x)$ is dead, i.e. $\tau^d \leq t$.\ In a given model, we denote by $\mathcal{E}_W$ the set of event types with individual intensity @eq-intensity-interaction.</span>
+<span id="cb7-305"><a href="#cb7-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-306"><a href="#cb7-306" aria-hidden="true" tabindex="-1"></a>To summarize, an individual intensity in IBMPopSim can be written as:</span>
+<span id="cb7-307"><a href="#cb7-307" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-308"><a href="#cb7-308" aria-hidden="true" tabindex="-1"></a>    \lambda^e_t(I,Z_t) = \lambda^e(t, I) \mathbf{1}_{\{e \in \mathcal{E}\}} + \biggl( \sum_{j=1}^{N_t} W^e(t, I, I_j) \biggr) \mathbf{1}_{<span class="sc">\{</span>e \in \mathcal{E}_W<span class="sc">\}</span>}.</span>
+<span id="cb7-309"><a href="#cb7-309" aria-hidden="true" tabindex="-1"></a>$$ {#eq-indiviual-intensity}</span>
+<span id="cb7-310"><a href="#cb7-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-311"><a href="#cb7-311" aria-hidden="true" tabindex="-1"></a>::: {#exm-popfinale}</span>
+<span id="cb7-312"><a href="#cb7-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-313"><a href="#cb7-313" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>An example of death intensity without interaction for an individual $I=(\tau^b, \tau^d, x)$ alive at time $t$, $t &lt; \tau^d$, is:</span>
+<span id="cb7-314"><a href="#cb7-314" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-315"><a href="#cb7-315" aria-hidden="true" tabindex="-1"></a>    \lambda^d(t,I) =  \alpha_x \exp(\beta_x a(I,t)), \text{ where }  a(I,t) = t-\tau^b</span>
+<span id="cb7-316"><a href="#cb7-316" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-317"><a href="#cb7-317" aria-hidden="true" tabindex="-1"></a>is the age of the individual $I$ at time $t$. In this classical case, the death rate of an individual $I$ is an exponential (Gompertz) function of the individual's age, with coefficients depending on the individual's characteristics $x$.</span>
+<span id="cb7-318"><a href="#cb7-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-319"><a href="#cb7-319" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>In the presence of competition between individuals, the death intensity of an individual $I$ also depend on other individuals $J$ in the population. For example, if $I=(\tau^b,\tau^d, x)$, with $x$ its size, then we can have: </span>
+<span id="cb7-320"><a href="#cb7-320" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-321"><a href="#cb7-321" aria-hidden="true" tabindex="-1"></a>    W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{<span class="sc">\{</span>\tau^d_J &gt; t<span class="sc">\}</span>}, \quad \forall \; J=(\tau^b_J,\tau^d_J , x_J).</span>
+<span id="cb7-322"><a href="#cb7-322" aria-hidden="true" tabindex="-1"></a>$$ {#eq-ex-interation}</span>
+<span id="cb7-323"><a href="#cb7-323" aria-hidden="true" tabindex="-1"></a>This can be interpreted as follows: if the individual $I$ meets randomly an individual $J$ alive at time $t$, and of bigger size $x_J &gt; x$, then he can die at the intensity $x_J-x$. If $J$ is smaller than $I$, then he cannot kill $I$. The bigger is the size $x$ of $I$, the lower is his death intensity $\lambda^d_t(I,Z_t)$ defined by </span>
+<span id="cb7-324"><a href="#cb7-324" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-325"><a href="#cb7-325" aria-hidden="true" tabindex="-1"></a>    \lambda^d_t(I,Z_t) = \sum_{\genfrac{}{}{0pt}{2}{J\in Z_t,}{x_J &gt; x}} (x_J -x)\mathbf{1}_{<span class="sc">\{</span>\tau^d_J &gt; t<span class="sc">\}</span>}.</span>
+<span id="cb7-326"><a href="#cb7-326" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-327"><a href="#cb7-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-328"><a href="#cb7-328" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span><span class="in">`IBMPopSim`</span> can simulate IBMs that include intensities expressed as a sum of Poisson intensities and individual intensities of the form $\Lambda^e(Z_t) =\mu^e_t + \sum_{k=1}^{N_t} \lambda^e(I_k, Z_t)$. Other examples are provided in @sec-insurance-portfolio and @sec-example-interaction.</span>
+<span id="cb7-329"><a href="#cb7-329" aria-hidden="true" tabindex="-1"></a>Finally, the global intensity at which an event can occur in the population is defined by: </span>
+<span id="cb7-330"><a href="#cb7-330" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-331"><a href="#cb7-331" aria-hidden="true" tabindex="-1"></a>    \Lambda_t(Z_t) = \sum_{e\in \mathcal{P}} \mu^e(t) + \sum_{e \in \mathcal E} \Big(\sum_{k=1}^{N_t} \lambda^e(t, I_k)\Big) + \sum_{e \in \mathcal E_W} \Big(\sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)\Big).</span>
+<span id="cb7-332"><a href="#cb7-332" aria-hidden="true" tabindex="-1"></a>$$ {#eq-global-ev-intensity}</span>
+<span id="cb7-333"><a href="#cb7-333" aria-hidden="true" tabindex="-1"></a>An important point is that for events $e \in \mathcal E$ without interactions, the global event intensity $\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t} \lambda^e(t, I_k)$ is _of order_ $N_t^a$ defined in @eq-Nta (number of alive individuals at time $t$). On the other hand, for events $e \in \mathcal{E}_W$ with interactions, $\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)$ is of order $(N_t^a)^2$. </span>
+<span id="cb7-334"><a href="#cb7-334" aria-hidden="true" tabindex="-1"></a>Informally, this means that when the population size increases, events with interaction are more costly to simulate. Furthermore, the numerous computations of the interaction kernel $W^e$ can also be quite costly. The randomized Algorithm <span class="co">[</span><span class="ot">\[algo::rzndomized\]</span><span class="co">](#algo::rzndomized)</span>{reference-type="ref" reference="algo::rzndomized"}, detailed in Section <span class="co">[</span><span class="ot">2.3</span><span class="co">](#sec::simulation_algo_randomized)</span>{reference-type="ref" reference="sec::simulation_algo_randomized"}, allows us to overcome these limitations.</span>
+<span id="cb7-335"><a href="#cb7-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-336"><a href="#cb7-336" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-337"><a href="#cb7-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-338"><a href="#cb7-338" aria-hidden="true" tabindex="-1"></a><span class="fu">### Events intensity bounds</span></span>
+<span id="cb7-339"><a href="#cb7-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-340"><a href="#cb7-340" aria-hidden="true" tabindex="-1"></a>The simulation algorithms implemented in <span class="in">`IBMPopSim`</span> are based on an acceptance/rejection procedure, which requires to specify bounds for the various events intensities $\Lambda^e_t(Z_t)$. These bounds are defined differently depending on the expression of the intensity.</span>
+<span id="cb7-341"><a href="#cb7-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-342"><a href="#cb7-342" aria-hidden="true" tabindex="-1"></a>::: {#cnj-intensity-poisson} </span>
+<span id="cb7-343"><a href="#cb7-343" aria-hidden="true" tabindex="-1"></a>For all events $e \in \mathcal{P}$ with Poisson intensity @eq-poisson-intensity, the intensity is assumed to be bounded on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$:</span>
+<span id="cb7-344"><a href="#cb7-344" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-345"><a href="#cb7-345" aria-hidden="true" tabindex="-1"></a>    \forall t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>, \quad \Lambda^e_t(Z_t) = \mu^e(t) \leq \bar \mu^e.</span>
+<span id="cb7-346"><a href="#cb7-346" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-347"><a href="#cb7-347" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-348"><a href="#cb7-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-349"><a href="#cb7-349" aria-hidden="true" tabindex="-1"></a>When $e \in \mathcal{E} \cup \mathcal{E}_W$, $\Lambda^e_t(Z_t) =\sum_{k=1}^{N_t} \lambda^e_t(I_k,Z_t)$, assuming that $\Lambda^e_t(Z_t)$ is uniformly bounded is too restrictive since the event intensity depends on the population size. In this case, the assumption is made on the individual intensity $\lambda^e$ or on the interaction function $W^e$, depending on the situation.</span>
+<span id="cb7-350"><a href="#cb7-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-351"><a href="#cb7-351" aria-hidden="true" tabindex="-1"></a>::: {#cnj-intensity1}</span>
+<span id="cb7-352"><a href="#cb7-352" aria-hidden="true" tabindex="-1"></a>For all event types $e \in \mathcal{E}$, the associated individual event intensity $\lambda^e$ with no interactions, _i.e._ $\lambda^e$ verifies @eq-intensity-no-interaction, is assumed to be uniformly bounded:</span>
+<span id="cb7-353"><a href="#cb7-353" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-354"><a href="#cb7-354" aria-hidden="true" tabindex="-1"></a>    \lambda^e(t, I) \leq \bar \lambda^e, \quad \forall \;  t\in <span class="co">[</span><span class="ot">0, T</span><span class="co">]</span>,  \;   I \in \mathcal{I}.</span>
+<span id="cb7-355"><a href="#cb7-355" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-356"><a href="#cb7-356" aria-hidden="true" tabindex="-1"></a>In particular, </span>
+<span id="cb7-357"><a href="#cb7-357" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-358"><a href="#cb7-358" aria-hidden="true" tabindex="-1"></a>    \forall t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>, \quad \Lambda^e_t (Z_t) = \sum_{k=1}^{N_t} \lambda^e(t, I) \leq \bar \lambda^e  N_t .</span>
+<span id="cb7-359"><a href="#cb7-359" aria-hidden="true" tabindex="-1"></a>$$ {#eq-def-bar-Lambda}</span>
+<span id="cb7-360"><a href="#cb7-360" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-361"><a href="#cb7-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-362"><a href="#cb7-362" aria-hidden="true" tabindex="-1"></a>::: {#cnj-intensity2}</span>
+<span id="cb7-363"><a href="#cb7-363" aria-hidden="true" tabindex="-1"></a>For all event types $e \in \mathcal{E}_W$, the associated interaction function $W^e$ is assumed to be uniformly bounded:</span>
+<span id="cb7-364"><a href="#cb7-364" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-365"><a href="#cb7-365" aria-hidden="true" tabindex="-1"></a>    W^e(t, I, J) \leq \bar W^e, \quad \forall \; t\in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>, \;   I, J \in \mathcal{I}.</span>
+<span id="cb7-366"><a href="#cb7-366" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-367"><a href="#cb7-367" aria-hidden="true" tabindex="-1"></a>In particular, $\forall t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$,</span>
+<span id="cb7-368"><a href="#cb7-368" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-369"><a href="#cb7-369" aria-hidden="true" tabindex="-1"></a>    \lambda^e_t (I,Z_t) = \sum_{j=1}^{N_t} W^e(t, I, I_j)  \leq  \bar W^e N_t, \quad \text{and} \quad \Lambda^e_t (Z_t) \leq \bar W^e (N_t)^2.</span>
+<span id="cb7-370"><a href="#cb7-370" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-371"><a href="#cb7-371" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-372"><a href="#cb7-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-373"><a href="#cb7-373" aria-hidden="true" tabindex="-1"></a>@cnj-intensity-poisson, @cnj-intensity1 and @cnj-intensity2 yield that events in the population occur with the global event intensity&nbsp;$\Lambda_t(Z_t)$, given in @eq-global-ev-intensity, which is dominated by a polynomial function in the population size: </span>
+<span id="cb7-374"><a href="#cb7-374" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-375"><a href="#cb7-375" aria-hidden="true" tabindex="-1"></a>    \Lambda_t(Z_t) \leq \bar \Lambda(N_t), \quad \text{with }  \bar \Lambda (n) = \sum_{e \in \mathcal{P}} \bar \mu^e + \sum_{e\in \mathcal{E}}\bar \lambda^e  n + \sum_{e \in \mathcal E_W} \bar W^e n^2.</span>
+<span id="cb7-376"><a href="#cb7-376" aria-hidden="true" tabindex="-1"></a>$$ {#eq-def-bar-Lambda}</span>
+<span id="cb7-377"><a href="#cb7-377" aria-hidden="true" tabindex="-1"></a>This bound is linear in the population size if there are no interactions, and quadratic if there at least is an event including interactions. This assumption is the key to the algorithms implemented in <span class="in">`IBMPopSim`</span>. Before presenting the simulation algorithm, we close this section with a rigorous definition of an IBM, based on the pathwise representation of its dynamics a Stochastic Differential Equation (SDE) driven by Poisson random measures.</span>
+<span id="cb7-378"><a href="#cb7-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-379"><a href="#cb7-379" aria-hidden="true" tabindex="-1"></a><span class="fu">## Pathwise representation</span></span>
+<span id="cb7-380"><a href="#cb7-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-381"><a href="#cb7-381" aria-hidden="true" tabindex="-1"></a>Since the seminal paper of <span class="co">[</span><span class="ot">@FouMel04</span><span class="co">]</span>, it has been shown in many examples that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. In the following, we introduce a unified framework for the pathwise representation of the class of stochastic IBMs introduced above. </span>
+<span id="cb7-382"><a href="#cb7-382" aria-hidden="true" tabindex="-1"></a>Some recalls on Poisson random measures are presented in the Appendix @sec-recall-poisson, and for more details on these representations on particular examples, we refer to the abundant literature on the subject.</span>
+<span id="cb7-383"><a href="#cb7-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-384"><a href="#cb7-384" aria-hidden="true" tabindex="-1"></a>In the following we consider an individual-based stochastic population $(Z_t)_{t\in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>}$, keeping the notations introduced in @sec-events and @sec-event-intensity for the events and their intensities.</span>
+<span id="cb7-385"><a href="#cb7-385" aria-hidden="true" tabindex="-1"></a>In particular, the set of events types that define the population evolution is denoted by $\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E$, with $\mathcal{P}$ the set of events types with Poisson intensity verifying @cnj-intensity-poisson, $\mathcal{E}$ the set of events types with individual intensity and no interaction, verifying @cnj-intensity1 and finally $\mathcal{E}_W$ the set of event types with interactions, verifying @cnj-intensity2.</span>
+<span id="cb7-386"><a href="#cb7-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-387"><a href="#cb7-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-388"><a href="#cb7-388" aria-hidden="true" tabindex="-1"></a><span class="fu">## Thinning of Poisson measure {#sec-thinning}</span></span>
+<span id="cb7-389"><a href="#cb7-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-390"><a href="#cb7-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-391"><a href="#cb7-391" aria-hidden="true" tabindex="-1"></a><span class="fu"># References {.unnumbered}</span></span>
+<span id="cb7-392"><a href="#cb7-392" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-393"><a href="#cb7-393" aria-hidden="true" tabindex="-1"></a>::: {#refs}</span>
+<span id="cb7-394"><a href="#cb7-394" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-395"><a href="#cb7-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-396"><a href="#cb7-396" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session information {.appendix .unnumbered}</span></span>
+<span id="cb7-397"><a href="#cb7-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-398"><a href="#cb7-398" aria-hidden="true" tabindex="-1"></a><span class="in">```{r session-info}</span></span>
+<span id="cb7-399"><a href="#cb7-399" aria-hidden="true" tabindex="-1"></a><span class="in">sessionInfo()</span></span>
+<span id="cb7-400"><a href="#cb7-400" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
