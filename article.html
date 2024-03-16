@@ -290,7 +290,15 @@ ISSN 2824-7795</p>
   </ul></li>
   <li><a href="#sec-simulation" id="toc-sec-simulation" class="nav-link" data-scroll-target="#sec-simulation"><span class="header-section-number">3</span> Population simulation</a>
   <ul class="collapse">
-  <li><a href="#sec-thinning" id="toc-sec-thinning" class="nav-link" data-scroll-target="#sec-thinning"><span class="header-section-number">3.1</span> Thinning of Poisson measure</a></li>
+  <li><a href="#sec-thinning" id="toc-sec-thinning" class="nav-link" data-scroll-target="#sec-thinning"><span class="header-section-number">3.1</span> Thinning of Poisson measure</a>
+  <ul class="collapse">
+  <li><a href="#sec-vector" id="toc-sec-vector" class="nav-link" data-scroll-target="#sec-vector"><span class="header-section-number">3.1.1</span> Multivariate Poisson process</a></li>
+  </ul></li>
+  <li><a href="#sec-simulation-algo" id="toc-sec-simulation-algo" class="nav-link" data-scroll-target="#sec-simulation-algo"><span class="header-section-number">3.2</span> Simulation algorithm</a>
+  <ul class="collapse">
+  <li><a href="#first-event-simulation" id="toc-first-event-simulation" class="nav-link" data-scroll-target="#first-event-simulation"><span class="header-section-number">3.2.1</span> First event simulation</a></li>
+  </ul></li>
+  <li><a href="#sec-simulation-randomized" id="toc-sec-simulation-randomized" class="nav-link" data-scroll-target="#sec-simulation-randomized"><span class="header-section-number">3.3</span> Simulation algorithm with randomization</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   
@@ -645,7 +653,7 @@ W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J &gt; t\}}, \quad \forall \; J=(\
 <li><p>The jump times of <span class="math inline">(\bar T_\ell)_{\ell \ge 1}</span> of <span class="math inline">\bar Q</span> are the jump times of a Poisson process of intensity <span class="math inline">\bar \Lambda</span>.</p></li>
 <li><p>The marks <span class="math inline">(\bar \Theta_\ell)_{\ell \ge 1}</span> are <em>i.i.d.</em> random variables, uniformly distributed on <span class="math inline">[0, \bar \Lambda]</span>.</p></li>
 </ul>
-<p>By <span class="citation" data-cites="pro-marked-poisson">(<a href="#ref-pro-marked-poisson" role="doc-biblioref"><strong>pro-marked-poisson?</strong></a>)</span> , <span class="math inline">\bar{Q}</span> is a Poisson random measure with mean measure <span class="math display">
+<p>By <strong>?@prp-marked-poisson</strong> , <span class="math inline">\bar{Q}</span> is a Poisson random measure with mean measure <span class="math display">
     \bar \mu(\mathrm{d}t, \mathrm{d}\theta): = \bar \Lambda \mathrm{d}t
     \frac{\mathbf{1}_{[0, \bar \Lambda]}(\theta)}{\bar \Lambda} \mathrm{d}\theta= \mathrm{d}t  \mathbf{1}_{[0, \bar \Lambda]}(\theta) \mathrm{d}\theta.
 </span> In particular, the average number of atoms <span class="math inline">(\bar T_\ell, \bar \Theta_\ell)</span> in <span class="math inline">[0,t]\times [0,h]</span> is <span class="math display">
@@ -669,11 +677,110 @@ Figure&nbsp;1: test
 </figcaption>
 </figure>
 </div>
-<div id="alg-thinning2" class="pseudocode-container" data-alg-title="Algorithm" data-no-end="false" data-pseudocode-index="1" data-line-number="true" data-comment-delimiter="//" data-indent-size="1.2em" data-line-number-punc=":">
+<p>Finally, the inhomogeneous Poisson process is obtained by the projection <strong>?@prp-proj-poisson-measure</strong>, which states that the jump times of <span class="math inline">Q^\Delta</span> are the jump times of an inhomogeneous Poisson process of intensity <span class="math inline">(\Lambda(t))</span>.</p>
+<div id="prp-thinning" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 1</strong></span> The counting process <span class="math inline">N^\Lambda</span>, projection of <span class="math inline">Q^{\Delta}</span> on the time component and defined by, <span id="eq-thinning-inhomogeneous-poisson"><span class="math display">
+    N^{\Lambda}_t := Q^{\Delta}( [0,t] \times {\mathbb{R}}^+) = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \Lambda(s)\}} \bar Q(\mathrm{d}s, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{ \bar T_\ell \leq t \}} \mathsf{1}_{\{\bar \Theta_\ell \leq  \Lambda(\bar T_\ell) \}},  \quad \forall t \in [0,T],
+\tag{13}</span></span> is an inhomogeneous Poisson process on <span class="math inline">[0,T]</span> of intensity function <span class="math inline">(\Lambda(t))_{t\in [0,T]}</span>. The thinning <a href="#eq-thinning-inhomogeneous-poisson" class="quarto-xref">Equation&nbsp;13</a> is a pathwise representation of <span class="math inline">N^\Lambda</span> by <em>restriction and projection</em> of the Poisson measure <span class="math inline">Q</span> on <span class="math inline">[0,T]</span>.</p>
+</div>
+<p>The previous proposition yields a straightforward thinning algorithm to simulate the jump times <span class="math inline">(T_k)_{k \ge 1}</span> of an inhomogeneous Poisson process of intensity <span class="math inline">\Lambda(t)</span>, by selecting jump times <span class="math inline">\bar T_\ell</span> such that <span class="math inline">\bar \Theta_\ell \le \Lambda(\bar T_\ell)</span>.</p>
+<section id="sec-vector" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="sec-vector"><span class="header-section-number">3.1.1</span> Multivariate Poisson process</h3>
+<p>This can be extended to the simulation of multivariate inhomogeneous Poisson processes, which is an important example before tackling the simulation of an IBM.</p>
+<p>Let <span class="math inline">(N^j)_{j \in \mathcal{J}}</span> be a (inhomogeneous) multivariate Poisson process indexed by a finite set <span class="math inline">\mathcal{J}</span>, such that <span class="math inline">\forall j \in \mathcal{J}</span>, the intensity <span class="math inline">(\lambda_j(t))_{t\in [0,T]}</span> of <span class="math inline">N_j</span> is bounded on <span class="math inline">[0,T]</span>: <span class="math display">
+    \sup_{t\in[0,T]} \lambda_j(t) \le \bar \lambda_j, \text{ and let }
+    \bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j.
+</span> Recall that such multivariate counting process can be rewritten as a Poisson random measure <span class="math inline">N= \sum_{k\geq 1} \delta_{(T_k,J_k)}</span> on <span class="math inline">{\mathbb{R}}^+\times \mathcal{J}</span> (see e.g.&nbsp;Sec. 2 of Chapter 6 in&nbsp;<span class="citation" data-cites="Cin11">(<a href="#ref-Cin11" role="doc-biblioref">Çinlar 2011</a>)</span>), where <span class="math inline">T_k</span> is the <span class="math inline">k</span>th jump time of <span class="math inline">\sum_{j\in \mathcal{J}} N^j</span> and <span class="math inline">J_k</span> corresponds to the component of the the vector which jumps. In particular, <span class="math inline">N^j_t = N([0,t]\times \{j\})</span>.</p>
+<p>Once again the simulation of such process can be obtained from the simulation of a (homogeneous) multivariate Poisson process of intensity vector <span class="math inline">(\bar{\lambda}_j)_{j \in \mathcal{J}}</span>, extended into a Poisson measures by adding marks on <span class="math inline">{\mathbb{R}}^+</span>. Thus, we introduce the Marked Poisson measure <span class="math inline">\bar Q = \sum \delta_{(\bar T_\ell, \bar J_\ell, \bar \Theta_\ell)}</span> on <span class="math inline">{\mathbb{R}}^+  \times \mathcal{J}\times {\mathbb{R}}^+</span>, such that:</p>
+<ul>
+<li>The jump times <span class="math inline">(\bar T_\ell)</span> of <span class="math inline">\bar Q</span> are the jump times of a Poisson measure of intensity <span class="math inline">\bar \Lambda</span>.</li>
+<li>The variables <span class="math inline">(\bar J_\ell)</span> are <em>i.i.d.</em> random variables on <span class="math inline">\mathcal{J}</span>, with <span class="math inline">\displaystyle p_j= {\mathbb{P}}(\bar J_1 = j)= \bar \lambda_j/\bar \Lambda</span> and representing the component of the vector which jumps.</li>
+<li>The marks <span class="math inline">(\bar \Theta_\ell)</span> are independent variables with <span class="math inline">\bar \Theta_\ell</span> a uniform random variable on <span class="math inline">[0,\bar \lambda_{{\bar J}_\ell}]</span>, <span class="math inline">\forall \ell \geq 1</span>.</li>
+</ul>
+<p>By <strong>?@prp-marked-poisson</strong> and <strong>?@prp-proj-poisson-measure</strong>, each measure <span class="math inline">\bar Q_j (\mathrm{d}t, \mathrm{d}\theta) = \bar Q(\mathrm{d}t, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{\bar J_\ell=j \}} \delta_{(\bar T_\ell, \bar \Theta_\ell)}</span> is a marked Poisson measure of intensity <span class="math display">
+    \bar \mu_j ( \mathrm{d}t  ,\mathrm{d}\theta) = \bar{\Lambda}p_j \mathrm{d}t  \frac{\mathsf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta)}{\bar \lambda_{j}} \mathrm{d}\theta = \mathrm{d}t  \mathsf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta) \mathrm{d}\theta.
+</span> As a direct application of <a href="#prp-thinning" class="quarto-xref">Proposition&nbsp;1</a> , the inhomogeneous multivariate Poisson process is obtained by restriction of each measures <span class="math inline">\bar Q_j</span> to <span class="math inline">\Delta_j = \{ (t, \theta) \in [0,T] \times [0,\bar \lambda_j] ;\; \theta \leq \lambda_j(t) \}</span> and projection.</p>
+<div id="prp-thinning-vector" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 2</strong></span> The multivariate counting process <span class="math inline">(N^j)_{j \in \mathcal{J}}</span>, defined for all <span class="math inline">j \in \mathcal{J}</span> and <span class="math inline">t \in [0,T]</span> by thinning and projection of <span class="math inline">\bar Q</span>: <span class="math display">
+    N^j_t  := \int_0^t \int_{ {\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \lambda_j(s)\}} \bar{Q}(\mathrm{d}s, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{ \bar T_\ell \leq t \}}\mathsf{1}_{\{\bar J_\ell = j\}} \mathsf{1}_{\{\bar \Theta_\ell \leq  \lambda_j (\bar T_\ell ) \}},
+</span> is an inhomogeneous Poisson process of intensity vector <span class="math inline">(\lambda_j(t))_{j\in\mathcal{J}}</span> on <span class="math inline">[0,T]</span>.</p>
+</div>
+<p><a href="#prp-thinning-vector" class="quarto-xref">Proposition&nbsp;2</a> yields the following simulation <a href="#alg-thinning2">Algorithm 1</a> for multivariate Poisson processes.</p>
+<div id="alg-thinning2" class="pseudocode-container" data-pseudocode-index="1" data-line-number-punc=":" data-line-number="true" data-no-end="false" data-comment-delimiter="//" data-alg-title="Algorithm" data-indent-size="1.2em">
 <div class="pseudocode">
 \begin{algorithm} \caption{Thinning algorithm for multivariate inhomogeneous Poisson processes.} \begin{algorithmic} \State \textbf{Input:} Functions $\lambda_j: [0,T] \to [0,\bar \lambda]$ and $\bar \lambda_j$, $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$ \State \textbf{Output:} Points $(T_k, J_k)$ of Poisson measure $N$ on $[0,T] \times \mathcal{J}$ \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ \While{$T_k &lt; T$} \Repeat \State increment iterative variable $\ell \longleftarrow \ell+1$ \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + S_\ell$ with $S_\ell \sim \mathcal{E}(\bar \Lambda)$ \State draw $\bar J_\ell \sim \mathcal{U}\big\{ \bar \lambda_j / \bar \Lambda, j \in \mathcal{J} \big\}$ i.e. $\mathbb{P}(\bar J_\ell = j) = \bar \lambda_j / \bar \Lambda$ \State draw $\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda_{\bar J_\ell}])$ \Until{accepted event $\bar \Theta_\ell \le \lambda_{\bar J_\ell}(\bar T_{\ell})$} \State record $(T_k, J_k) \longleftarrow (\bar T_{\ell}, \bar J_\ell)$ as accepted point \EndWhile \end{algorithmic} \end{algorithm}
 </div>
 </div>
+<div id="rem-alternate-thinning" class="proof remark">
+<p><span class="proof-title"><em>Remark 2</em>. </span>The acceptance/rejection <a href="#alg-thinning2">Algorithm 1</a> can be efficient when the functions <span class="math inline">\lambda_j</span> are of different order, and thus bounded by different <span class="math inline">\bar \lambda_j</span>. However, it is important to note that the simulation of the discrete random variables <span class="math inline">(\bar J_\ell)</span> can be costly (compared to a uniform law) when <span class="math inline">\mathcal{J}</span> is large, for instance when an individual is drawn from a large population. In this case, an alternative is to choose the same bound <span class="math inline">\bar \lambda_j= \bar \lambda</span> for all <span class="math inline">j \in \mathcal{J}</span>. Then the marks <span class="math inline">(\bar J_\ell, \bar \Theta_\ell)</span> are <em>i.i.d.</em> uniform variables on <span class="math inline">\mathcal{J}\times [0,\bar \lambda]</span>, faster to simulate.</p>
+</div>
+</section>
+</section>
+<section id="sec-simulation-algo" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-simulation-algo"><span class="header-section-number">3.2</span> Simulation algorithm</h2>
+<p>Let us now come back to the simulation of the IBM introduced in <strong>?@sec-ibm</strong>. For ease of notations, we assume that there are no event with Poisson intensity (<span class="math inline">\mathcal{P} =\emptyset</span>), so that all events that occur are of type <span class="math inline">e \in \mathcal{E} \cup \mathcal{E}_W</span>, with individual intensity <span class="math inline">\lambda_t^e(I,Z_t)</span> depending on the population composition <span class="math inline">Z_t</span> (<span class="math inline">e \in \mathcal{E}_W</span>) or not (<span class="math inline">e \in \mathcal{E}</span>), as defined in <strong>?@eq-indivual-intensity</strong> and verifying either <a href="#cnj-intensity1" class="quarto-xref">Assumption&nbsp;2</a> or <a href="#cnj-intensity2" class="quarto-xref">Assumption&nbsp;3</a>. The global intensity <strong>?@eq-global-event-intensity</strong> at time <span class="math inline">t \in [0,T]</span> is thus <span id="eq-def-intensity"><span class="math display">
+    \Lambda_t(Z_t) = \sum_{e \in \mathcal{E}} \Big( \sum_{k=1}^{N_t} \lambda^e(t, I_k) \Big)
+    + \sum_{e \in \mathcal{E}_W} \Big( \sum_{k=1}^{N_t} \sum_{j=1}^{N_t} W^e(t, I_k, I_j) \Big) \leq \bar \Lambda(N_t),
+\tag{14}</span></span> with <span class="math inline">\bar \Lambda(n) = \big(\sum_{e \in \mathcal{E}} \bar \lambda^e \big) n + \big( \sum_{e \in \mathcal{E}_W} \bar W^e \big) n^2</span>.</p>
+<p>One of the main difficulty is that the intensity of events is not deterministic as in the case of inhomogeneous Poisson processes, but a function <span class="math inline">\Lambda_t(Z_t)</span> of the population state, bounded by a function which also depends on the population size. However, the <a href="#alg-thinning2">Algorithm 1</a> can be adapted to simulate the IBM. The construction is done by induction, by conditioning on the state of the population <span class="math inline">Z_{T_k}</span> at the <span class="math inline">k</span>th event time <span class="math inline">T_k</span> (<span class="math inline">T_0 = 0</span>).</p>
+<p>We first present the construction of the first event at time <span class="math inline">T_1</span>.</p>
+<section id="first-event-simulation" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="first-event-simulation"><span class="header-section-number">3.2.1</span> First event simulation</h3>
+<p>Before the first event time, on <span class="math inline">\{ t &lt; T_1 \}</span>, the population composition is constant : <span class="math inline">Z_t = Z_0 = \{ I_1, \dots, I_{N_0}\}</span>. For each type of event <span class="math inline">e</span> and individual <span class="math inline">I_k</span>, <span class="math inline">k \in \{1,\dots N_0\}</span>, we denote by <span class="math inline">N^{k,e}</span> the counting process of intensity <span class="math inline">\lambda_t^e (I_k,Z_t)</span>, counting the occurrences of the events of type <span class="math inline">e</span> happening to the individual <span class="math inline">I_k</span>. Then, the first event <span class="math inline">T_1</span> is the first jump time of the multivariate counting vector <span class="math inline">(N^{(k,e)})_{ (k,e) \in \mathcal{J}_0}</span>, with <span class="math inline">\mathcal{J}_0 = \{1,\dots , N_0\}\times \big(\mathcal{E} \cup \mathcal{E}_W \big)</span>.</p>
+<p>Since the population composition is constant before the first event time, each counting process <span class="math inline">N^{j}</span> coincides on <span class="math inline">[0,T_1[</span> with an inhomogeneous Poisson process, of intensity <span class="math inline">\lambda_t^e (I_k,Z_0)</span>. Thus (conditionally to <span class="math inline">Z_0</span>), <span class="math inline">T_1</span> is also the first jump time of an inhomogeneous multivariate Poisson process <span class="math inline">N^0 = (N^{0,j})_{j \in \mathcal{J}_0}</span> of intensity function <span class="math inline">(\lambda_j)_{j\in \mathcal J_0}</span>, defined for all <span class="math inline">j = (k,e) \in \mathcal{J}_0</span> by: <span class="math display">
+    \lambda_j(t) = \lambda^e_t(I_k,Z_0) \le \bar \lambda^e_0 \quad \text{with} \quad \bar \lambda^e_0 = \bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_0 \mathbf{1}_{e \in \mathcal{E}_W},
+</span> by <a href="#cnj-intensity1" class="quarto-xref">Assumption&nbsp;2</a> and <a href="#cnj-intensity2" class="quarto-xref">Assumption&nbsp;3</a>. In particular, the jump times of <span class="math inline">N^0</span> occur at the intensity <span class="math display">
+    \Lambda(t) =\sum_{j \in \mathcal{J}_0} \lambda_j(t)  =\sum_{e \in \mathcal{E} \cup \mathcal{E}_W} \sum_{k=1}^{N_0}  \lambda^e_t(I_k,Z_0) \leq \bar \Lambda(N_0)=N_0 \sum_{e \in \mathcal{E} \cup \mathcal{E}_W} \bar \lambda^e_0.
+</span> By <a href="#prp-thinning-vector" class="quarto-xref">Proposition&nbsp;2</a>, <span class="math inline">N^0</span> can be obtained by thinning of the marked Poisson measure <span class="math inline">\bar Q^0 = \sum_{\ell \geq 1} \delta_{(\bar T_\ell , (\bar{K}_\ell, \bar E_\ell), \bar \Theta_\ell)}</span> on <span class="math inline">{\mathbb{R}}^+\times\mathcal{J}_0 \times {\mathbb{R}}^+</span>, with:</p>
+<ul>
+<li><span class="math inline">(\bar T_\ell)_{\ell \in {\mathbb{N}}^*}</span> the jump times of a Poisson process of rate <span class="math inline">\bar \Lambda(N_0)</span>.</li>
+<li><span class="math inline">(\bar{K}_\ell, \bar E_\ell)_{\ell \in {\mathbb{N}}^*}</span> discrete <em>i.i.d.</em> random variables on <span class="math inline">\mathcal{J}_0 = \{1,\dots , N_0\}\times \big(\mathcal{E} \cup \mathcal{E}_W \big)</span>, with <span class="math inline">K_\ell</span> representing the index of the chosen individual and <span class="math inline">E_\ell</span> the event type for the proposed event, such that: <span class="math display">
+  \mathbb{P}( \bar  K_1 = k, \bar E_1 = e)
+  = \frac{\bar \lambda^e_0 }{\bar \Lambda(N_0)}
+  = \frac{1}{N_0} \frac{\bar \lambda^e_0 N_0}{\bar \Lambda(N_0)},
+</span> i.e.&nbsp;<span class="math inline">(\bar K_1, \bar E_1)</span> are distributed as independent random variables where <span class="math inline">\bar K_1 \sim \mathcal U(\{1,\dots, N_0\})</span> and <span class="math inline">\bar E_1</span> such that <span class="math display">
+  p_e := \mathbb{P}( \bar E_1 = e)
+      = \frac{\bar \lambda^e_0 N_0}{\bar \Lambda(N_0)}.
+</span></li>
+<li><span class="math inline">(\bar \Theta_\ell)_{\ell \in {\mathbb{N}}^*}</span> are independent uniform random variables, with <span class="math inline">\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda^{\bar E_\ell}]).</span></li>
+</ul>
+<p>Since the first event is the first jump of <span class="math inline">N^0</span>, by <a href="#prp-thinning-vector" class="quarto-xref">Proposition&nbsp;2</a> and <a href="#alg-thinning2">Algorithm 1</a>, the first event time <span class="math inline">T_1</span> is the first jump time <span class="math inline">\bar T_\ell</span> of <span class="math inline">\bar Q^0</span> such that <span class="math inline">\bar \Theta_\ell \leq \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell}, Z_0)</span>.</p>
+<p>At <span class="math inline">T_1 =\bar T_{\ell}</span>, the event <span class="math inline">\bar E_\ell</span> occurs to the individual <span class="math inline">I_{\bar K_\ell} = (\tau^b, \infty, x)</span>. For instance, if <span class="math inline">\bar E_\ell =d</span>, a death/exit event occurs, so that <span class="math inline">Z_{T_1} = Z_{0} + \delta_{(\tau^b, T_1, x)} - \delta_{I_{\bar K_\ell}}</span> and <span class="math inline">N_{T_1} = N_{0}</span>. If <span class="math inline">\bar E_\ell =b</span> or <span class="math inline">en</span>, a birth or entry event occurs, so that <span class="math inline">N_{T_1} = N_{0} + 1</span>, and a new individual <span class="math inline">I_{N_0+1}</span> is added to the population, chosen as described in <a href="#tbl-event-action" class="quarto-xref">Table&nbsp;1</a>. Finally, if <span class="math inline">\bar E_\ell=s</span>, a swap event occurs, the population size stays constant and <span class="math inline">I_{\bar K_\ell}</span> is replaced by an individual <span class="math inline">I_{\bar K_\ell}'</span>, chosen as described in <a href="#tbl-event-action" class="quarto-xref">Table&nbsp;1</a>.</p>
+<p>The steps for simulating the first event in the population can be iterated in order to simulate the population. At the <span class="math inline">k</span>th step, the same procedure is repeated to simulate the <span class="math inline">k</span>th event, starting from a population <span class="math inline">Z_{T_{k-1}}</span> of size <span class="math inline">N_{T_{k-1}}</span>.</p>
+<div id="alg-no-interaction" class="pseudocode-container" data-pseudocode-index="2" data-line-number-punc=":" data-line-number="true" data-no-end="false" data-comment-delimiter="//" data-alg-title="Algorithm" data-indent-size="1.2em">
+<div class="pseudocode">
+\begin{algorithm} \caption{IBM simulation algorithm (without events of Poissonian intensity)} \begin{algorithmic} \State \textbf{Input:} Initial population $Z_0$, horizon $T &gt; 0$, and events described by: \State - Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$ and $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ \State - Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W$ (see @tbl-event-action) \State \textbf{Output:} Population $Z_T$ \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ \While{$T_k &lt; T$} \Repeat \State increment iterative variable $\ell \longleftarrow \ell+1$ \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + \mathcal{E}\big(\bar \Lambda(N_{T_k}) \big)$ \State draw a proposed event $\bar E_\ell \sim \mathcal{U}\{p_e\}$ with $p_e = \frac{\bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_{T_k} \mathbf{1}_{e \in \mathcal{E}_W}}{\sum_{e \in \mathcal{E}} \bar \lambda^e + \sum_{e \in \mathcal{E}_W} \bar W^e N_{T_k}}$ \State draw an individual index $\bar K_\ell \sim \mathcal{U}(\{1,\dots,N_{T_k}\})$ \State draw $\bar \Theta_\ell \sim \mathcal{U}([0, \bar \lambda^{\bar E_\ell}])$ if $\bar E_\ell \in \mathcal{E}$ or $\bar \Theta_\ell \sim \mathcal{U}([0, \bar W^{\bar E_\ell} N_{T_k}])$ if $\bar E_\ell \in \mathcal{E}_W$ \Until{accepted event $\bar \Theta_\ell \le \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell},Z_{T_{k}})$} \State increment iterative variable $k \longleftarrow k+1$ \State record $(T_k, E_k, I_k) \longleftarrow (\bar T_{\ell}, \bar E_\ell, I_{\bar K_\ell})$ as accepted time, event and individual \State update the population $Z_{T_k} = Z_{T_{k-1}} + \phi^{E_k}(T_k, I_k)$ \EndWhile \end{algorithmic} \end{algorithm}
+</div>
+</div>
+<div id="thm-no-interaction" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 2</strong></span> <a href="#alg-no-interaction">Algorithm 2</a> are exact simulations of solution of the SDE <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a>.</p>
+</div>
+<p>The proof of <a href="#thm-no-interaction" class="quarto-xref">Theorem&nbsp;2</a> is detailed in the Appendix <strong>?@prf-no-interaction</strong>.</p>
+<div id="rem-remvoval-dead" class="proof remark">
+<p><span class="proof-title"><em>Remark 3</em>. </span>The population <span class="math inline">Z_{T_k}</span> includes dead/exited individuals before the event time <span class="math inline">T_k</span>. Thus, <span class="math inline">N_{T_k} &gt; N_{T_k}^a</span> is greater than the number of alive individuals at time <span class="math inline">T_k</span>. When a dead individual <span class="math inline">I_{\bar K_l}</span> is drawn from the population during the rejection/acceptance phase of the algorithm, the proposed event <span class="math inline">(\bar T_{\ell}, \bar E_\ell,  I_{\bar K_\ell})</span> is automatically rejected since the event intensity is <span class="math inline">\lambda^{\bar E_\ell}_{T_\ell}(I_{\bar K_\ell}, Z_{T_k}) = 0</span> (nothing can happen to a dead individual). This can slow down the algorithm, especially when the proportion of dead/exited individuals in the population increases. However, the computational cost of keeping dead/exited individuals in the population is much lower than the cost of removing an individual from the population at each death/exit event, which is linear in the population size.</p>
+<p>Actually, dead/exited individuals are regularly removed from the population in the <code>IBMPopSim</code> algorithm, in order to optimize the trade-off between having to many dead individuals and removing dead individuals from the population too often. The frequency at which dead individuals are “removed from the population” can be chosen by the user, as an optional argument of the main function <code>popsim</code> (see details in <a href="#sec-simulation" class="quarto-xref">Section&nbsp;3</a>).</p>
+</div>
+<div id="rem-sharp-bounds" class="proof remark">
+<p><span class="proof-title"><em>Remark 4</em>. </span>In practice, the bounds <span class="math inline">\bar \lambda^e</span> and <span class="math inline">\bar W^e</span> should be chosen as sharp as possible. It is easy to see that conditionally to <span class="math inline">\{\bar E_\ell = e, \bar T_\ell = t, \bar K_\ell = l \}</span> the probability of accepting the event is, depending if there are interactions, <span class="math display">
+    \mathbb{P}\big(\bar \Theta_\ell \le \lambda^e_t(I_l,Z_{T_k})| \mathcal{F}_{T_k}\big)
+    = \frac{\lambda^e(t, I_l)}{\bar \lambda^e} \mathbf{1}_{e \in \mathcal{E}} +  \frac{\sum_{j=1}^{N_{T_k}} W^e(t, I_l, I_j)}{\bar W^e N_{T_k}} \mathbf{1}_{e \in \mathcal{E}_W}.
+</span> The sharper the bounds <span class="math inline">\bar \lambda^e</span> and <span class="math inline">\bar W^e</span> are, the higher is the acceptance rate. For even sharper bounds, an alternative is to define bounds <span class="math inline">\bar \lambda^e(I_l)</span> and <span class="math inline">\bar W^e(I_l)</span> depending on the individuals’ characteristics. However, the algorithm is modified and the individual <span class="math inline">I_l</span> is not chosen uniformly in the population anymore. Due to the population size, this is way more costly than choosing uniform bounds, as explained in <a href="#rem-alternate-thinning" class="quarto-xref">Remark&nbsp;2</a>.</p>
+</div>
+</section>
+</section>
+<section id="sec-simulation-randomized" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-simulation-randomized"><span class="header-section-number">3.3</span> Simulation algorithm with randomization</h2>
+<p>Let <span class="math inline">e \in \cal E_W</span> be an event with interactions. In order to evaluate the individual intensity <span class="math inline">\lambda^e_t (I,Z_t) = \sum_{j=1}^{N_t} W^e(t, I,I_j)</span> one must compute <span class="math inline">W^e(t, I_l, I_j)</span> for all individuals in the population. This step can be computationally costly, especially for large populations. One way to avoid this summation is to use randomization (see also&nbsp;<span class="citation" data-cites="FouMel04">(<a href="#ref-FouMel04" role="doc-biblioref">Fournier and Méléard 2004</a>)</span> in a model without age). The randomization consists in replacing the summation by an evaluation of the interaction function <span class="math inline">W^e</span> using an individual <span class="math inline">J</span> drawn uniformly from the population.</p>
+<p>More precisely, if <span class="math inline">J \sim \mathcal{U}(\{1, \dots, N_{T_k}\})</span> is independent of <span class="math inline">\bar \Theta_\ell</span>, we have <span id="eq-randomized-event"><span class="math display">
+    \mathbb{P}\Big(\bar \Theta_\ell \le
+    \sum_{j=1}^{N_{T_k}} W^e(t, I_l, I_j) | \mathcal{F}_{T_k} \Big)
+    = \mathbb{P}\big(\bar \Theta_\ell
+    \le N_{T_k} W^e(t, I_l, I_J) | \mathcal{F}_{T_k}\big).
+\tag{15}</span></span> Equivalently, we can write this probability as <span class="math inline">\mathbb{P}\big(\tilde \Theta_\ell \le W^e(t, I_l, I_J) \big)</span> where <span class="math inline">\tilde \Theta_\ell  = \frac{\bar \Theta_\ell}{N_{T_k}}\sim \mathcal{U}([0, \bar W^e])</span> is independent of <span class="math inline">J \sim \mathcal{U}(\{1, \dots, N_{T_k}\})</span>.</p>
+<div id="rem">
+<p>The efficiency of the randomization procedure increases with the population homogeneity. If the function <span class="math inline">W^e</span> varies little according to the individuals in the population, the randomization approach is very efficient in practice, especially when the population is large.</p>
+</div>
+<p>We now present the main algorithm implemented in the <code>popsim</code> function of the <code>IBMPopSim</code> package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, <span class="math inline">\bar \Lambda(n)</span> is defined by <a href="#eq-def-bar-Lambda" class="quarto-xref">Equation&nbsp;11</a>.</p>
 </section>
 </section>
 <section id="references" class="level1 unnumbered">
@@ -1745,7 +1852,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb7-484"><a href="#cb7-484" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-485"><a href="#cb7-485" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The marks $(\bar \Theta_\ell)_{\ell \ge 1}$ are _i.i.d._ random variables, uniformly distributed on $<span class="co">[</span><span class="ot">0, \bar \Lambda</span><span class="co">]</span>$.</span>
 <span id="cb7-486"><a href="#cb7-486" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-487"><a href="#cb7-487" aria-hidden="true" tabindex="-1"></a>By @pro-marked-poisson , $\bar{Q}$ is a Poisson random measure with mean measure</span>
+<span id="cb7-487"><a href="#cb7-487" aria-hidden="true" tabindex="-1"></a>By @prp-marked-poisson , $\bar{Q}$ is a Poisson random measure with mean measure</span>
 <span id="cb7-488"><a href="#cb7-488" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb7-489"><a href="#cb7-489" aria-hidden="true" tabindex="-1"></a>    \bar \mu(\mathrm{d}t, \mathrm{d}\theta): = \bar \Lambda \mathrm{d}t</span>
 <span id="cb7-490"><a href="#cb7-490" aria-hidden="true" tabindex="-1"></a>    \frac{\mathbf{1}_{[0, \bar \Lambda]}(\theta)}{\bar \Lambda} \mathrm{d}\theta= \mathrm{d}t  \mathbf{1}_{<span class="co">[</span><span class="ot">0, \bar \Lambda</span><span class="co">]</span>}(\theta) \mathrm{d}\theta.</span>
@@ -1772,48 +1879,248 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb7-511"><a href="#cb7-511" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-512"><a href="#cb7-512" aria-hidden="true" tabindex="-1"></a><span class="al">![test](img/plot_thinning.tex)</span>{#fig-thinning}</span>
 <span id="cb7-513"><a href="#cb7-513" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-514"><a href="#cb7-514" aria-hidden="true" tabindex="-1"></a><span class="in">```pseudocode</span></span>
-<span id="cb7-515"><a href="#cb7-515" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: alg-thinning2</span></span>
-<span id="cb7-516"><a href="#cb7-516" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-indent-size: "1.2em"</span></span>
-<span id="cb7-517"><a href="#cb7-517" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-comment-delimiter: "//"</span></span>
-<span id="cb7-518"><a href="#cb7-518" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number: true</span></span>
-<span id="cb7-519"><a href="#cb7-519" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number-punc: ":"</span></span>
-<span id="cb7-520"><a href="#cb7-520" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-no-end: false</span></span>
-<span id="cb7-521"><a href="#cb7-521" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-placement: "htb!"</span></span>
-<span id="cb7-522"><a href="#cb7-522" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-line-number: true</span></span>
+<span id="cb7-514"><a href="#cb7-514" aria-hidden="true" tabindex="-1"></a>Finally, the inhomogeneous Poisson process is obtained by the projection @prp-proj-poisson-measure, which states that the jump times of $Q^\Delta$ are the jump times of an inhomogeneous Poisson process of intensity $(\Lambda(t))$.</span>
+<span id="cb7-515"><a href="#cb7-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-516"><a href="#cb7-516" aria-hidden="true" tabindex="-1"></a>::: {#prp-thinning}</span>
+<span id="cb7-517"><a href="#cb7-517" aria-hidden="true" tabindex="-1"></a>The counting process $N^\Lambda$, projection of $Q^{\Delta}$ on the time component and defined by,</span>
+<span id="cb7-518"><a href="#cb7-518" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-519"><a href="#cb7-519" aria-hidden="true" tabindex="-1"></a>    N^{\Lambda}_t := Q^{\Delta}( [0,t] \times {\mathbb{R}}^+) = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \Lambda(s)\}} \bar Q(\mathrm{d}s, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{ \bar T_\ell \leq t \}} \mathsf{1}_{\{\bar \Theta_\ell \leq  \Lambda(\bar T_\ell) <span class="sc">\}</span>},  \quad \forall t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>,</span>
+<span id="cb7-520"><a href="#cb7-520" aria-hidden="true" tabindex="-1"></a>$$ {#eq-thinning-inhomogeneous-poisson}</span>
+<span id="cb7-521"><a href="#cb7-521" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$ of intensity function $(\Lambda(t))_{t\in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>}$. The thinning @eq-thinning-inhomogeneous-poisson is a pathwise representation of $N^\Lambda$ by *restriction and projection* of the Poisson measure $Q$ on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$.</span>
+<span id="cb7-522"><a href="#cb7-522" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb7-523"><a href="#cb7-523" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-524"><a href="#cb7-524" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithm}</span></span>
-<span id="cb7-525"><a href="#cb7-525" aria-hidden="true" tabindex="-1"></a><span class="in">\caption{Thinning algorithm for multivariate inhomogeneous Poisson processes.}</span></span>
-<span id="cb7-526"><a href="#cb7-526" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithmic}</span></span>
-<span id="cb7-527"><a href="#cb7-527" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Input:} Functions $\lambda_j: [0,T] \to [0,\bar \lambda]$ and $\bar \lambda_j$, $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$</span></span>
-<span id="cb7-528"><a href="#cb7-528" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Output:} Points $(T_k, J_k)$ of Poisson measure $N$ on $[0,T] \times \mathcal{J}$</span></span>
-<span id="cb7-529"><a href="#cb7-529" aria-hidden="true" tabindex="-1"></a><span class="in">    \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$</span></span>
-<span id="cb7-530"><a href="#cb7-530" aria-hidden="true" tabindex="-1"></a><span class="in">    \While{$T_k &lt; T$}</span></span>
-<span id="cb7-531"><a href="#cb7-531" aria-hidden="true" tabindex="-1"></a><span class="in">        \Repeat</span></span>
-<span id="cb7-532"><a href="#cb7-532" aria-hidden="true" tabindex="-1"></a><span class="in">            \State increment iterative variable $\ell \longleftarrow \ell+1$</span></span>
-<span id="cb7-533"><a href="#cb7-533" aria-hidden="true" tabindex="-1"></a><span class="in">            \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + S_\ell$  with $S_\ell \sim \mathcal{E}(\bar \Lambda)$ </span></span>
-<span id="cb7-534"><a href="#cb7-534" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw $\bar J_\ell \sim \mathcal{U}\big\{ \bar \lambda_j / \bar \Lambda, j \in \mathcal{J} \big\}$ i.e. $\mathbb{P}(\bar J_\ell = j) = \bar \lambda_j / \bar \Lambda$</span></span>
-<span id="cb7-535"><a href="#cb7-535" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw $\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda_{\bar J_\ell}])$</span></span>
-<span id="cb7-536"><a href="#cb7-536" aria-hidden="true" tabindex="-1"></a><span class="in">        \Until{accepted event $\bar \Theta_\ell \le \lambda_{\bar J_\ell}(\bar T_{\ell})$} </span></span>
-<span id="cb7-537"><a href="#cb7-537" aria-hidden="true" tabindex="-1"></a><span class="in">        \State record $(T_k, J_k) \longleftarrow (\bar T_{\ell}, \bar J_\ell)$ as accepted point</span></span>
-<span id="cb7-538"><a href="#cb7-538" aria-hidden="true" tabindex="-1"></a><span class="in">    \EndWhile</span></span>
-<span id="cb7-539"><a href="#cb7-539" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithmic}</span></span>
-<span id="cb7-540"><a href="#cb7-540" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithm}</span></span>
-<span id="cb7-541"><a href="#cb7-541" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb7-542"><a href="#cb7-542" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-543"><a href="#cb7-543" aria-hidden="true" tabindex="-1"></a><span class="fu"># References {.unnumbered}</span></span>
-<span id="cb7-544"><a href="#cb7-544" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-545"><a href="#cb7-545" aria-hidden="true" tabindex="-1"></a>::: {#refs}</span>
-<span id="cb7-546"><a href="#cb7-546" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb7-547"><a href="#cb7-547" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-548"><a href="#cb7-548" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session information {.appendix .unnumbered}</span></span>
+<span id="cb7-524"><a href="#cb7-524" aria-hidden="true" tabindex="-1"></a>The previous proposition yields a straightforward thinning algorithm to simulate the jump times $(T_k)_{k \ge 1}$ of an inhomogeneous Poisson process of intensity $\Lambda(t)$, by selecting jump times $\bar T_\ell$ such that $\bar \Theta_\ell \le \Lambda(\bar T_\ell)$.</span>
+<span id="cb7-525"><a href="#cb7-525" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-526"><a href="#cb7-526" aria-hidden="true" tabindex="-1"></a><span class="fu">### Multivariate Poisson process {#sec-vector}</span></span>
+<span id="cb7-527"><a href="#cb7-527" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-528"><a href="#cb7-528" aria-hidden="true" tabindex="-1"></a>This can be extended to the simulation of multivariate inhomogeneous Poisson processes, which is an important example before tackling the simulation of an IBM.</span>
+<span id="cb7-529"><a href="#cb7-529" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-530"><a href="#cb7-530" aria-hidden="true" tabindex="-1"></a>Let $(N^j)_{j \in \mathcal{J}}$ be a (inhomogeneous) multivariate Poisson process indexed by a finite set $\mathcal{J}$, such that $\forall j \in \mathcal{J}$, the intensity $(\lambda_j(t))_{t\in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>}$ of $N_j$ is bounded on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$:</span>
+<span id="cb7-531"><a href="#cb7-531" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-532"><a href="#cb7-532" aria-hidden="true" tabindex="-1"></a>    \sup_{t\in<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>} \lambda_j(t) \le \bar \lambda_j, \text{ and let }</span>
+<span id="cb7-533"><a href="#cb7-533" aria-hidden="true" tabindex="-1"></a>    \bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j.</span>
+<span id="cb7-534"><a href="#cb7-534" aria-hidden="true" tabindex="-1"></a>$$ </span>
+<span id="cb7-535"><a href="#cb7-535" aria-hidden="true" tabindex="-1"></a>Recall that such multivariate counting process can be rewritten as a Poisson random measure $N= \sum_{k\geq 1} \delta_{(T_k,J_k)}$ on ${\mathbb{R}}^+\times \mathcal{J}$ (see e.g. Sec. 2 of Chapter 6 in&nbsp;<span class="co">[</span><span class="ot">@Cin11</span><span class="co">]</span>), where $T_k$ is the $k$th jump time of $\sum_{j\in \mathcal{J}} N^j$ and $J_k$ corresponds to the component of the the vector which jumps. In particular, $N^j_t = N(<span class="co">[</span><span class="ot">0,t</span><span class="co">]</span>\times <span class="sc">\{</span>j<span class="sc">\}</span>)$.</span>
+<span id="cb7-536"><a href="#cb7-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-537"><a href="#cb7-537" aria-hidden="true" tabindex="-1"></a>Once again the simulation of such process can be obtained from the simulation of a (homogeneous) multivariate Poisson process of intensity vector $(\bar{\lambda}_j)_{j \in \mathcal{J}}$, extended into a Poisson measures by adding marks on ${\mathbb{R}}^+$. </span>
+<span id="cb7-538"><a href="#cb7-538" aria-hidden="true" tabindex="-1"></a>Thus, we introduce the Marked Poisson measure $\bar Q = \sum \delta_{(\bar T_\ell, \bar J_\ell, \bar \Theta_\ell)}$ on ${\mathbb{R}}^+  \times \mathcal{J}\times {\mathbb{R}}^+$, such that:</span>
+<span id="cb7-539"><a href="#cb7-539" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-540"><a href="#cb7-540" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The jump times $(\bar T_\ell)$ of $\bar Q$ are the jump times of a Poisson measure of intensity $\bar \Lambda$.</span>
+<span id="cb7-541"><a href="#cb7-541" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The variables $(\bar J_\ell)$ are *i.i.d.* random variables on $\mathcal{J}$, with $\displaystyle p_j= {\mathbb{P}}(\bar J_1 = j)= \bar \lambda_j/\bar \Lambda$ and representing the component of the vector which jumps.</span>
+<span id="cb7-542"><a href="#cb7-542" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The marks $(\bar \Theta_\ell)$ are independent variables with $\bar \Theta_\ell$ a uniform random variable on $[0,\bar \lambda_{{\bar J}_\ell}]$, $\forall \ell \geq 1$.</span>
+<span id="cb7-543"><a href="#cb7-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-544"><a href="#cb7-544" aria-hidden="true" tabindex="-1"></a>By @prp-marked-poisson and @prp-proj-poisson-measure, each measure $\bar Q_j (\mathrm{d}t, \mathrm{d}\theta) = \bar Q(\mathrm{d}t, <span class="sc">\{</span>j<span class="sc">\}</span>, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{\bar J_\ell=j \}} \delta_{(\bar T_\ell, \bar \Theta_\ell)}$ is a marked Poisson measure of intensity</span>
+<span id="cb7-545"><a href="#cb7-545" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-546"><a href="#cb7-546" aria-hidden="true" tabindex="-1"></a>    \bar \mu_j ( \mathrm{d}t  ,\mathrm{d}\theta) = \bar{\Lambda}p_j \mathrm{d}t  \frac{\mathsf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta)}{\bar \lambda_{j}} \mathrm{d}\theta = \mathrm{d}t  \mathsf{1}_{\{\theta \leq \bar \lambda_{j}<span class="sc">\}</span>}(\theta) \mathrm{d}\theta.</span>
+<span id="cb7-547"><a href="#cb7-547" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-548"><a href="#cb7-548" aria-hidden="true" tabindex="-1"></a>As a direct application of @prp-thinning , the inhomogeneous multivariate Poisson process is obtained by restriction of each measures $\bar Q_j$ to $\Delta_j = <span class="sc">\{</span> (t, \theta) \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span> \times <span class="co">[</span><span class="ot">0,\bar \lambda_j</span><span class="co">]</span> ;\; \theta \leq \lambda_j(t) <span class="sc">\}</span>$ and projection.</span>
 <span id="cb7-549"><a href="#cb7-549" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-550"><a href="#cb7-550" aria-hidden="true" tabindex="-1"></a><span class="in">```{r session-info}</span></span>
-<span id="cb7-551"><a href="#cb7-551" aria-hidden="true" tabindex="-1"></a><span class="in">sessionInfo()</span></span>
-<span id="cb7-552"><a href="#cb7-552" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-550"><a href="#cb7-550" aria-hidden="true" tabindex="-1"></a>::: {#prp-thinning-vector}</span>
+<span id="cb7-551"><a href="#cb7-551" aria-hidden="true" tabindex="-1"></a>The multivariate counting process $(N^j)_{j \in \mathcal{J}}$, defined for all $j \in \mathcal{J}$ and $t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$ by thinning and projection of $\bar Q$:</span>
+<span id="cb7-552"><a href="#cb7-552" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-553"><a href="#cb7-553" aria-hidden="true" tabindex="-1"></a>    N^j_t  := \int_0^t \int_{ {\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \lambda_j(s)\}} \bar{Q}(\mathrm{d}s, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{ \bar T_\ell \leq t \}}\mathsf{1}_{\{\bar J_\ell = j\}} \mathsf{1}_{\{\bar \Theta_\ell \leq  \lambda_j (\bar T_\ell ) <span class="sc">\}</span>},</span>
+<span id="cb7-554"><a href="#cb7-554" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-555"><a href="#cb7-555" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process of intensity vector $(\lambda_j(t))_{j\in\mathcal{J}}$ on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$.</span>
+<span id="cb7-556"><a href="#cb7-556" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-557"><a href="#cb7-557" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-558"><a href="#cb7-558" aria-hidden="true" tabindex="-1"></a>@prp-thinning-vector yields the following simulation @alg-thinning2 for multivariate Poisson processes.</span>
+<span id="cb7-559"><a href="#cb7-559" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-560"><a href="#cb7-560" aria-hidden="true" tabindex="-1"></a><span class="in">```pseudocode</span></span>
+<span id="cb7-561"><a href="#cb7-561" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: alg-thinning2</span></span>
+<span id="cb7-562"><a href="#cb7-562" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-indent-size: "1.2em"</span></span>
+<span id="cb7-563"><a href="#cb7-563" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-comment-delimiter: "//"</span></span>
+<span id="cb7-564"><a href="#cb7-564" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number: true</span></span>
+<span id="cb7-565"><a href="#cb7-565" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number-punc: ":"</span></span>
+<span id="cb7-566"><a href="#cb7-566" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-no-end: false</span></span>
+<span id="cb7-567"><a href="#cb7-567" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-placement: "htb!"</span></span>
+<span id="cb7-568"><a href="#cb7-568" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-line-number: true</span></span>
+<span id="cb7-569"><a href="#cb7-569" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-570"><a href="#cb7-570" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithm}</span></span>
+<span id="cb7-571"><a href="#cb7-571" aria-hidden="true" tabindex="-1"></a><span class="in">\caption{Thinning algorithm for multivariate inhomogeneous Poisson processes.}</span></span>
+<span id="cb7-572"><a href="#cb7-572" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithmic}</span></span>
+<span id="cb7-573"><a href="#cb7-573" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Input:} Functions $\lambda_j: [0,T] \to [0,\bar \lambda]$ and $\bar \lambda_j$, $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$</span></span>
+<span id="cb7-574"><a href="#cb7-574" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Output:} Points $(T_k, J_k)$ of Poisson measure $N$ on $[0,T] \times \mathcal{J}$</span></span>
+<span id="cb7-575"><a href="#cb7-575" aria-hidden="true" tabindex="-1"></a><span class="in">    \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$</span></span>
+<span id="cb7-576"><a href="#cb7-576" aria-hidden="true" tabindex="-1"></a><span class="in">    \While{$T_k &lt; T$}</span></span>
+<span id="cb7-577"><a href="#cb7-577" aria-hidden="true" tabindex="-1"></a><span class="in">        \Repeat</span></span>
+<span id="cb7-578"><a href="#cb7-578" aria-hidden="true" tabindex="-1"></a><span class="in">            \State increment iterative variable $\ell \longleftarrow \ell+1$</span></span>
+<span id="cb7-579"><a href="#cb7-579" aria-hidden="true" tabindex="-1"></a><span class="in">            \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + S_\ell$  with $S_\ell \sim \mathcal{E}(\bar \Lambda)$ </span></span>
+<span id="cb7-580"><a href="#cb7-580" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw $\bar J_\ell \sim \mathcal{U}\big\{ \bar \lambda_j / \bar \Lambda, j \in \mathcal{J} \big\}$ i.e. $\mathbb{P}(\bar J_\ell = j) = \bar \lambda_j / \bar \Lambda$</span></span>
+<span id="cb7-581"><a href="#cb7-581" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw $\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda_{\bar J_\ell}])$</span></span>
+<span id="cb7-582"><a href="#cb7-582" aria-hidden="true" tabindex="-1"></a><span class="in">        \Until{accepted event $\bar \Theta_\ell \le \lambda_{\bar J_\ell}(\bar T_{\ell})$} </span></span>
+<span id="cb7-583"><a href="#cb7-583" aria-hidden="true" tabindex="-1"></a><span class="in">        \State record $(T_k, J_k) \longleftarrow (\bar T_{\ell}, \bar J_\ell)$ as accepted point</span></span>
+<span id="cb7-584"><a href="#cb7-584" aria-hidden="true" tabindex="-1"></a><span class="in">    \EndWhile</span></span>
+<span id="cb7-585"><a href="#cb7-585" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithmic}</span></span>
+<span id="cb7-586"><a href="#cb7-586" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithm}</span></span>
+<span id="cb7-587"><a href="#cb7-587" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-588"><a href="#cb7-588" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-589"><a href="#cb7-589" aria-hidden="true" tabindex="-1"></a>::: {#rem-alternate-thinning}</span>
+<span id="cb7-590"><a href="#cb7-590" aria-hidden="true" tabindex="-1"></a>The acceptance/rejection @alg-thinning2 can be efficient when the functions $\lambda_j$ are of different order, and thus bounded by different $\bar \lambda_j$. However, it is important to note that the simulation of the discrete random variables $(\bar J_\ell)$ can be costly (compared to a uniform law) when $\mathcal{J}$ is large, for instance when an individual is drawn from a large population. In this case, an alternative is to choose the same bound $\bar \lambda_j= \bar \lambda$ for all $j \in \mathcal{J}$. Then the marks $(\bar J_\ell, \bar \Theta_\ell)$ are *i.i.d.* uniform variables on $\mathcal{J}\times <span class="co">[</span><span class="ot">0,\bar \lambda</span><span class="co">]</span>$, faster to simulate.</span>
+<span id="cb7-591"><a href="#cb7-591" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-592"><a href="#cb7-592" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-593"><a href="#cb7-593" aria-hidden="true" tabindex="-1"></a><span class="fu">## Simulation algorithm {#sec-simulation-algo}</span></span>
+<span id="cb7-594"><a href="#cb7-594" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-595"><a href="#cb7-595" aria-hidden="true" tabindex="-1"></a>Let us now come back to the simulation of the IBM introduced in @sec-ibm. For ease of notations, we assume that there are no event with Poisson intensity ($\mathcal{P} =\emptyset$), so that all events that occur are of type $e \in \mathcal{E} \cup \mathcal{E}_W$, with individual intensity $\lambda_t^e(I,Z_t)$ depending on the population composition $Z_t$ ($e \in \mathcal{E}_W$) or not ($e \in \mathcal{E}$), as defined in @eq-indivual-intensity and verifying either @cnj-intensity1 or @cnj-intensity2.</span>
+<span id="cb7-596"><a href="#cb7-596" aria-hidden="true" tabindex="-1"></a>The global intensity @eq-global-event-intensity at time $t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$ is thus</span>
+<span id="cb7-597"><a href="#cb7-597" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-598"><a href="#cb7-598" aria-hidden="true" tabindex="-1"></a>    \Lambda_t(Z_t) = \sum_{e \in \mathcal{E}} \Big( \sum_{k=1}^{N_t} \lambda^e(t, I_k) \Big)</span>
+<span id="cb7-599"><a href="#cb7-599" aria-hidden="true" tabindex="-1"></a><span class="ss">    + </span>\sum_{e \in \mathcal{E}_W} \Big( \sum_{k=1}^{N_t} \sum_{j=1}^{N_t} W^e(t, I_k, I_j) \Big) \leq \bar \Lambda(N_t),</span>
+<span id="cb7-600"><a href="#cb7-600" aria-hidden="true" tabindex="-1"></a>$$ {#eq-def-intensity}</span>
+<span id="cb7-601"><a href="#cb7-601" aria-hidden="true" tabindex="-1"></a>with</span>
+<span id="cb7-602"><a href="#cb7-602" aria-hidden="true" tabindex="-1"></a>$\bar \Lambda(n) = \big(\sum_{e \in \mathcal{E}} \bar \lambda^e \big) n + \big( \sum_{e \in \mathcal{E}_W} \bar W^e \big) n^2$.</span>
+<span id="cb7-603"><a href="#cb7-603" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-604"><a href="#cb7-604" aria-hidden="true" tabindex="-1"></a>One of the main difficulty is that the intensity of events is not deterministic as in the case of inhomogeneous Poisson processes, but a function $\Lambda_t(Z_t)$ of the population state, bounded by a function which also depends on the population size. However, the @alg-thinning2 can be adapted to simulate the IBM. The construction is done by induction, by conditioning on the state of the population $Z_{T_k}$ at the $k$th event time $T_k$ ($T_0 = 0$).</span>
+<span id="cb7-605"><a href="#cb7-605" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-606"><a href="#cb7-606" aria-hidden="true" tabindex="-1"></a>We first present the construction of the first event at time $T_1$.</span>
+<span id="cb7-607"><a href="#cb7-607" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-608"><a href="#cb7-608" aria-hidden="true" tabindex="-1"></a><span class="fu">### First event simulation</span></span>
+<span id="cb7-609"><a href="#cb7-609" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-610"><a href="#cb7-610" aria-hidden="true" tabindex="-1"></a>Before the first event time, on $<span class="sc">\{</span> t &lt; T_1 <span class="sc">\}</span>$, the population composition is constant : $Z_t = Z_0 = <span class="sc">\{</span> I_1, \dots, I_{N_0}<span class="sc">\}</span>$. For each type of event $e$ and individual $I_k$, $k \in <span class="sc">\{</span>1,\dots N_0<span class="sc">\}</span>$, we denote by $N^{k,e}$ the counting process of intensity $\lambda_t^e (I_k,Z_t)$, counting the occurrences of the events of type $e$ happening to the individual $I_k$. Then, the first event $T_1$ is the first jump time of the multivariate counting vector $(N^{(k,e)})_{ (k,e) \in \mathcal{J}_0}$, with $\mathcal{J}_0 = <span class="sc">\{</span>1,\dots , N_0<span class="sc">\}</span>\times \big(\mathcal{E} \cup \mathcal{E}_W \big)$.</span>
+<span id="cb7-611"><a href="#cb7-611" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-612"><a href="#cb7-612" aria-hidden="true" tabindex="-1"></a>Since the population composition is constant before the first event time, each counting process $N^{j}$ coincides on $[0,T_1[$ with an inhomogeneous Poisson process, of intensity $\lambda_t^e (I_k,Z_0)$. Thus (conditionally to $Z_0$), $T_1$ is also the first jump time of an inhomogeneous multivariate Poisson process $N^0 = (N^{0,j})_{j \in \mathcal{J}_0}$ of intensity function $(\lambda_j)_{j\in \mathcal J_0}$, defined for all $j = (k,e) \in \mathcal{J}_0$ by:</span>
+<span id="cb7-613"><a href="#cb7-613" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-614"><a href="#cb7-614" aria-hidden="true" tabindex="-1"></a>    \lambda_j(t) = \lambda^e_t(I_k,Z_0) \le \bar \lambda^e_0 \quad \text{with} \quad \bar \lambda^e_0 = \bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_0 \mathbf{1}_{e \in \mathcal{E}_W},</span>
+<span id="cb7-615"><a href="#cb7-615" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-616"><a href="#cb7-616" aria-hidden="true" tabindex="-1"></a>by @cnj-intensity1 and @cnj-intensity2. In particular, the jump times of $N^0$ occur at the intensity</span>
+<span id="cb7-617"><a href="#cb7-617" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-618"><a href="#cb7-618" aria-hidden="true" tabindex="-1"></a>    \Lambda(t) =\sum_{j \in \mathcal{J}_0} \lambda_j(t)  =\sum_{e \in \mathcal{E} \cup \mathcal{E}_W} \sum_{k=1}^{N_0}  \lambda^e_t(I_k,Z_0) \leq \bar \Lambda(N_0)=N_0 \sum_{e \in \mathcal{E} \cup \mathcal{E}_W} \bar \lambda^e_0.</span>
+<span id="cb7-619"><a href="#cb7-619" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-620"><a href="#cb7-620" aria-hidden="true" tabindex="-1"></a>By @prp-thinning-vector, $N^0$ can be obtained by thinning of the marked Poisson measure $\bar Q^0 = \sum_{\ell \geq 1} \delta_{(\bar T_\ell , (\bar{K}_\ell, \bar E_\ell), \bar \Theta_\ell)}$ on ${\mathbb{R}}^+\times\mathcal{J}_0 \times {\mathbb{R}}^+$, with:</span>
+<span id="cb7-621"><a href="#cb7-621" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-622"><a href="#cb7-622" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$(\bar T_\ell)_{\ell \in {\mathbb{N}}^*}$ the jump times of a Poisson process of rate $\bar \Lambda(N_0)$.</span>
+<span id="cb7-623"><a href="#cb7-623" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$(\bar{K}_\ell, \bar E_\ell)_{\ell \in {\mathbb{N}}^*}$ discrete *i.i.d.* random variables on $\mathcal{J}_0 = \{1,\dots , N_0\}\times \big(\mathcal{E} \cup \mathcal{E}_W \big)$, with $K_\ell$ representing the index of the chosen individual and $E_\ell$ the event type for the proposed event, such that:</span>
+<span id="cb7-624"><a href="#cb7-624" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-625"><a href="#cb7-625" aria-hidden="true" tabindex="-1"></a>    \mathbb{P}( \bar  K_1 = k, \bar E_1 = e) </span>
+<span id="cb7-626"><a href="#cb7-626" aria-hidden="true" tabindex="-1"></a>    = \frac{\bar \lambda^e_0 }{\bar \Lambda(N_0)}</span>
+<span id="cb7-627"><a href="#cb7-627" aria-hidden="true" tabindex="-1"></a>    = \frac{1}{N_0} \frac{\bar \lambda^e_0 N_0}{\bar \Lambda(N_0)},</span>
+<span id="cb7-628"><a href="#cb7-628" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-629"><a href="#cb7-629" aria-hidden="true" tabindex="-1"></a>i.e. $(\bar K_1, \bar E_1)$ are distributed as independent random variables where $\bar K_1 \sim \mathcal U(<span class="sc">\{</span>1,\dots, N_0<span class="sc">\}</span>)$ and $\bar E_1$ such that </span>
+<span id="cb7-630"><a href="#cb7-630" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-631"><a href="#cb7-631" aria-hidden="true" tabindex="-1"></a>    p_e := \mathbb{P}( \bar E_1 = e)</span>
+<span id="cb7-632"><a href="#cb7-632" aria-hidden="true" tabindex="-1"></a>        = \frac{\bar \lambda^e_0 N_0}{\bar \Lambda(N_0)}.</span>
+<span id="cb7-633"><a href="#cb7-633" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-634"><a href="#cb7-634" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$(\bar \Theta_\ell)_{\ell \in {\mathbb{N}}^*}$ are independent uniform random variables, with $\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda^{\bar E_\ell}]).$</span>
+<span id="cb7-635"><a href="#cb7-635" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-636"><a href="#cb7-636" aria-hidden="true" tabindex="-1"></a>Since the first event is the first jump of $N^0$, by @prp-thinning-vector and @alg-thinning2, the first event time $T_1$ is the first jump time $\bar T_\ell$ of $\bar Q^0$ such that $\bar \Theta_\ell \leq \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell}, Z_0)$.</span>
+<span id="cb7-637"><a href="#cb7-637" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-638"><a href="#cb7-638" aria-hidden="true" tabindex="-1"></a>At $T_1 =\bar T_{\ell}$, the event $\bar E_\ell$ occurs to the individual $I_{\bar K_\ell} = (\tau^b, \infty, x)$. For instance, if $\bar E_\ell =d$, a death/exit event occurs, so that $Z_{T_1} = Z_{0} + \delta_{(\tau^b, T_1, x)} - \delta_{I_{\bar K_\ell}}$ and $N_{T_1} = N_{0}$. If $\bar E_\ell =b$ or $en$, a birth or entry event occurs, so that $N_{T_1} = N_{0} + 1$, and a new individual $I_{N_0+1}$ is added to the population, chosen as described in @tbl-event-action. </span>
+<span id="cb7-639"><a href="#cb7-639" aria-hidden="true" tabindex="-1"></a>Finally, if $\bar E_\ell=s$, a swap event occurs, the population size stays constant and $I_{\bar K_\ell}$ is replaced by an individual $I_{\bar K_\ell}'$, chosen as described in @tbl-event-action.</span>
+<span id="cb7-640"><a href="#cb7-640" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-641"><a href="#cb7-641" aria-hidden="true" tabindex="-1"></a>The steps for simulating the first event in the population can be iterated in order to simulate the population. At the $k$th step, the same procedure is repeated to simulate the $k$th event, starting from a population $Z_{T_{k-1}}$ of size $N_{T_{k-1}}$.</span>
+<span id="cb7-642"><a href="#cb7-642" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-643"><a href="#cb7-643" aria-hidden="true" tabindex="-1"></a><span class="in">```pseudocode</span></span>
+<span id="cb7-644"><a href="#cb7-644" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: alg-no-interaction</span></span>
+<span id="cb7-645"><a href="#cb7-645" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-indent-size: "1.2em"</span></span>
+<span id="cb7-646"><a href="#cb7-646" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-comment-delimiter: "//"</span></span>
+<span id="cb7-647"><a href="#cb7-647" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number: true</span></span>
+<span id="cb7-648"><a href="#cb7-648" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number-punc: ":"</span></span>
+<span id="cb7-649"><a href="#cb7-649" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-no-end: false</span></span>
+<span id="cb7-650"><a href="#cb7-650" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-placement: "htb!"</span></span>
+<span id="cb7-651"><a href="#cb7-651" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-line-number: true</span></span>
+<span id="cb7-652"><a href="#cb7-652" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-653"><a href="#cb7-653" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithm}</span></span>
+<span id="cb7-654"><a href="#cb7-654" aria-hidden="true" tabindex="-1"></a><span class="in">\caption{IBM simulation algorithm (without events of Poissonian intensity)}</span></span>
+<span id="cb7-655"><a href="#cb7-655" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithmic}</span></span>
+<span id="cb7-656"><a href="#cb7-656" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Input:} Initial population $Z_0$, horizon $T &gt; 0$, and events described by:</span></span>
+<span id="cb7-657"><a href="#cb7-657" aria-hidden="true" tabindex="-1"></a><span class="in">        \State - Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$ and $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ </span></span>
+<span id="cb7-658"><a href="#cb7-658" aria-hidden="true" tabindex="-1"></a><span class="in">        \State - Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W$ (see @tbl-event-action)</span></span>
+<span id="cb7-659"><a href="#cb7-659" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Output:} Population $Z_T$</span></span>
+<span id="cb7-660"><a href="#cb7-660" aria-hidden="true" tabindex="-1"></a><span class="in">    \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$</span></span>
+<span id="cb7-661"><a href="#cb7-661" aria-hidden="true" tabindex="-1"></a><span class="in">    \While{$T_k &lt; T$}</span></span>
+<span id="cb7-662"><a href="#cb7-662" aria-hidden="true" tabindex="-1"></a><span class="in">        \Repeat</span></span>
+<span id="cb7-663"><a href="#cb7-663" aria-hidden="true" tabindex="-1"></a><span class="in">            \State increment iterative variable $\ell \longleftarrow \ell+1$</span></span>
+<span id="cb7-664"><a href="#cb7-664" aria-hidden="true" tabindex="-1"></a><span class="in">            \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + \mathcal{E}\big(\bar \Lambda(N_{T_k}) \big)$</span></span>
+<span id="cb7-665"><a href="#cb7-665" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw a proposed event $\bar E_\ell \sim \mathcal{U}\{p_e\}$ with $p_e = \frac{\bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_{T_k} \mathbf{1}_{e \in \mathcal{E}_W}}{\sum_{e \in \mathcal{E}} \bar \lambda^e + \sum_{e \in \mathcal{E}_W} \bar W^e N_{T_k}}$</span></span>
+<span id="cb7-666"><a href="#cb7-666" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw an individual index $\bar K_\ell \sim \mathcal{U}(\{1,\dots,N_{T_k}\})$ </span></span>
+<span id="cb7-667"><a href="#cb7-667" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw $\bar \Theta_\ell \sim \mathcal{U}([0, \bar \lambda^{\bar E_\ell}])$ if $\bar E_\ell \in \mathcal{E}$ or $\bar \Theta_\ell \sim \mathcal{U}([0, \bar W^{\bar E_\ell} N_{T_k}])$ if $\bar E_\ell \in \mathcal{E}_W$</span></span>
+<span id="cb7-668"><a href="#cb7-668" aria-hidden="true" tabindex="-1"></a><span class="in">        \Until{accepted event $\bar \Theta_\ell \le \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell},Z_{T_{k}})$}</span></span>
+<span id="cb7-669"><a href="#cb7-669" aria-hidden="true" tabindex="-1"></a><span class="in">        \State increment iterative variable $k \longleftarrow k+1$ </span></span>
+<span id="cb7-670"><a href="#cb7-670" aria-hidden="true" tabindex="-1"></a><span class="in">        \State record $(T_k, E_k, I_k) \longleftarrow (\bar T_{\ell}, \bar E_\ell,  I_{\bar K_\ell})$ as accepted time, event and individual</span></span>
+<span id="cb7-671"><a href="#cb7-671" aria-hidden="true" tabindex="-1"></a><span class="in">        \State update the population $Z_{T_k} = Z_{T_{k-1}} + \phi^{E_k}(T_k, I_k)$</span></span>
+<span id="cb7-672"><a href="#cb7-672" aria-hidden="true" tabindex="-1"></a><span class="in">    \EndWhile</span></span>
+<span id="cb7-673"><a href="#cb7-673" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithmic}</span></span>
+<span id="cb7-674"><a href="#cb7-674" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithm}</span></span>
+<span id="cb7-675"><a href="#cb7-675" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-676"><a href="#cb7-676" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-677"><a href="#cb7-677" aria-hidden="true" tabindex="-1"></a>::: {#thm-no-interaction}</span>
+<span id="cb7-678"><a href="#cb7-678" aria-hidden="true" tabindex="-1"></a>@alg-no-interaction are exact simulations of solution of the SDE @eq-sde-eq-Z.</span>
+<span id="cb7-679"><a href="#cb7-679" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-680"><a href="#cb7-680" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-681"><a href="#cb7-681" aria-hidden="true" tabindex="-1"></a>The proof of @thm-no-interaction is detailed in the Appendix @prf-no-interaction.</span>
+<span id="cb7-682"><a href="#cb7-682" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-683"><a href="#cb7-683" aria-hidden="true" tabindex="-1"></a>::: {#rem-remvoval-dead} </span>
+<span id="cb7-684"><a href="#cb7-684" aria-hidden="true" tabindex="-1"></a>The population $Z_{T_k}$ includes dead/exited individuals before the event time $T_k$. Thus, $N_{T_k} &gt; N_{T_k}^a$ is greater than the number of alive individuals at time $T_k$. When a dead individual $I_{\bar K_l}$ is drawn from the population during the rejection/acceptance phase of the algorithm, the proposed event $(\bar T_{\ell}, \bar E_\ell,  I_{\bar K_\ell})$ is automatically rejected since the event intensity is $\lambda^{\bar E_\ell}_{T_\ell}(I_{\bar K_\ell}, Z_{T_k}) = 0$ (nothing can happen to a dead individual). </span>
+<span id="cb7-685"><a href="#cb7-685" aria-hidden="true" tabindex="-1"></a>This can slow down the algorithm, especially when the proportion of dead/exited individuals in the population increases. However, the computational cost of keeping dead/exited individuals in the population is much lower than the cost of removing an individual from the population at each death/exit event, which is linear in the population size.</span>
+<span id="cb7-686"><a href="#cb7-686" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-687"><a href="#cb7-687" aria-hidden="true" tabindex="-1"></a>Actually, dead/exited individuals are regularly removed from the population in the <span class="in">`IBMPopSim`</span> algorithm, in order to optimize the trade-off between having to many dead individuals and removing dead individuals from the population too often. The frequency at which dead individuals are "removed from the population" can be chosen by the user, as an optional argument of the main function <span class="in">`popsim`</span> (see details in @sec-simulation). </span>
+<span id="cb7-688"><a href="#cb7-688" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-689"><a href="#cb7-689" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-690"><a href="#cb7-690" aria-hidden="true" tabindex="-1"></a>::: {#rem-sharp-bounds}</span>
+<span id="cb7-691"><a href="#cb7-691" aria-hidden="true" tabindex="-1"></a>In practice, the bounds $\bar \lambda^e$ and $\bar W^e$ should be chosen as sharp as possible. It is easy to see that conditionally to $<span class="sc">\{</span>\bar E_\ell = e, \bar T_\ell = t, \bar K_\ell = l <span class="sc">\}</span>$ the probability of accepting the event is, depending if there are interactions,</span>
+<span id="cb7-692"><a href="#cb7-692" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-693"><a href="#cb7-693" aria-hidden="true" tabindex="-1"></a>    \mathbb{P}\big(\bar \Theta_\ell \le \lambda^e_t(I_l,Z_{T_k})| \mathcal{F}_{T_k}\big)</span>
+<span id="cb7-694"><a href="#cb7-694" aria-hidden="true" tabindex="-1"></a>    = \frac{\lambda^e(t, I_l)}{\bar \lambda^e} \mathbf{1}_{e \in \mathcal{E}} +  \frac{\sum_{j=1}^{N_{T_k}} W^e(t, I_l, I_j)}{\bar W^e N_{T_k}} \mathbf{1}_{e \in \mathcal{E}_W}.</span>
+<span id="cb7-695"><a href="#cb7-695" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-696"><a href="#cb7-696" aria-hidden="true" tabindex="-1"></a>The sharper the bounds $\bar \lambda^e$ and $\bar W^e$ are, the higher is the acceptance rate. For even sharper bounds, an alternative is to define bounds $\bar \lambda^e(I_l)$ and $\bar W^e(I_l)$ depending on the individuals' characteristics. However, the algorithm is modified and the individual $I_l$ is not chosen uniformly in the population anymore. Due to the population size, this is way more costly than choosing uniform bounds, as explained in @rem-alternate-thinning.</span>
+<span id="cb7-697"><a href="#cb7-697" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-698"><a href="#cb7-698" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-699"><a href="#cb7-699" aria-hidden="true" tabindex="-1"></a><span class="fu">## Simulation algorithm with randomization {#sec-simulation-randomized}</span></span>
+<span id="cb7-700"><a href="#cb7-700" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-701"><a href="#cb7-701" aria-hidden="true" tabindex="-1"></a>Let $e \in \cal E_W$ be an event with interactions. In order to evaluate the individual intensity $\lambda^e_t (I,Z_t) = \sum_{j=1}^{N_t} W^e(t, I,I_j)$ one must compute $W^e(t, I_l, I_j)$ for all individuals in the population. This step can be computationally costly, especially for large populations. </span>
+<span id="cb7-702"><a href="#cb7-702" aria-hidden="true" tabindex="-1"></a>One way to avoid this summation is to use randomization (see also&nbsp;<span class="co">[</span><span class="ot">@FouMel04</span><span class="co">]</span> in a model without age). The randomization consists in replacing the summation by an evaluation of the interaction function $W^e$ using an individual $J$ drawn uniformly from the population.</span>
+<span id="cb7-703"><a href="#cb7-703" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-704"><a href="#cb7-704" aria-hidden="true" tabindex="-1"></a>More precisely, if $J \sim \mathcal{U}(<span class="sc">\{</span>1, \dots, N_{T_k}<span class="sc">\}</span>)$ is independent of $\bar \Theta_\ell$, we have </span>
+<span id="cb7-705"><a href="#cb7-705" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-706"><a href="#cb7-706" aria-hidden="true" tabindex="-1"></a>    \mathbb{P}\Big(\bar \Theta_\ell \le </span>
+<span id="cb7-707"><a href="#cb7-707" aria-hidden="true" tabindex="-1"></a>    \sum_{j=1}^{N_{T_k}} W^e(t, I_l, I_j) | \mathcal{F}_{T_k} \Big)</span>
+<span id="cb7-708"><a href="#cb7-708" aria-hidden="true" tabindex="-1"></a>    = \mathbb{P}\big(\bar \Theta_\ell </span>
+<span id="cb7-709"><a href="#cb7-709" aria-hidden="true" tabindex="-1"></a>    \le N_{T_k} W^e(t, I_l, I_J) | \mathcal{F}_{T_k}\big).</span>
+<span id="cb7-710"><a href="#cb7-710" aria-hidden="true" tabindex="-1"></a>$$ {#eq-randomized-event}</span>
+<span id="cb7-711"><a href="#cb7-711" aria-hidden="true" tabindex="-1"></a>Equivalently, we can write this probability as $\mathbb{P}\big(\tilde \Theta_\ell \le W^e(t, I_l, I_J) \big)$ where $\tilde \Theta_\ell  = \frac{\bar \Theta_\ell}{N_{T_k}}\sim \mathcal{U}(<span class="co">[</span><span class="ot">0, \bar W^e</span><span class="co">]</span>)$ is independent of $J \sim \mathcal{U}(<span class="sc">\{</span>1, \dots, N_{T_k}<span class="sc">\}</span>)$.</span>
+<span id="cb7-712"><a href="#cb7-712" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-713"><a href="#cb7-713" aria-hidden="true" tabindex="-1"></a>::: {#rem} </span>
+<span id="cb7-714"><a href="#cb7-714" aria-hidden="true" tabindex="-1"></a>The efficiency of the randomization procedure increases with the population homogeneity. If the function $W^e$ varies little according to the individuals in the population, the randomization approach is very efficient in practice, especially when the population is large.</span>
+<span id="cb7-715"><a href="#cb7-715" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-716"><a href="#cb7-716" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-717"><a href="#cb7-717" aria-hidden="true" tabindex="-1"></a>We now present the main algorithm implemented in the <span class="in">`popsim`</span> function of the <span class="in">`IBMPopSim`</span> package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, $\bar \Lambda(n)$ is defined by @eq-def-bar-Lambda.</span>
+<span id="cb7-718"><a href="#cb7-718" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-719"><a href="#cb7-719" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-720"><a href="#cb7-720" aria-hidden="true" tabindex="-1"></a><span class="fu"># References {.unnumbered}</span></span>
+<span id="cb7-721"><a href="#cb7-721" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-722"><a href="#cb7-722" aria-hidden="true" tabindex="-1"></a>::: {#refs}</span>
+<span id="cb7-723"><a href="#cb7-723" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-724"><a href="#cb7-724" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-725"><a href="#cb7-725" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session information {.appendix .unnumbered}</span></span>
+<span id="cb7-726"><a href="#cb7-726" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-727"><a href="#cb7-727" aria-hidden="true" tabindex="-1"></a><span class="in">```{r session-info}</span></span>
+<span id="cb7-728"><a href="#cb7-728" aria-hidden="true" tabindex="-1"></a><span class="in">sessionInfo()</span></span>
+<span id="cb7-729"><a href="#cb7-729" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+<script>
+(function(d) {
+  d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+    let pseudocodeOptions = {
+      indentSize: el.dataset.indentSize || "1.2em",
+      commentDelimiter: el.dataset.commentDelimiter || "//",
+      lineNumber: el.dataset.lineNumber === "true" ? true : false,
+      lineNumberPunc: el.dataset.lineNumberPunc || ":",
+      noEnd: el.dataset.noEnd === "true" ? true : false,
+      titlePrefix: el.dataset.algTitle || "Algorithm"
+    };
+    pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
+  });
+})(document);
+(function(d) {
+  d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+    titleSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
+    titlePrefix = el.dataset.algTitle;
+    titleIndex = el.dataset.chapterLevel ? el.dataset.chapterLevel + "." + el.dataset.pseudocodeIndex : el.dataset.pseudocodeIndex;
+    titleSpan.innerHTML = titlePrefix + " " + titleIndex + " ";
+  });
+})(document);
+</script>
 <script>
 (function(d) {
   d.querySelectorAll(".pseudocode-container").forEach(function(el) {
