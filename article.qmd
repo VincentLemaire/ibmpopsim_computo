@@ -372,9 +372,161 @@ Some recalls on Poisson random measures are presented in the Appendix @sec-recal
 In the following we consider an individual-based stochastic population $(Z_t)_{t\in [0,T]}$, keeping the notations introduced in @sec-events and @sec-event-intensity for the events and their intensities.
 In particular, the set of events types that define the population evolution is denoted by $\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E$, with $\mathcal{P}$ the set of events types with Poisson intensity verifying @cnj-intensity-poisson, $\mathcal{E}$ the set of events types with individual intensity and no interaction, verifying @cnj-intensity1 and finally $\mathcal{E}_W$ the set of event types with interactions, verifying @cnj-intensity2.
 
+### Non explosion criterion
+
+First, one has to ensure that the number of events occurring in the population will not explode in finite time, leading to an infinite simulation time. @cnj-intensity1 and @cnj-intensity2 are not sufficient to guarantee the non explosion of the event number, due to the potential explosion of the population size in the presence of interactions. An example is the case when only birth events occur, with an intensity $\Lambda^b_t(Z_t) = C_b (N_t^a)^2$ ($W^b(t, I,J) =C_b$). Then, the number of alive individuals $(N_t^a)_{t\geq 0}$ is a well-known pure birth process of intensity function $g(n) = C_b n^2$ (intensity of moving from state $n$ to $n+1$). This process explodes in finite time, since $g$ does not verify the necessary and sufficient non explosion criterion for pure birth Markov processes: $\sum_{n=1}^\infty \frac{1}{g(n)} = \infty$ (see e.g. Theorem 2.2 in [@BanMel15]). There is thus an explosion in finite time of birth events.
+
+This example shows that the important point for non explosion is to control the population size. We give below a general sufficient condition on birth and entry event intensities, in order for the population size to stay finite in finite time. This ensures that the number of events does not explode in finite time. Informally, the idea is to control the intensities by a pure birth intensity function verifying the non-explosion criterion.
+
+::: {#cnj-non-explosion} 
+Let $e=b$ or $en$, a birth or entry event type. If the intensity at which the events of type $e$ occur in the population are not Poissonian, i.e. $e \in \mathcal{E} \cup \mathcal{E}_W$, then there exists a function $f^e : {\mathbb{N}}\to (0, +\infty)$, such that
+$$
+    \sum_{n=1}^{\infty} \frac{1}{nf^e(n)} = \infty,
+$$
+and for all individual $I \in \mathcal{I}$ and population measure $Z = \sum_{k=1}^{n} \delta_{I_k}$ of size $n$,
+$$
+    \lambda^e_t (I, Z) \leq f^e(n), \; \forall \; 0\leq t \leq T.
+$$
+:::
+
+::: {#rem}
+If $e \in \mathcal{E}$, $\lambda_t^e(I,Z) = \lambda^e(t,I) \leq \bar{\lambda}^e$ by the domination @cnj-intensity2, then @cnj-non-explosion is always verified with $f^e(n) = \bar{\lambda}^e$.
+:::
+
+@cnj-non-explosion yields that the global intensity $\Lambda_t^e(\cdot)$ of event $e$ is bounded by a function $g^e$ only depending on the population size:
+$$
+    \Lambda_t^e (Z) \leq g^e(n) := nf^e(n), \quad \text{with }\sum_{n=1}^{\infty} \frac{1}{g^e(n)} = \infty.
+$$
+If $e\in \mathcal{P}$ has a Poisson intensity, then $\Lambda_t^e(Z) =\mu^e_t$ always verifies the previous equation with $g^e(n) = \bar \mu^e$.
+
+Before introducing the IBM SDE, let us give an idea of the equation construction. Between two successive events, the population composition $Z_t$ stays constant, since the population process $(Z_t)_{t \geq 0}$ is a pure jump process.
+Furthermore, since each event type is characterized by an intensity function, the jumps occurring in the population can be represented by restriction and projection of a Poisson measure defined on a larger state space. 
+More precisely, we introduce a random Poisson measure $Q$ on $\mathbb R^+ \times \mathcal{J}\times \mathbb{R}^+$, with $\mathcal{J}= \mathbb N \times(\mathcal E \cup \mathcal{E}_W)$. $Q$ is composed of random quadruplets $(\tau, k , e, \theta)$, where $\tau$ represents a potential event time for an individual $I_k$ and event type $e$. 
+The last variable $\theta$ is used to accept/reject this proposed event, depending on the event intensity. Hence, the Poisson measure is restricted to a certain random set and then projected on the space of interest ${\mathbb{R}}^+ \times \mathcal{J}$. If the event is accepted, then a jump $\phi^e(\tau,I_k)$ occurs.
+
+The proof of @thm-eq-Z is detailed in the Appendix @prf-thm-eq-Z. Note that @eq-sde-eq-Z is an SDE describing the evolution of the IBM, the intensity of the events in the right hand side of the equation depending on the population process $Z$ itself. 
+The main idea of the proof of @thm-eq-Z is to use the non explosion property of @lem-non-explosion, and to write the r.h.s of @eq-sde-eq-Z as a sum of simple equations between two successive events, solved by induction.
+
+The proof of @lem-non-explosion
+, detailed in Appendix @prf-lem-non-explosion
+is more technical and rely on pathwise
+comparison result, generalizing those obtained in [@KaaElK20]. An
+alternative pathwise representation of the population process, inspired
+by the randomized Algorithm
+[\[algo::rzndomized\]](#algo::rzndomized){reference-type="ref"
+reference="algo::rzndomized"}, 
+is given as well in Theorem
+[\[ThEqZrandomized\]](#ThEqZrandomized){reference-type="ref"
+reference="ThEqZrandomized"}.
+
+::: {#thm-eq-Z} 
+## Pathwise representation
+
+Let $T\in {\mathbb{R}}^+$ and $\mathcal{J}= \mathbb N \times(\mathcal E \cup \mathcal{E}_W)$. 
+Let $Q$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{J}\times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\mathcal{J}}(\mathrm{d}k,\mathrm{d}e)  \mathbf{1}_{[0,\bar \lambda^e]} (\theta)\mathrm{d}\theta$, with $\delta_{\mathcal{J}}$ the counting measure on $\mathcal{J}$. 
+Finally, let $Q^{\mathcal P}$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{P}  \times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\cal P}(\mathrm{d}e)  \mathbf{1}_{[0,\bar \mu^e]} (\theta)\mathrm{d}\theta$, and $Z_0= \sum_{k=1}^{N_0} \delta_{I_k}$ an initial population.
+Then, under @cnj-non-explosion
+, there exists a unique
+measure-valued population process $Z$, strong solution on the following
+SDE driven by the Poisson measure $Q$: 
+$$
+    \begin{aligned}
+    Z_t = Z_0 &+ \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{s^-}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-})\}} Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ) \\
+    \nonumber &+   \int_0^t \int_{\mathcal{P} \times \mathbb R^+}  \phi^e(s, I_{s^-}) \mathbf{1}_{\{\theta \leq \mu^e(s) \}} Q^{\mathcal{P}} (\mathrm{d}s ,\mathrm{d}e,  \mathrm{d}\theta),  \qquad \forall  0 \leq t \leq T,
+\end{aligned}
+$$ {#eq-sde-eq-Z}
+and where $I_{s^-}$ is an individual, chosen uniformly among alive individuals in the population $Z_{s^-}$.
+:::
+
+::: {#lem-non-explosion}
+Let $Z$ be a solution of @eq-sde-eq-Z on ${\mathbb{R}}^+$, with $(T_n)_{n\geq 0}$ its jump times, $T_0 = 0$. If @cnj-non-explosion is satisfied, then
+$$
+    \lim_{n \to \infty} T_n = \infty, \quad {\mathbb{P}}\text{-a.s.}
+$$
+:::
+
+# Population simulation {#sec-simulation}
+
+We now present the main algorithm for simulating the evolution of an IBM over $[0,T]$.The algorithm implemented in `IBMPopSim` allows the exact simulation of @eq-sde-eq-Z, based on an acceptance/reject algorithm for simulating random times called *thinning*. The exact simulation of event times with this acceptance/reject procedure is closely related to the simulations of inhomogeneous Poisson processes by the so-called thinning algorithm, often attributed to [@LewShe79]. 
+The simulation methods for inhomogeneous Poisson processes can be adapted to IBMs, and we introduce in this section a general algorithm extending those by [@FouMel04] (see also [@FerTra09], [@Ben10]).
+
+The algorithm is based on exponential "candidate" event times, chosen with a (constant) intensity which must be greater than the global event intensity $\Lambda_t(Z_t)$ (@eq-global-intensity). Starting from time $t$, once a candidate event time $t + \bar T_\ell$ has been proposed, a candidate event type $e$ (birth, death,\...) is chosen with a probability $p^e$ depending on the event intensity bounds $\bar \mu^e$, $\bar \lambda^e$ and $\bar W^e$, as defined in @cnj-intensity1 and @cnj-intensity2. 
+An individual $I$ is then drawn from the population. 
+Finally, it remains to accept or reject the candidate event with a probability $q^e(t,I,Z_t)$ depending on the true event intensity. 
+If the candidate event time is accepted, then the event $e$ occurs at time $t + \bar T_\ell$ to the individual $I$. The main idea of the algorithm implemented can be summarized as follows:
+
+1. Draw a candidate time $t + \bar T_\ell$ and candidate event type $e$.
+2. Draw a uniform variable $\theta \sim \mathcal{U}([0, 1])$ and individual $I$.
+3. **If** $\theta \leq q^e(t,I,Z_t)$ **then** event $e$ occur to individual $I$, **else** Do nothing and start again from $t + \bar T_\ell$.
+
+Before introducing the main algorithms in more details, we recall briefly the thinning procedure for simulating inhomogeneous Poisson processes, as well as the links with pathwise representations. Some recalls on Poisson random measures are presented in @sec-recall-poisson.
+For a more general presentation of thinning of a Poisson random measure, see [@Dev86; @Cin11; @Kal17].
 
 ## Thinning of Poisson measure {#sec-thinning}
 
+Let us start with the simulation and pathwise representation of an inhomogeneous Poisson process on $[0,T]$ with intensity $(\Lambda(t))_{t\in [0,T]}$. The thinning procedure is based on the fundamental assumption that $\Lambda(t) \leq  \bar \Lambda$ is bounded on $[0,T]$. In this case, the inhomogeneous Poisson can be obtained from an homogeneous Poisson process of intensity $\bar \Lambda$, which can be simulated easily.
+
+First, the Poisson process can be extended to a Marked Poisson measure $\bar Q:= \sum_{\ell \ge 1} \delta_{(\bar T_\ell, \bar \Theta_\ell)}$ on $(\mathbb{R}^+)^2$, defined as follow:
+
+- The jump times of $(\bar T_\ell)_{\ell \ge 1}$ of $\bar Q$ are the jump times of a Poisson process of intensity $\bar \Lambda$.
+
+- The marks $(\bar \Theta_\ell)_{\ell \ge 1}$ are _i.i.d._ random variables, uniformly distributed on $[0, \bar \Lambda]$.
+
+By @pro-marked-poisson , $\bar{Q}$ is a Poisson random measure with mean measure
+$$
+    \bar \mu(\mathrm{d}t, \mathrm{d}\theta): = \bar \Lambda \mathrm{d}t
+    \frac{\mathbf{1}_{[0, \bar \Lambda]}(\theta)}{\bar \Lambda} \mathrm{d}\theta= \mathrm{d}t  \mathbf{1}_{[0, \bar \Lambda]}(\theta) \mathrm{d}\theta.
+$$
+In particular, the average number of atoms $(\bar T_\ell, \bar \Theta_\ell)$ in $[0,t]\times [0,h]$ is
+$$
+    \mathbb{E}[Q([0,t]\times [0,h])]={\mathbb{E}}[\sum_{\ell} \boldsymbol{1}_{[0,t]\times [0,h]} (\bar T_\ell, \bar \Theta_{\ell})]  = \int_{(\mathbb{R}^+)^2}  \bar \mu(\mathrm{d}t, \mathrm{d}\theta)  = t (\bar \Lambda \wedge h).
+$$
+The thinning is based on the restriction property for Poisson measure: for a measurable set $\Delta\subset {\mathbb{R}}^+\times {\mathbb{R}}^+$, the restriction $Q^\Delta:= \boldsymbol{1}_{\Delta}\bar Q$ of $\bar Q$ to $\Delta$ (by taking only atoms in $\Delta$) is also a Poisson random measure of mean measure $\mu^{\Delta}(\mathrm{d}t, \mathrm{d}\theta)  = \boldsymbol{1}_{\Delta}(t,\theta) \bar \mu(\mathrm{d}t, \mathrm{d}\theta).$
+
+In order to obtain an inhomogeneous Poisson measure of intensity $(\Lambda(t))$, the "good" choice of $\Delta$ is the hypograph of $\Lambda$:
+$\Delta =\{ (t,\theta) \in [0,T]\times [0,\bar \Lambda] ; \; \theta \leq \Lambda(t)\}$ 
+(see @fig-thinning). Then, 
+$$
+    Q^\Delta = \sum_{\ell \ge 1} \mathbf{1}_{\left\{\bar \Theta_\ell \le \Lambda(\bar T_\ell)\right\}} \delta_{(\bar T_\ell, \bar \Theta_\ell)},
+$$ 
+and since $\Lambda(t) \leq \bar \Lambda$, on $[0,T]$:
+$$
+\begin{aligned}
+    \mu^{\Delta}(\mathrm{d}t, \mathrm{d}\theta) & = \boldsymbol{1}_{\{ \theta \leq \Lambda(t)\}}  \mathrm{d}t
+\mathbf{1}_{[0, \bar \Lambda]}(\theta)\mathrm{d}\theta = \boldsymbol{1}_{\{\theta \leq \Lambda(t)\}} \mathrm{d}t \mathrm{d}\theta.
+\end{aligned}
+$$
+
+![test](img/plot_thinning.tex){#fig-thinning}
+
+```pseudocode
+#| label: alg-thinning2
+#| html-indent-size: "1.2em"
+#| html-comment-delimiter: "//"
+#| html-line-number: true
+#| html-line-number-punc: ":"
+#| html-no-end: false
+#| pdf-placement: "htb!"
+#| pdf-line-number: true
+
+\begin{algorithm}
+\caption{Thinning algorithm for multivariate inhomogeneous Poisson processes.}
+\begin{algorithmic}
+    \State \textbf{Input:} Functions $\lambda_j: [0,T] \to [0,\bar \lambda]$ and $\bar \lambda_j$, $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$
+    \State \textbf{Output:} Points $(T_k, J_k)$ of Poisson measure $N$ on $[0,T] \times \mathcal{J}$
+    \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$
+    \While{$T_k < T$}
+        \Repeat
+            \State increment iterative variable $\ell \longleftarrow \ell+1$
+            \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + S_\ell$  with $S_\ell \sim \mathcal{E}(\bar \Lambda)$ 
+            \State draw $\bar J_\ell \sim \mathcal{U}\big\{ \bar \lambda_j / \bar \Lambda, j \in \mathcal{J} \big\}$ i.e. $\mathbb{P}(\bar J_\ell = j) = \bar \lambda_j / \bar \Lambda$
+            \State draw $\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda_{\bar J_\ell}])$
+        \Until{accepted event $\bar \Theta_\ell \le \lambda_{\bar J_\ell}(\bar T_{\ell})$} 
+        \State record $(T_k, J_k) \longleftarrow (\bar T_{\ell}, \bar J_\ell)$ as accepted point
+    \EndWhile
+\end{algorithmic}
+\end{algorithm}
+```
 
 # References {.unnumbered}
 
