@@ -9,7 +9,7 @@
 <meta name="author" content="Daphné Giorgi">
 <meta name="author" content="Vincent Lemaire">
 <meta name="author" content="Sarah Kaakai">
-<meta name="dcterms.date" content="2024-03-16">
+<meta name="dcterms.date" content="2024-03-17">
 <meta name="keywords" content="Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation">
 <meta name="description" content="TODO">
 
@@ -223,14 +223,14 @@ ISSN 2824-7795</p>
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 16, 2024</p>
+        <p class="date">March 17, 2024</p>
       </div>
     </div>
                                     
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">March 16, 2024</p>
+        <p class="date-modified">March 17, 2024</p>
       </div>
     </div>
       
@@ -300,6 +300,7 @@ ISSN 2824-7795</p>
   </ul></li>
   <li><a href="#sec-simulation-randomized" id="toc-sec-simulation-randomized" class="nav-link" data-scroll-target="#sec-simulation-randomized"><span class="header-section-number">3.3</span> Simulation algorithm with randomization</a></li>
   </ul></li>
+  
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   
   </ul>
@@ -597,7 +598,7 @@ W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J &gt; t\}}, \quad \forall \; J=(\
 </section>
 <section id="pathwise-representation" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="pathwise-representation"><span class="header-section-number">2.5</span> Pathwise representation</h2>
-<p>Since the seminal paper of <span class="citation" data-cites="FouMel04">(<a href="#ref-FouMel04" role="doc-biblioref">Fournier and Méléard 2004</a>)</span>, it has been shown in many examples that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. In the following, we introduce a unified framework for the pathwise representation of the class of stochastic IBMs introduced above. Some recalls on Poisson random measures are presented in the Appendix <strong>?@sec-recall-poisson</strong>, and for more details on these representations on particular examples, we refer to the abundant literature on the subject.</p>
+<p>Since the seminal paper of <span class="citation" data-cites="FouMel04">(<a href="#ref-FouMel04" role="doc-biblioref">Fournier and Méléard 2004</a>)</span>, it has been shown in many examples that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. In the following, we introduce a unified framework for the pathwise representation of the class of stochastic IBMs introduced above. Some recalls on Poisson random measures are presented in the Appendix <a href="#sec-recall-poisson" class="quarto-xref">Section&nbsp;3.4</a>, and for more details on these representations on particular examples, we refer to the abundant literature on the subject.</p>
 <p>In the following we consider an individual-based stochastic population <span class="math inline">(Z_t)_{t\in [0,T]}</span>, keeping the notations introduced in <a href="#sec-events" class="quarto-xref">Section&nbsp;2.3</a> and <a href="#sec-event-intensity" class="quarto-xref">Section&nbsp;2.4</a> for the events and their intensities. In particular, the set of events types that define the population evolution is denoted by <span class="math inline">\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E</span>, with <span class="math inline">\mathcal{P}</span> the set of events types with Poisson intensity verifying <a href="#cnj-intensity-poisson" class="quarto-xref">Assumption&nbsp;1</a>, <span class="math inline">\mathcal{E}</span> the set of events types with individual intensity and no interaction, verifying <a href="#cnj-intensity1" class="quarto-xref">Assumption&nbsp;2</a> and finally <span class="math inline">\mathcal{E}_W</span> the set of event types with interactions, verifying <a href="#cnj-intensity2" class="quarto-xref">Assumption&nbsp;3</a>.</p>
 <section id="non-explosion-criterion" class="level3" data-number="2.5.1">
 <h3 data-number="2.5.1" class="anchored" data-anchor-id="non-explosion-criterion"><span class="header-section-number">2.5.1</span> Non explosion criterion</h3>
@@ -644,7 +645,7 @@ W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J &gt; t\}}, \quad \forall \; J=(\
 <li>Draw a uniform variable <span class="math inline">\theta \sim \mathcal{U}([0, 1])</span> and individual <span class="math inline">I</span>.</li>
 <li><strong>If</strong> <span class="math inline">\theta \leq q^e(t,I,Z_t)</span> <strong>then</strong> event <span class="math inline">e</span> occur to individual <span class="math inline">I</span>, <strong>else</strong> Do nothing and start again from <span class="math inline">t + \bar T_\ell</span>.</li>
 </ol>
-<p>Before introducing the main algorithms in more details, we recall briefly the thinning procedure for simulating inhomogeneous Poisson processes, as well as the links with pathwise representations. Some recalls on Poisson random measures are presented in <strong>?@sec-recall-poisson</strong>. For a more general presentation of thinning of a Poisson random measure, see <span class="citation" data-cites="Dev86 Cin11 Kal17">(<a href="#ref-Dev86" role="doc-biblioref">Devroye 1986</a>; <a href="#ref-Cin11" role="doc-biblioref">Çinlar 2011</a>; <a href="#ref-Kal17" role="doc-biblioref">Kallenberg 2017</a>)</span>.</p>
+<p>Before introducing the main algorithms in more details, we recall briefly the thinning procedure for simulating inhomogeneous Poisson processes, as well as the links with pathwise representations. Some recalls on Poisson random measures are presented in <a href="#sec-recall-poisson" class="quarto-xref">Section&nbsp;3.4</a>. For a more general presentation of thinning of a Poisson random measure, see <span class="citation" data-cites="Dev86 Cin11 Kal17">(<a href="#ref-Dev86" role="doc-biblioref">Devroye 1986</a>; <a href="#ref-Cin11" role="doc-biblioref">Çinlar 2011</a>; <a href="#ref-Kal17" role="doc-biblioref">Kallenberg 2017</a>)</span>.</p>
 <section id="sec-thinning" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-thinning"><span class="header-section-number">3.1</span> Thinning of Poisson measure</h2>
 <p>Let us start with the simulation and pathwise representation of an inhomogeneous Poisson process on <span class="math inline">[0,T]</span> with intensity <span class="math inline">(\Lambda(t))_{t\in [0,T]}</span>. The thinning procedure is based on the fundamental assumption that <span class="math inline">\Lambda(t) \leq  \bar \Lambda</span> is bounded on <span class="math inline">[0,T]</span>. In this case, the inhomogeneous Poisson can be obtained from an homogeneous Poisson process of intensity <span class="math inline">\bar \Lambda</span>, which can be simulated easily.</p>
@@ -653,7 +654,7 @@ W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J &gt; t\}}, \quad \forall \; J=(\
 <li><p>The jump times of <span class="math inline">(\bar T_\ell)_{\ell \ge 1}</span> of <span class="math inline">\bar Q</span> are the jump times of a Poisson process of intensity <span class="math inline">\bar \Lambda</span>.</p></li>
 <li><p>The marks <span class="math inline">(\bar \Theta_\ell)_{\ell \ge 1}</span> are <em>i.i.d.</em> random variables, uniformly distributed on <span class="math inline">[0, \bar \Lambda]</span>.</p></li>
 </ul>
-<p>By <strong>?@prp-marked-poisson</strong> , <span class="math inline">\bar{Q}</span> is a Poisson random measure with mean measure <span class="math display">
+<p>By <a href="#prp-marked-poisson" class="quarto-xref">Proposition&nbsp;6</a> , <span class="math inline">\bar{Q}</span> is a Poisson random measure with mean measure <span class="math display">
     \bar \mu(\mathrm{d}t, \mathrm{d}\theta): = \bar \Lambda \mathrm{d}t
     \frac{\mathbf{1}_{[0, \bar \Lambda]}(\theta)}{\bar \Lambda} \mathrm{d}\theta= \mathrm{d}t  \mathbf{1}_{[0, \bar \Lambda]}(\theta) \mathrm{d}\theta.
 </span> In particular, the average number of atoms <span class="math inline">(\bar T_\ell, \bar \Theta_\ell)</span> in <span class="math inline">[0,t]\times [0,h]</span> is <span class="math display">
@@ -677,7 +678,7 @@ Figure&nbsp;1: test
 </figcaption>
 </figure>
 </div>
-<p>Finally, the inhomogeneous Poisson process is obtained by the projection <strong>?@prp-proj-poisson-measure</strong>, which states that the jump times of <span class="math inline">Q^\Delta</span> are the jump times of an inhomogeneous Poisson process of intensity <span class="math inline">(\Lambda(t))</span>.</p>
+<p>Finally, the inhomogeneous Poisson process is obtained by the projection <a href="#prp-proj-poisson-measure" class="quarto-xref">Proposition&nbsp;5</a>, which states that the jump times of <span class="math inline">Q^\Delta</span> are the jump times of an inhomogeneous Poisson process of intensity <span class="math inline">(\Lambda(t))</span>.</p>
 <div id="prp-thinning" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 1</strong></span> The counting process <span class="math inline">N^\Lambda</span>, projection of <span class="math inline">Q^{\Delta}</span> on the time component and defined by, <span id="eq-thinning-inhomogeneous-poisson"><span class="math display">
     N^{\Lambda}_t := Q^{\Delta}( [0,t] \times {\mathbb{R}}^+) = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \Lambda(s)\}} \bar Q(\mathrm{d}s, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{ \bar T_\ell \leq t \}} \mathsf{1}_{\{\bar \Theta_\ell \leq  \Lambda(\bar T_\ell) \}},  \quad \forall t \in [0,T],
@@ -697,7 +698,7 @@ Figure&nbsp;1: test
 <li>The variables <span class="math inline">(\bar J_\ell)</span> are <em>i.i.d.</em> random variables on <span class="math inline">\mathcal{J}</span>, with <span class="math inline">\displaystyle p_j= {\mathbb{P}}(\bar J_1 = j)= \bar \lambda_j/\bar \Lambda</span> and representing the component of the vector which jumps.</li>
 <li>The marks <span class="math inline">(\bar \Theta_\ell)</span> are independent variables with <span class="math inline">\bar \Theta_\ell</span> a uniform random variable on <span class="math inline">[0,\bar \lambda_{{\bar J}_\ell}]</span>, <span class="math inline">\forall \ell \geq 1</span>.</li>
 </ul>
-<p>By <strong>?@prp-marked-poisson</strong> and <strong>?@prp-proj-poisson-measure</strong>, each measure <span class="math inline">\bar Q_j (\mathrm{d}t, \mathrm{d}\theta) = \bar Q(\mathrm{d}t, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{\bar J_\ell=j \}} \delta_{(\bar T_\ell, \bar \Theta_\ell)}</span> is a marked Poisson measure of intensity <span class="math display">
+<p>By <a href="#prp-marked-poisson" class="quarto-xref">Proposition&nbsp;6</a> and <a href="#prp-proj-poisson-measure" class="quarto-xref">Proposition&nbsp;5</a>, each measure <span class="math inline">\bar Q_j (\mathrm{d}t, \mathrm{d}\theta) = \bar Q(\mathrm{d}t, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{\bar J_\ell=j \}} \delta_{(\bar T_\ell, \bar \Theta_\ell)}</span> is a marked Poisson measure of intensity <span class="math display">
     \bar \mu_j ( \mathrm{d}t  ,\mathrm{d}\theta) = \bar{\Lambda}p_j \mathrm{d}t  \frac{\mathsf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta)}{\bar \lambda_{j}} \mathrm{d}\theta = \mathrm{d}t  \mathsf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta) \mathrm{d}\theta.
 </span> As a direct application of <a href="#prp-thinning" class="quarto-xref">Proposition&nbsp;1</a> , the inhomogeneous multivariate Poisson process is obtained by restriction of each measures <span class="math inline">\bar Q_j</span> to <span class="math inline">\Delta_j = \{ (t, \theta) \in [0,T] \times [0,\bar \lambda_j] ;\; \theta \leq \lambda_j(t) \}</span> and projection.</p>
 <div id="prp-thinning-vector" class="theorem proposition">
@@ -706,7 +707,7 @@ Figure&nbsp;1: test
 </span> is an inhomogeneous Poisson process of intensity vector <span class="math inline">(\lambda_j(t))_{j\in\mathcal{J}}</span> on <span class="math inline">[0,T]</span>.</p>
 </div>
 <p><a href="#prp-thinning-vector" class="quarto-xref">Proposition&nbsp;2</a> yields the following simulation <a href="#alg-thinning2">Algorithm 1</a> for multivariate Poisson processes.</p>
-<div id="alg-thinning2" class="pseudocode-container" data-pseudocode-index="1" data-line-number-punc=":" data-line-number="true" data-no-end="false" data-comment-delimiter="//" data-alg-title="Algorithm" data-indent-size="1.2em">
+<div id="alg-thinning2" class="pseudocode-container" data-indent-size="1.2em" data-comment-delimiter="//" data-no-end="false" data-alg-title="Algorithm" data-line-number-punc=":" data-line-number="true" data-pseudocode-index="1">
 <div class="pseudocode">
 \begin{algorithm} \caption{Thinning algorithm for multivariate inhomogeneous Poisson processes.} \begin{algorithmic} \State \textbf{Input:} Functions $\lambda_j: [0,T] \to [0,\bar \lambda]$ and $\bar \lambda_j$, $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$ \State \textbf{Output:} Points $(T_k, J_k)$ of Poisson measure $N$ on $[0,T] \times \mathcal{J}$ \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ \While{$T_k &lt; T$} \Repeat \State increment iterative variable $\ell \longleftarrow \ell+1$ \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + S_\ell$ with $S_\ell \sim \mathcal{E}(\bar \Lambda)$ \State draw $\bar J_\ell \sim \mathcal{U}\big\{ \bar \lambda_j / \bar \Lambda, j \in \mathcal{J} \big\}$ i.e. $\mathbb{P}(\bar J_\ell = j) = \bar \lambda_j / \bar \Lambda$ \State draw $\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda_{\bar J_\ell}])$ \Until{accepted event $\bar \Theta_\ell \le \lambda_{\bar J_\ell}(\bar T_{\ell})$} \State record $(T_k, J_k) \longleftarrow (\bar T_{\ell}, \bar J_\ell)$ as accepted point \EndWhile \end{algorithmic} \end{algorithm}
 </div>
@@ -747,7 +748,7 @@ Figure&nbsp;1: test
 <p>Since the first event is the first jump of <span class="math inline">N^0</span>, by <a href="#prp-thinning-vector" class="quarto-xref">Proposition&nbsp;2</a> and <a href="#alg-thinning2">Algorithm 1</a>, the first event time <span class="math inline">T_1</span> is the first jump time <span class="math inline">\bar T_\ell</span> of <span class="math inline">\bar Q^0</span> such that <span class="math inline">\bar \Theta_\ell \leq \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell}, Z_0)</span>.</p>
 <p>At <span class="math inline">T_1 =\bar T_{\ell}</span>, the event <span class="math inline">\bar E_\ell</span> occurs to the individual <span class="math inline">I_{\bar K_\ell} = (\tau^b, \infty, x)</span>. For instance, if <span class="math inline">\bar E_\ell =d</span>, a death/exit event occurs, so that <span class="math inline">Z_{T_1} = Z_{0} + \delta_{(\tau^b, T_1, x)} - \delta_{I_{\bar K_\ell}}</span> and <span class="math inline">N_{T_1} = N_{0}</span>. If <span class="math inline">\bar E_\ell =b</span> or <span class="math inline">en</span>, a birth or entry event occurs, so that <span class="math inline">N_{T_1} = N_{0} + 1</span>, and a new individual <span class="math inline">I_{N_0+1}</span> is added to the population, chosen as described in <a href="#tbl-event-action" class="quarto-xref">Table&nbsp;1</a>. Finally, if <span class="math inline">\bar E_\ell=s</span>, a swap event occurs, the population size stays constant and <span class="math inline">I_{\bar K_\ell}</span> is replaced by an individual <span class="math inline">I_{\bar K_\ell}'</span>, chosen as described in <a href="#tbl-event-action" class="quarto-xref">Table&nbsp;1</a>.</p>
 <p>The steps for simulating the first event in the population can be iterated in order to simulate the population. At the <span class="math inline">k</span>th step, the same procedure is repeated to simulate the <span class="math inline">k</span>th event, starting from a population <span class="math inline">Z_{T_{k-1}}</span> of size <span class="math inline">N_{T_{k-1}}</span>.</p>
-<div id="alg-no-interaction" class="pseudocode-container" data-pseudocode-index="2" data-line-number-punc=":" data-line-number="true" data-no-end="false" data-comment-delimiter="//" data-alg-title="Algorithm" data-indent-size="1.2em">
+<div id="alg-no-interaction" class="pseudocode-container" data-indent-size="1.2em" data-comment-delimiter="//" data-no-end="false" data-alg-title="Algorithm" data-line-number-punc=":" data-line-number="true" data-pseudocode-index="2">
 <div class="pseudocode">
 \begin{algorithm} \caption{IBM simulation algorithm (without events of Poissonian intensity)} \begin{algorithmic} \State \textbf{Input:} Initial population $Z_0$, horizon $T &gt; 0$, and events described by: \State - Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$ and $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ \State - Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W$ (see @tbl-event-action) \State \textbf{Output:} Population $Z_T$ \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ \While{$T_k &lt; T$} \Repeat \State increment iterative variable $\ell \longleftarrow \ell+1$ \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + \mathcal{E}\big(\bar \Lambda(N_{T_k}) \big)$ \State draw a proposed event $\bar E_\ell \sim \mathcal{U}\{p_e\}$ with $p_e = \frac{\bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_{T_k} \mathbf{1}_{e \in \mathcal{E}_W}}{\sum_{e \in \mathcal{E}} \bar \lambda^e + \sum_{e \in \mathcal{E}_W} \bar W^e N_{T_k}}$ \State draw an individual index $\bar K_\ell \sim \mathcal{U}(\{1,\dots,N_{T_k}\})$ \State draw $\bar \Theta_\ell \sim \mathcal{U}([0, \bar \lambda^{\bar E_\ell}])$ if $\bar E_\ell \in \mathcal{E}$ or $\bar \Theta_\ell \sim \mathcal{U}([0, \bar W^{\bar E_\ell} N_{T_k}])$ if $\bar E_\ell \in \mathcal{E}_W$ \Until{accepted event $\bar \Theta_\ell \le \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell},Z_{T_{k}})$} \State increment iterative variable $k \longleftarrow k+1$ \State record $(T_k, E_k, I_k) \longleftarrow (\bar T_{\ell}, \bar E_\ell, I_{\bar K_\ell})$ as accepted time, event and individual \State update the population $Z_{T_k} = Z_{T_{k-1}} + \phi^{E_k}(T_k, I_k)$ \EndWhile \end{algorithmic} \end{algorithm}
 </div>
@@ -781,8 +782,12 @@ Figure&nbsp;1: test
 <p>The efficiency of the randomization procedure increases with the population homogeneity. If the function <span class="math inline">W^e</span> varies little according to the individuals in the population, the randomization approach is very efficient in practice, especially when the population is large.</p>
 </div>
 <p>We now present the main algorithm implemented in the <code>popsim</code> function of the <code>IBMPopSim</code> package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, <span class="math inline">\bar \Lambda(n)</span> is defined by <a href="#eq-def-bar-Lambda" class="quarto-xref">Equation&nbsp;11</a>.</p>
+<div id="prp-randomized" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 3</strong></span> &nbsp;</p>
+</div>
 </section>
 </section>
+
 <section id="references" class="level1 unnumbered">
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
@@ -871,7 +876,82 @@ Zinn, Sabine, Jutta Gampe, Jan Himmelspach, and Adelinde M Uhrmacher. 2009. <spa
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="session-information" class="level1 appendix unnumbered"><h2 class="anchored quarto-appendix-heading">Session information</h2><div class="quarto-appendix-contents">
+<div id="quarto-appendix" class="default"><section id="appendix" class="level1 appendix unnumbered"><h2 class="anchored quarto-appendix-heading">Appendix</h2><div class="quarto-appendix-contents">
+
+<section id="sec-recall-poisson" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="sec-recall-poisson"><span class="header-section-number">3.4</span> Recall on Poisson random measures</h2>
+<p>We recall below some useful properties of Poisson random measures, mainly following Chapter&nbsp;6 of&nbsp;<span class="citation" data-cites="Cin11">(<a href="#ref-Cin11" role="doc-biblioref">Çinlar 2011</a>)</span>. We also refer to&nbsp;<span class="citation" data-cites="Kal17">(<a href="#ref-Kal17" role="doc-biblioref">Kallenberg 2017</a>)</span> for a more comprehensive presentation of random counting measures.</p>
+<div id="def-poisson-random-measure" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 1 (Poisson Random Measures)</strong></span> Let <span class="math inline">\mu</span> be a <span class="math inline">\sigma</span>-finite diffuse measure on a Borel subspace <span class="math inline">(E,\mathcal{E})</span> of <span class="math inline">({\mathbb{R}}^d, \mathcal{B}({\mathbb{R}}^d))</span>. A random counting measure <span class="math inline">Q= \sum_{k\geq 1} \delta_{X_k}</span> is a Poisson (counting) random measure of <em>mean measure</em> <span class="math inline">\mu</span> if</p>
+<ol type="1">
+<li><span class="math inline">\forall A \in \mathcal{E}</span>, <span class="math inline">Q(A)</span> is a Poisson random variable with <span class="math inline">{\mathbb{E}}[Q(A)]= \mu(A)</span>.</li>
+<li>For all disjoints subsets <span class="math inline">A_1, \dots, A_n \in \mathcal{E}</span>, <span class="math inline">Q(A_1), \dots, Q(A_n)</span> are independent Poisson random variables.</li>
+</ol>
+</div>
+<p>Let us briefly recall here some simple but useful operations on Poisson measures. In the following, <span class="math inline">Q</span> is a Poisson measure of mean measure <span class="math inline">\mu</span>, unless stated otherwise.</p>
+<div id="prp-restriction-poisson-measure" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 4 (Restricted Poisson measure)</strong></span> If <span class="math inline">B \in \mathcal{E}</span>, then, the restriction of <span class="math inline">Q</span> to <span class="math inline">B</span> defined by <span class="math display">
+    Q^B = \boldsymbol{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}
+</span> is also a Poisson random measure, of mean measure <span class="math inline">\mu^B = \mu(\cdot \cap B)</span>.</p>
+</div>
+<div id="prp-proj-poisson-measure" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 5 (Projection of Poisson measure)</strong></span> If <span class="math inline">E = F_1 \times F_2</span> is a product space, then the projection <span class="math display">
+    Q_1(\mathrm{d}x) = \int_{F_2} Q(\mathrm{d}x , \mathrm{d}y)
+</span> is a Poisson random measure of mean measure <span class="math inline">\mu_1 (\mathrm{d}x ) = \int_{F_2} \mu(\mathrm{d}x, \mathrm{d}y)</span>.</p>
+</div>
+<section id="link-with-poisson-processes" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="link-with-poisson-processes"><span class="header-section-number">3.4.1</span> Link with Poisson processes</h3>
+<p>Let <span class="math inline">Q= \sum_{k\geq 1} \delta_{T_k}</span> a Poisson random measure on <span class="math inline">E={\mathbb{R}}^+</span> with mean measure <span class="math inline">\mu(\mathrm{d}t) = \Lambda (t) \mathrm{d}t</span> absolutely continuous with respect to the Lebesgue measure, <span class="math inline">\mu(A) = \int_A \Lambda(t) \mathrm{d}t</span>. The counting process <span class="math inline">(N_t)_{t \ge 0}</span> defined by <span id="eq-inhomogeneous-pp"><span class="math display">
+    N_t = Q([0,t]) = \sum_{k \geq 1} \boldsymbol{1}_{\{T_k \leq t\}}, \quad \forall \; t\geq 0,
+\tag{16}</span></span> is an inhomogeneous Poisson process with intensity function (or rate) <span class="math inline">t \mapsto \Lambda(t)</span>. In particular, when <span class="math inline">\Lambda(t) \equiv c</span> is a constant, <span class="math inline">N</span> is a homogeneous Poisson process with rate <span class="math inline">c</span>. Assuming that the atoms are ordered <span class="math inline">T_1&lt; T_2&lt; \dots</span>, we recall that the sequence <span class="math inline">(T_{k+1}-T_k)_{k\geq 1}</span> is a sequence of <em>i.i.d.</em> exponential variables of parameter <span class="math inline">c</span>.</p>
+</section>
+<section id="marked-poisson-measures-on-e-mathbbr-times-f" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="marked-poisson-measures-on-e-mathbbr-times-f"><span class="header-section-number">3.4.2</span> Marked Poisson measures on <span class="math inline">E = {\mathbb{R}}^+ \times F</span></h3>
+<p>We are interested in the particular case when <span class="math inline">E</span> is the product space <span class="math inline">{\mathbb{R}}^+ \times F</span>, with <span class="math inline">(F,\mathcal{F})</span> a Borel subspace of <span class="math inline">{\mathbb{R}}^d</span>. Then, a random counting measure is defined by a random set <span class="math inline">S =\{ (T_k, \Theta_k ), k \geq 1\}</span>. The random variables <span class="math inline">T_k\geq 0</span> can be considered as time variables, and constitute the jump times of the random measure, while the variables <span class="math inline">\Theta_k \in F</span> represent space variables.</p>
+<p>We recall in this special case the Theorem&nbsp;VI.3.2 in&nbsp;<span class="citation" data-cites="Cin11">(<a href="#ref-Cin11" role="doc-biblioref">Çinlar 2011</a>)</span>.</p>
+<div id="prp-marked-poisson" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 6 (Marked Poisson measure)</strong></span> Let <span class="math inline">m</span> be a <span class="math inline">\sigma</span>–finite diffuse measure on <span class="math inline">{\mathbb{R}}^+</span>, and <span class="math inline">K</span> a transition probability kernel from <span class="math inline">({\mathbb{R}}^+,\mathcal{B}({\mathbb{R}}^+))</span> into <span class="math inline">(F, \mathcal{F})</span>. Assume that the collection <span class="math inline">(T_k)_{k \ge 1}</span> forms a Poisson process <span class="math inline">(N_t) =(\sum_{k\geq 1} \mathsf{1}_{\{T_k \leq t\}})</span> with mean <span class="math inline">m(\mathrm{d}t) =\Lambda(t) \mathrm{d}t</span>, and that given <span class="math inline">(T_k)_{k \ge 1}</span>, the variables <span class="math inline">\Theta_k</span> are conditionally independent and have the respective distributions <span class="math inline">K(T_k, \cdot)</span>.</p>
+<ol type="1">
+<li><p>Then, <span class="math inline">\{ (T_k, \Theta_k) ;\; k \ge 1\}</span> forms a Poisson random measure <span class="math inline">Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}</span> on <span class="math inline">({\mathbb{R}}^+ \times F, \mathcal{B}({\mathbb{R}}^+) \otimes \mathcal{F})</span>, called a <em>Marked point process</em> , with mean <span class="math inline">\mu</span> defined by <span class="math display">
+\mu(\mathrm{d}t, \mathrm{d}y) = \Lambda(t) \mathrm{d}t K(t, \mathrm{d}y).
+</span></p></li>
+<li><p>Reciprocally let <span class="math inline">Q</span> be a Poisson random measure of mean measure <span class="math inline">\mu(\mathrm{d}t, \mathrm{d}y)</span>, admitting the following disintegration with respect to the first coordinate: <span class="math inline">\mu(\mathrm{d}t , \mathrm{d}y) =\tilde  \Lambda(t) \mathrm{d}t \nu(t, \mathrm{d}y)</span>, with <span class="math inline">\nu(t, F)&lt;\infty</span>. Let <span class="math inline">K(t, \mathrm{d}y) = \dfrac{\nu(t,\mathrm{d}y) }{\nu(t, F) }</span> and <span class="math inline">\Lambda(t) = \nu(t, F)\tilde  \Lambda(t)</span>. Then, <span class="math inline">Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}</span> is a marked Poisson measure with <span class="math inline">(T_k,\Theta_k)_{k\in {\mathbb{N}}^*}</span> defined as above. In particular, the projection <span class="math inline">N= (N_t)_{t\geq0}</span> of the Poisson measure on the first coordinate, <span class="math display">
+N_t = Q([0,t] \times F) = \sum_{k\geq 1} \boldsymbol{1}_{[0,t] \times F} (T_k, \Theta_k)  = \sum_{k\geq 1} \boldsymbol{1}_{\{T_k \leq t\}}, \quad \forall \; t \geq 0,
+</span> is an inhomogeneous Poisson process of rate <span class="math inline">\Lambda(t)= \nu(t, F)\tilde  \Lambda(t)</span>.</p></li>
+</ol>
+</div>
+<div id="rem">
+<p>When the transition probability kernel <span class="math inline">K</span> does not depend on the time: <span class="math inline">K(t, A) = \nu(A)</span> for some probability measure <span class="math inline">\nu</span>, then the marks <span class="math inline">(\Theta_k)_{k \ge 1}</span> form an <em>i.i.d.</em> sequence with distribution <span class="math inline">\nu</span>, independent of <span class="math inline">(T_k)_{k \ge 1}</span>.</p>
+</div>
+<p>The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on <span class="math inline">[0,T]\times F</span> with mean measure <span class="math inline">\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)</span> and <span class="math inline">c&gt;0</span>. The procedure is described in <span class="citation" data-cites="alg-marked-poisson">(<a href="#ref-alg-marked-poisson" role="doc-biblioref"><strong>alg-marked-poisson?</strong></a>)</span>.</p>
+</section>
+</section>
+<section id="sec-pathwise-representation" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="sec-pathwise-representation"><span class="header-section-number">3.5</span> Pathwise representation of IBMs</h2>
+<section id="notation-reminder" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="notation-reminder"><span class="header-section-number">3.5.1</span> Notation reminder</h3>
+<p>The population’s evolution is described by the measure valued process <span class="math inline">(Z_t)_{t\geq 0}</span>. Several types of events <span class="math inline">e</span> can occur to individuals denoted by <span class="math inline">I</span>. In an event of type <span class="math inline">e</span> occur to the individual <span class="math inline">I</span> at time <span class="math inline">t</span>, then the population state <span class="math inline">Z_{t^-}</span> is modified by <span class="math inline">\phi^e(t,I)</span>. If <span class="math inline">e\in \mathcal{E} \cup \mathcal{E}_W</span>, then events of type <span class="math inline">e</span> occur with an intensity <span class="math inline">\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)</span>, with <span class="math inline">\lambda_t^e(I,Z_t)</span> defined by <strong>?@eq-individual-intensity</strong>. If <span class="math inline">e \in \mathcal{P}</span>, then events of type <span class="math inline">e</span> occur in the population at a Poisson intensity of <span class="math inline">(\mu^e_t)</span>.</p>
+</section>
+<section id="proof-of-thm-eq-z" class="level3" data-number="3.5.2">
+<h3 data-number="3.5.2" class="anchored" data-anchor-id="proof-of-thm-eq-z"><span class="header-section-number">3.5.2</span> Proof of <a href="#thm-eq-Z" class="quarto-xref">Theorem&nbsp;1</a></h3>
+<div class="prf">
+<p>For ease of notation, we prove the case when <span class="math inline">\mathcal{P} =\emptyset</span> (there are no events with Poisson intensity).</p>
+<p><strong>Step 1</strong> The existence of a solution to <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a> is obtained by induction. Let <span class="math inline">Z^1</span> be the unique solution the thinning equation: <span class="math display">
+    Z_t^1 = Z_0 + \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{0}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{0})\}} Q (\mathrm{d}s,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ), \quad \forall  0 \leq t \leq T.
+</span> Let <span class="math inline">T_1</span> be the first jump time of <span class="math inline">Z^1</span>. Since <span class="math inline">Z_{s^-}^1 = Z_{0}</span> and <span class="math inline">N_{s^-}=N_{0}</span> on <span class="math inline">[0, T_1]</span>, <span class="math inline">Z^1</span> is solution of <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a> on <span class="math inline">[0,T_1]</span>.</p>
+<p>Let us now assume that <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a> admits a solution <span class="math inline">Z^n</span> on <span class="math inline">[0,T_n]</span>, with <span class="math inline">T_n</span> the <span class="math inline">n</span>–th event time in the population. Let <span class="math inline">Z^{n+1}</span> be the unique solution of the thinning equation: <span class="math display">
+    Z^{n+1}_t  =  Z_{t\wedge T_n}^n + \int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{T_n}^n)\}} \mathbf{1}_{\{k \leq N_{T_n}^n \} }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).
+</span> First, observe that <span class="math inline">Z^{n+1}</span> coincides with <span class="math inline">Z^n</span> on <span class="math inline">[0,T_n]</span>. Let <span class="math inline">T_{n+1}</span> be the <span class="math inline">(n+1)</span>–th jump of <span class="math inline">Z^{n+1}</span>. Furthermore, <span class="math inline">Z_{s^-}^{n+1} = Z_{T_n}^n</span> and <span class="math inline">N_{s^-}^{n+1}=N_{T_n}^{n}</span> on <span class="math inline">[T_n, T_{n+1}]</span> (nothing happens between two successive event times), <span class="math inline">Z^{n+1}</span> verifies for all <span class="math inline">t\leq T_{n+1}</span>: <span class="math display">
+\begin{aligned}
+    Z^{n+1}_t  =  Z_{t\wedge T_n}^n +\int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-}^{n+1} )\}} \mathbf{1}_{\{k \leq N_{s^-}^{n+1} \} }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).
+\end{aligned}
+</span> Since, <span class="math inline">Z^n</span> is a solution of <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a> on <span class="math inline">[0,T_n]</span> coinciding with <span class="math inline">Z^{n+1}</span>, this achieves to prove that <span class="math inline">Z^{n+1}</span> is solution of <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a> on <span class="math inline">[0,T_{n+1}]</span>. Finally, let <span class="math inline">Z =\lim_{n\to \infty } Z^n</span>. For all <span class="math inline">n\geq 1</span>, <span class="math inline">T_n</span> is the <span class="math inline">n</span>–th event time of <span class="math inline">Z</span>, and <span class="math inline">Z</span> is solution of <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a> on all time intervals <span class="math inline">[0,T_n\wedge T]</span> by construction.</p>
+<p>By <a href="#lem-non-explosion" class="quarto-xref">Lemma&nbsp;1</a> <span class="math inline">T_n \underset{n\to \infty}{\longrightarrow} \infty</span>. Thus, by letting <span class="math inline">n\to \infty</span> we can conclude that <span class="math inline">Z</span> is a solution of <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a> on <span class="math inline">[0,T]</span>.</p>
+<p><strong>Step 2</strong> Let <span class="math inline">\tilde Z</span> be a solution of <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a>. Using the same arguments than in Step 1, it is straight forward to show that <span class="math inline">\tilde Z</span> coincides with <span class="math inline">Z^n</span> on <span class="math inline">[0,T_n]</span>, for all <span class="math inline">n \geq 1</span>. Thus, <span class="math inline">\tilde{Z} = Z</span>, with achieves to prove uniqueness.</p>
+</div>
+</section>
+</section>
+</div></section><section id="session-information" class="level1 appendix unnumbered"><h2 class="anchored quarto-appendix-heading">Session information</h2><div class="quarto-appendix-contents">
 
 <div class="cell">
 <details class="code-fold">
@@ -886,7 +966,7 @@ Zinn, Sabine, Jutta Gampe, Jan Himmelspach, and Adelinde M Uhrmacher. 2009. <spa
   publisher = {Société Française de Statistique},
   title = {Efficient Simulation of Individual-Based Population Models},
   journal = {Computo},
-  date = {2024-03-16},
+  date = {2024-03-17},
   url = {https://computo.sfds.asso.fr/template-computo-quarto},
   doi = {xxxx},
   issn = {2824-7795},
@@ -2084,17 +2164,137 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb7-716"><a href="#cb7-716" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-717"><a href="#cb7-717" aria-hidden="true" tabindex="-1"></a>We now present the main algorithm implemented in the <span class="in">`popsim`</span> function of the <span class="in">`IBMPopSim`</span> package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, $\bar \Lambda(n)$ is defined by @eq-def-bar-Lambda.</span>
 <span id="cb7-718"><a href="#cb7-718" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-719"><a href="#cb7-719" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-720"><a href="#cb7-720" aria-hidden="true" tabindex="-1"></a><span class="fu"># References {.unnumbered}</span></span>
+<span id="cb7-719"><a href="#cb7-719" aria-hidden="true" tabindex="-1"></a>::: {#prp-randomized}</span>
+<span id="cb7-720"><a href="#cb7-720" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb7-721"><a href="#cb7-721" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-722"><a href="#cb7-722" aria-hidden="true" tabindex="-1"></a>::: {#refs}</span>
-<span id="cb7-723"><a href="#cb7-723" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-722"><a href="#cb7-722" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-723"><a href="#cb7-723" aria-hidden="true" tabindex="-1"></a><span class="fu"># Appendix {.appendix .unnumbered} </span></span>
 <span id="cb7-724"><a href="#cb7-724" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-725"><a href="#cb7-725" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session information {.appendix .unnumbered}</span></span>
+<span id="cb7-725"><a href="#cb7-725" aria-hidden="true" tabindex="-1"></a><span class="fu">## Recall on Poisson random measures {#sec-recall-poisson}</span></span>
 <span id="cb7-726"><a href="#cb7-726" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-727"><a href="#cb7-727" aria-hidden="true" tabindex="-1"></a><span class="in">```{r session-info}</span></span>
-<span id="cb7-728"><a href="#cb7-728" aria-hidden="true" tabindex="-1"></a><span class="in">sessionInfo()</span></span>
-<span id="cb7-729"><a href="#cb7-729" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-727"><a href="#cb7-727" aria-hidden="true" tabindex="-1"></a>We recall below some useful properties of Poisson random measures,</span>
+<span id="cb7-728"><a href="#cb7-728" aria-hidden="true" tabindex="-1"></a>mainly following Chapter&nbsp;6 of&nbsp;<span class="co">[</span><span class="ot">@Cin11</span><span class="co">]</span>. We also refer to&nbsp;<span class="co">[</span><span class="ot">@Kal17</span><span class="co">]</span> for a</span>
+<span id="cb7-729"><a href="#cb7-729" aria-hidden="true" tabindex="-1"></a>more comprehensive presentation of random counting measures.</span>
+<span id="cb7-730"><a href="#cb7-730" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-731"><a href="#cb7-731" aria-hidden="true" tabindex="-1"></a>::: {#def-poisson-random-measure} </span>
+<span id="cb7-732"><a href="#cb7-732" aria-hidden="true" tabindex="-1"></a><span class="fu">## Poisson Random Measures</span></span>
+<span id="cb7-733"><a href="#cb7-733" aria-hidden="true" tabindex="-1"></a>Let $\mu$ be a $\sigma$-finite diffuse measure on a Borel subspace $(E,\mathcal{E})$ of $({\mathbb{R}}^d, \mathcal{B}({\mathbb{R}}^d))$. A random counting measure $Q= \sum_{k\geq 1} \delta_{X_k}$ is a Poisson (counting) random measure of *mean measure* $\mu$ if</span>
+<span id="cb7-734"><a href="#cb7-734" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-735"><a href="#cb7-735" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>$\forall A \in \mathcal{E}$, $Q(A)$ is a Poisson random variable with ${\mathbb{E}}<span class="co">[</span><span class="ot">Q(A)</span><span class="co">]</span>= \mu(A)$. </span>
+<span id="cb7-736"><a href="#cb7-736" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>For all disjoints subsets $A_1, \dots, A_n \in \mathcal{E}$, $Q(A_1), \dots, Q(A_n)$ are independent Poisson random variables.</span>
+<span id="cb7-737"><a href="#cb7-737" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-738"><a href="#cb7-738" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-739"><a href="#cb7-739" aria-hidden="true" tabindex="-1"></a>Let us briefly recall here some simple but useful operations on Poisson measures. In the following, $Q$ is a Poisson measure of mean measure $\mu$, unless stated otherwise.</span>
+<span id="cb7-740"><a href="#cb7-740" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-741"><a href="#cb7-741" aria-hidden="true" tabindex="-1"></a>::: {#prp-restriction-poisson-measure}</span>
+<span id="cb7-742"><a href="#cb7-742" aria-hidden="true" tabindex="-1"></a><span class="fu">## Restricted Poisson measure</span></span>
+<span id="cb7-743"><a href="#cb7-743" aria-hidden="true" tabindex="-1"></a>If $B \in \mathcal{E}$, then, the restriction of $Q$ to $B$ defined by </span>
+<span id="cb7-744"><a href="#cb7-744" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-745"><a href="#cb7-745" aria-hidden="true" tabindex="-1"></a>    Q^B = \boldsymbol{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}</span>
+<span id="cb7-746"><a href="#cb7-746" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-747"><a href="#cb7-747" aria-hidden="true" tabindex="-1"></a>is also a Poisson random measure, of mean measure $\mu^B = \mu(\cdot \cap B)$.</span>
+<span id="cb7-748"><a href="#cb7-748" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-749"><a href="#cb7-749" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-750"><a href="#cb7-750" aria-hidden="true" tabindex="-1"></a>::: {#prp-proj-poisson-measure}</span>
+<span id="cb7-751"><a href="#cb7-751" aria-hidden="true" tabindex="-1"></a><span class="fu">## Projection of Poisson measure</span></span>
+<span id="cb7-752"><a href="#cb7-752" aria-hidden="true" tabindex="-1"></a>If $E = F_1 \times F_2$ is a product space, then the projection</span>
+<span id="cb7-753"><a href="#cb7-753" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-754"><a href="#cb7-754" aria-hidden="true" tabindex="-1"></a>    Q_1(\mathrm{d}x) = \int_{F_2} Q(\mathrm{d}x , \mathrm{d}y)</span>
+<span id="cb7-755"><a href="#cb7-755" aria-hidden="true" tabindex="-1"></a>$$ </span>
+<span id="cb7-756"><a href="#cb7-756" aria-hidden="true" tabindex="-1"></a>is a Poisson random measure of mean measure $\mu_1 (\mathrm{d}x ) = \int_{F_2} \mu(\mathrm{d}x, \mathrm{d}y)$.</span>
+<span id="cb7-757"><a href="#cb7-757" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-758"><a href="#cb7-758" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-759"><a href="#cb7-759" aria-hidden="true" tabindex="-1"></a><span class="fu">### Link with Poisson processes</span></span>
+<span id="cb7-760"><a href="#cb7-760" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-761"><a href="#cb7-761" aria-hidden="true" tabindex="-1"></a>Let $Q= \sum_{k\geq 1} \delta_{T_k}$ a Poisson random measure on $E={\mathbb{R}}^+$ with mean measure $\mu(\mathrm{d}t) = \Lambda (t) \mathrm{d}t$ absolutely continuous with respect to the Lebesgue measure, $\mu(A) = \int_A \Lambda(t) \mathrm{d}t$. </span>
+<span id="cb7-762"><a href="#cb7-762" aria-hidden="true" tabindex="-1"></a>The counting process</span>
+<span id="cb7-763"><a href="#cb7-763" aria-hidden="true" tabindex="-1"></a>$(N_t)_{t \ge 0}$ defined by </span>
+<span id="cb7-764"><a href="#cb7-764" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-765"><a href="#cb7-765" aria-hidden="true" tabindex="-1"></a>    N_t = Q(<span class="co">[</span><span class="ot">0,t</span><span class="co">]</span>) = \sum_{k \geq 1} \boldsymbol{1}_{<span class="sc">\{</span>T_k \leq t<span class="sc">\}</span>}, \quad \forall \; t\geq 0,</span>
+<span id="cb7-766"><a href="#cb7-766" aria-hidden="true" tabindex="-1"></a>$$ {#eq-inhomogeneous-pp}</span>
+<span id="cb7-767"><a href="#cb7-767" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process with intensity function (or rate) $t \mapsto \Lambda(t)$. In particular, when $\Lambda(t) \equiv c$ is a constant, $N$ is a homogeneous Poisson process with rate $c$. Assuming that the atoms are ordered $T_1&lt; T_2&lt; \dots$, we recall that the sequence $(T_{k+1}-T_k)_{k\geq 1}$ is a sequence of *i.i.d.* exponential variables of parameter $c$.</span>
+<span id="cb7-768"><a href="#cb7-768" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-769"><a href="#cb7-769" aria-hidden="true" tabindex="-1"></a><span class="fu">### Marked Poisson measures on $E = {\mathbb{R}}^+ \times F$</span></span>
+<span id="cb7-770"><a href="#cb7-770" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-771"><a href="#cb7-771" aria-hidden="true" tabindex="-1"></a>We are interested in the particular case when $E$ is the product space ${\mathbb{R}}^+ \times F$, with $(F,\mathcal{F})$ a Borel subspace of ${\mathbb{R}}^d$. Then, a random counting measure is defined by a random set $S =<span class="sc">\{</span> (T_k, \Theta_k ), k \geq 1<span class="sc">\}</span>$. The random variables $T_k\geq 0$ can be considered as time variables, and constitute the jump times of the random measure, while the variables $\Theta_k \in F$ represent space variables.</span>
+<span id="cb7-772"><a href="#cb7-772" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-773"><a href="#cb7-773" aria-hidden="true" tabindex="-1"></a>We recall in this special case the Theorem&nbsp;VI.3.2 in&nbsp;<span class="co">[</span><span class="ot">@Cin11</span><span class="co">]</span>.</span>
+<span id="cb7-774"><a href="#cb7-774" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-775"><a href="#cb7-775" aria-hidden="true" tabindex="-1"></a>::: {#prp-marked-poisson}</span>
+<span id="cb7-776"><a href="#cb7-776" aria-hidden="true" tabindex="-1"></a><span class="fu">## Marked Poisson measure </span></span>
+<span id="cb7-777"><a href="#cb7-777" aria-hidden="true" tabindex="-1"></a>Let $m$ be a $\sigma$--finite diffuse measure on ${\mathbb{R}}^+$, and $K$ a transition probability kernel from $({\mathbb{R}}^+,\mathcal{B}({\mathbb{R}}^+))$ into $(F, \mathcal{F})$. </span>
+<span id="cb7-778"><a href="#cb7-778" aria-hidden="true" tabindex="-1"></a>Assume that the collection $(T_k)_{k \ge 1}$ forms a Poisson process $(N_t) =(\sum_{k\geq 1} \mathsf{1}_{\{T_k \leq t\}})$ with mean $m(\mathrm{d}t) =\Lambda(t) \mathrm{d}t$, and that given $(T_k)_{k \ge 1}$, the variables $\Theta_k$ are conditionally independent and have the respective distributions $K(T_k, \cdot)$.</span>
+<span id="cb7-779"><a href="#cb7-779" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-780"><a href="#cb7-780" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Then, $<span class="sc">\{</span> (T_k, \Theta_k) ;\; k \ge 1\}$ forms a Poisson random measure $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ on $({\mathbb{R}}^+ \times F, \mathcal{B}({\mathbb{R}}^+) \otimes \mathcal{F})$, called a *Marked point process* , with mean $\mu$ defined by </span>
+<span id="cb7-781"><a href="#cb7-781" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-782"><a href="#cb7-782" aria-hidden="true" tabindex="-1"></a>    \mu(\mathrm{d}t, \mathrm{d}y) = \Lambda(t) \mathrm{d}t K(t, \mathrm{d}y).</span>
+<span id="cb7-783"><a href="#cb7-783" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-784"><a href="#cb7-784" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-785"><a href="#cb7-785" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Reciprocally let $Q$ be a Poisson random measure of mean measure $\mu(\mathrm{d}t, \mathrm{d}y)$, admitting the following disintegration with respect to the first coordinate: $\mu(\mathrm{d}t , \mathrm{d}y) =\tilde  \Lambda(t) \mathrm{d}t \nu(t, \mathrm{d}y)$, with $\nu(t, F)&lt;\infty$. </span>
+<span id="cb7-786"><a href="#cb7-786" aria-hidden="true" tabindex="-1"></a>Let $K(t, \mathrm{d}y) = \dfrac{\nu(t,\mathrm{d}y) }{\nu(t, F) }$ and $\Lambda(t) = \nu(t, F)\tilde  \Lambda(t)$. Then, $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ is a marked Poisson measure with $(T_k,\Theta_k)_{k\in {\mathbb{N}}^*}$ defined as above. </span>
+<span id="cb7-787"><a href="#cb7-787" aria-hidden="true" tabindex="-1"></a>In particular, the projection $N= (N_t)_{t\geq0}$ of the Poisson measure on the first coordinate,</span>
+<span id="cb7-788"><a href="#cb7-788" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-789"><a href="#cb7-789" aria-hidden="true" tabindex="-1"></a>    N_t = Q([0,t] \times F) = \sum_{k\geq 1} \boldsymbol{1}_{[0,t] \times F} (T_k, \Theta_k)  = \sum_{k\geq 1} \boldsymbol{1}_{<span class="sc">\{</span>T_k \leq t<span class="sc">\}</span>}, \quad \forall \; t \geq 0,</span>
+<span id="cb7-790"><a href="#cb7-790" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-791"><a href="#cb7-791" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process of rate $\Lambda(t)= \nu(t, F)\tilde  \Lambda(t)$.</span>
+<span id="cb7-792"><a href="#cb7-792" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-793"><a href="#cb7-793" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-794"><a href="#cb7-794" aria-hidden="true" tabindex="-1"></a>::: {#rem}</span>
+<span id="cb7-795"><a href="#cb7-795" aria-hidden="true" tabindex="-1"></a>When the transition probability kernel $K$ does not depend on the time: $K(t, A) = \nu(A)$ for some probability measure $\nu$, then the marks $(\Theta_k)_{k \ge 1}$ form an *i.i.d.* sequence with distribution $\nu$, independent of $(T_k)_{k \ge 1}$.</span>
+<span id="cb7-796"><a href="#cb7-796" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-797"><a href="#cb7-797" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-798"><a href="#cb7-798" aria-hidden="true" tabindex="-1"></a>The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c&gt;0$. The procedure is described in @alg-marked-poisson.</span>
+<span id="cb7-799"><a href="#cb7-799" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-800"><a href="#cb7-800" aria-hidden="true" tabindex="-1"></a><span class="fu">## Pathwise representation of IBMs {#sec-pathwise-representation}</span></span>
+<span id="cb7-801"><a href="#cb7-801" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-802"><a href="#cb7-802" aria-hidden="true" tabindex="-1"></a><span class="fu">### Notation reminder</span></span>
+<span id="cb7-803"><a href="#cb7-803" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-804"><a href="#cb7-804" aria-hidden="true" tabindex="-1"></a>The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. In an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. </span>
+<span id="cb7-805"><a href="#cb7-805" aria-hidden="true" tabindex="-1"></a>If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. </span>
+<span id="cb7-806"><a href="#cb7-806" aria-hidden="true" tabindex="-1"></a>If $e \in \mathcal{P}$, then events of type $e$ occur in the population at a Poisson intensity of $(\mu^e_t)$.</span>
+<span id="cb7-807"><a href="#cb7-807" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-808"><a href="#cb7-808" aria-hidden="true" tabindex="-1"></a><span class="fu">### Proof of @thm-eq-Z </span></span>
+<span id="cb7-809"><a href="#cb7-809" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-810"><a href="#cb7-810" aria-hidden="true" tabindex="-1"></a>::: prf</span>
+<span id="cb7-811"><a href="#cb7-811" aria-hidden="true" tabindex="-1"></a>For ease of notation, we prove the case when $\mathcal{P} =\emptyset$ (there are no events with Poisson intensity).</span>
+<span id="cb7-812"><a href="#cb7-812" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-813"><a href="#cb7-813" aria-hidden="true" tabindex="-1"></a>**Step 1** The existence of a solution to @eq-sde-eq-Z is obtained by induction. Let $Z^1$ be the unique solution the thinning equation:</span>
+<span id="cb7-814"><a href="#cb7-814" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-815"><a href="#cb7-815" aria-hidden="true" tabindex="-1"></a>    Z_t^1 = Z_0 + \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{0}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{0})<span class="sc">\}</span>} Q (\mathrm{d}s,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ), \quad \forall  0 \leq t \leq T.</span>
+<span id="cb7-816"><a href="#cb7-816" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-817"><a href="#cb7-817" aria-hidden="true" tabindex="-1"></a>Let $T_1$ be the first jump time of $Z^1$. Since $Z_{s^-}^1 = Z_{0}$ and $N_{s^-}=N_{0}$ on $<span class="co">[</span><span class="ot">0, T_1</span><span class="co">]</span>$, $Z^1$ is solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_1</span><span class="co">]</span>$.</span>
+<span id="cb7-818"><a href="#cb7-818" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-819"><a href="#cb7-819" aria-hidden="true" tabindex="-1"></a>Let us now assume that @eq-sde-eq-Z admits a solution $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$, with $T_n$ the $n$--th event time in the population. Let $Z^{n+1}$ be the unique solution of the thinning equation:</span>
+<span id="cb7-820"><a href="#cb7-820" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-821"><a href="#cb7-821" aria-hidden="true" tabindex="-1"></a>    Z^{n+1}_t  =  Z_{t\wedge T_n}^n + \int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{T_n}^n)\}} \mathbf{1}_{\{k \leq N_{T_n}^n <span class="sc">\}</span> }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).</span>
+<span id="cb7-822"><a href="#cb7-822" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-823"><a href="#cb7-823" aria-hidden="true" tabindex="-1"></a>First, observe that $Z^{n+1}$ coincides with $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$. Let $T_{n+1}$ be the $(n+1)$--th jump of $Z^{n+1}$. Furthermore, $Z_{s^-}^{n+1} = Z_{T_n}^n$ and $N_{s^-}^{n+1}=N_{T_n}^{n}$ on $<span class="co">[</span><span class="ot">T_n, T_{n+1}</span><span class="co">]</span>$ (nothing happens between two successive event times), $Z^{n+1}$ verifies for all $t\leq T_{n+1}$: </span>
+<span id="cb7-824"><a href="#cb7-824" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb7-825"><a href="#cb7-825" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb7-826"><a href="#cb7-826" aria-hidden="true" tabindex="-1"></a>    Z^{n+1}_t  =  Z_{t\wedge T_n}^n +\int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-}^{n+1} )\}} \mathbf{1}_{\{k \leq N_{s^-}^{n+1} <span class="sc">\}</span> }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).</span>
+<span id="cb7-827"><a href="#cb7-827" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb7-828"><a href="#cb7-828" aria-hidden="true" tabindex="-1"></a>$$ </span>
+<span id="cb7-829"><a href="#cb7-829" aria-hidden="true" tabindex="-1"></a>Since, $Z^n$ is a solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$ coinciding with $Z^{n+1}$, this achieves to prove that $Z^{n+1}$ is solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_{n+1}</span><span class="co">]</span>$.</span>
+<span id="cb7-830"><a href="#cb7-830" aria-hidden="true" tabindex="-1"></a>Finally, let $Z =\lim_{n\to \infty } Z^n$. For all $n\geq 1$, $T_n$ is the $n$--th event time of $Z$, and $Z$ is solution of @eq-sde-eq-Z on all time intervals $<span class="co">[</span><span class="ot">0,T_n\wedge T</span><span class="co">]</span>$ by construction.</span>
+<span id="cb7-831"><a href="#cb7-831" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-832"><a href="#cb7-832" aria-hidden="true" tabindex="-1"></a>By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus, by letting $n\to \infty$ we can conclude that $Z$ is a solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$.</span>
+<span id="cb7-833"><a href="#cb7-833" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-834"><a href="#cb7-834" aria-hidden="true" tabindex="-1"></a>**Step 2** Let $\tilde Z$ be a solution of @eq-sde-eq-Z.</span>
+<span id="cb7-835"><a href="#cb7-835" aria-hidden="true" tabindex="-1"></a>Using the same arguments than in Step 1, it is straight forward to show</span>
+<span id="cb7-836"><a href="#cb7-836" aria-hidden="true" tabindex="-1"></a>that $\tilde Z$ coincides with $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$, for all $n \geq 1$.</span>
+<span id="cb7-837"><a href="#cb7-837" aria-hidden="true" tabindex="-1"></a>Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.</span>
+<span id="cb7-838"><a href="#cb7-838" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-839"><a href="#cb7-839" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-840"><a href="#cb7-840" aria-hidden="true" tabindex="-1"></a><span class="fu"># References {.unnumbered}</span></span>
+<span id="cb7-841"><a href="#cb7-841" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-842"><a href="#cb7-842" aria-hidden="true" tabindex="-1"></a>::: {#refs}</span>
+<span id="cb7-843"><a href="#cb7-843" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-844"><a href="#cb7-844" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-845"><a href="#cb7-845" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session information {.appendix .unnumbered}</span></span>
+<span id="cb7-846"><a href="#cb7-846" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-847"><a href="#cb7-847" aria-hidden="true" tabindex="-1"></a><span class="in">```{r session-info}</span></span>
+<span id="cb7-848"><a href="#cb7-848" aria-hidden="true" tabindex="-1"></a><span class="in">sessionInfo()</span></span>
+<span id="cb7-849"><a href="#cb7-849" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

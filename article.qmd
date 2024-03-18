@@ -704,6 +704,126 @@ The efficiency of the randomization procedure increases with the population homo
 
 We now present the main algorithm implemented in the `popsim` function of the `IBMPopSim` package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, $\bar \Lambda(n)$ is defined by @eq-def-bar-Lambda.
 
+::: {#prp-randomized}
+:::
+
+
+# Appendix {.appendix .unnumbered} 
+
+## Recall on Poisson random measures {#sec-recall-poisson}
+
+We recall below some useful properties of Poisson random measures,
+mainly following Chapter 6 of [@Cin11]. We also refer to [@Kal17] for a
+more comprehensive presentation of random counting measures.
+
+::: {#def-poisson-random-measure} 
+## Poisson Random Measures
+Let $\mu$ be a $\sigma$-finite diffuse measure on a Borel subspace $(E,\mathcal{E})$ of $({\mathbb{R}}^d, \mathcal{B}({\mathbb{R}}^d))$. A random counting measure $Q= \sum_{k\geq 1} \delta_{X_k}$ is a Poisson (counting) random measure of *mean measure* $\mu$ if
+
+1. $\forall A \in \mathcal{E}$, $Q(A)$ is a Poisson random variable with ${\mathbb{E}}[Q(A)]= \mu(A)$. 
+2. For all disjoints subsets $A_1, \dots, A_n \in \mathcal{E}$, $Q(A_1), \dots, Q(A_n)$ are independent Poisson random variables.
+:::
+
+Let us briefly recall here some simple but useful operations on Poisson measures. In the following, $Q$ is a Poisson measure of mean measure $\mu$, unless stated otherwise.
+
+::: {#prp-restriction-poisson-measure}
+## Restricted Poisson measure
+If $B \in \mathcal{E}$, then, the restriction of $Q$ to $B$ defined by 
+$$
+    Q^B = \boldsymbol{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}
+$$
+is also a Poisson random measure, of mean measure $\mu^B = \mu(\cdot \cap B)$.
+:::
+
+::: {#prp-proj-poisson-measure}
+## Projection of Poisson measure
+If $E = F_1 \times F_2$ is a product space, then the projection
+$$
+    Q_1(\mathrm{d}x) = \int_{F_2} Q(\mathrm{d}x , \mathrm{d}y)
+$$ 
+is a Poisson random measure of mean measure $\mu_1 (\mathrm{d}x ) = \int_{F_2} \mu(\mathrm{d}x, \mathrm{d}y)$.
+:::
+
+### Link with Poisson processes
+
+Let $Q= \sum_{k\geq 1} \delta_{T_k}$ a Poisson random measure on $E={\mathbb{R}}^+$ with mean measure $\mu(\mathrm{d}t) = \Lambda (t) \mathrm{d}t$ absolutely continuous with respect to the Lebesgue measure, $\mu(A) = \int_A \Lambda(t) \mathrm{d}t$. 
+The counting process
+$(N_t)_{t \ge 0}$ defined by 
+$$
+    N_t = Q([0,t]) = \sum_{k \geq 1} \boldsymbol{1}_{\{T_k \leq t\}}, \quad \forall \; t\geq 0,
+$$ {#eq-inhomogeneous-pp}
+is an inhomogeneous Poisson process with intensity function (or rate) $t \mapsto \Lambda(t)$. In particular, when $\Lambda(t) \equiv c$ is a constant, $N$ is a homogeneous Poisson process with rate $c$. Assuming that the atoms are ordered $T_1< T_2< \dots$, we recall that the sequence $(T_{k+1}-T_k)_{k\geq 1}$ is a sequence of *i.i.d.* exponential variables of parameter $c$.
+
+### Marked Poisson measures on $E = {\mathbb{R}}^+ \times F$
+
+We are interested in the particular case when $E$ is the product space ${\mathbb{R}}^+ \times F$, with $(F,\mathcal{F})$ a Borel subspace of ${\mathbb{R}}^d$. Then, a random counting measure is defined by a random set $S =\{ (T_k, \Theta_k ), k \geq 1\}$. The random variables $T_k\geq 0$ can be considered as time variables, and constitute the jump times of the random measure, while the variables $\Theta_k \in F$ represent space variables.
+
+We recall in this special case the Theorem VI.3.2 in [@Cin11].
+
+::: {#prp-marked-poisson}
+## Marked Poisson measure 
+Let $m$ be a $\sigma$--finite diffuse measure on ${\mathbb{R}}^+$, and $K$ a transition probability kernel from $({\mathbb{R}}^+,\mathcal{B}({\mathbb{R}}^+))$ into $(F, \mathcal{F})$. 
+Assume that the collection $(T_k)_{k \ge 1}$ forms a Poisson process $(N_t) =(\sum_{k\geq 1} \mathsf{1}_{\{T_k \leq t\}})$ with mean $m(\mathrm{d}t) =\Lambda(t) \mathrm{d}t$, and that given $(T_k)_{k \ge 1}$, the variables $\Theta_k$ are conditionally independent and have the respective distributions $K(T_k, \cdot)$.
+
+1. Then, $\{ (T_k, \Theta_k) ;\; k \ge 1\}$ forms a Poisson random measure $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ on $({\mathbb{R}}^+ \times F, \mathcal{B}({\mathbb{R}}^+) \otimes \mathcal{F})$, called a *Marked point process* , with mean $\mu$ defined by 
+$$
+    \mu(\mathrm{d}t, \mathrm{d}y) = \Lambda(t) \mathrm{d}t K(t, \mathrm{d}y).
+$$
+
+2. Reciprocally let $Q$ be a Poisson random measure of mean measure $\mu(\mathrm{d}t, \mathrm{d}y)$, admitting the following disintegration with respect to the first coordinate: $\mu(\mathrm{d}t , \mathrm{d}y) =\tilde  \Lambda(t) \mathrm{d}t \nu(t, \mathrm{d}y)$, with $\nu(t, F)<\infty$. 
+Let $K(t, \mathrm{d}y) = \dfrac{\nu(t,\mathrm{d}y) }{\nu(t, F) }$ and $\Lambda(t) = \nu(t, F)\tilde  \Lambda(t)$. Then, $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ is a marked Poisson measure with $(T_k,\Theta_k)_{k\in {\mathbb{N}}^*}$ defined as above. 
+In particular, the projection $N= (N_t)_{t\geq0}$ of the Poisson measure on the first coordinate,
+$$
+    N_t = Q([0,t] \times F) = \sum_{k\geq 1} \boldsymbol{1}_{[0,t] \times F} (T_k, \Theta_k)  = \sum_{k\geq 1} \boldsymbol{1}_{\{T_k \leq t\}}, \quad \forall \; t \geq 0,
+$$
+is an inhomogeneous Poisson process of rate $\Lambda(t)= \nu(t, F)\tilde  \Lambda(t)$.
+:::
+
+::: {#rem}
+When the transition probability kernel $K$ does not depend on the time: $K(t, A) = \nu(A)$ for some probability measure $\nu$, then the marks $(\Theta_k)_{k \ge 1}$ form an *i.i.d.* sequence with distribution $\nu$, independent of $(T_k)_{k \ge 1}$.
+:::
+
+The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on $[0,T]\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c>0$. The procedure is described in @alg-marked-poisson.
+
+## Pathwise representation of IBMs {#sec-pathwise-representation}
+
+### Notation reminder
+
+The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. In an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. 
+If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. 
+If $e \in \mathcal{P}$, then events of type $e$ occur in the population at a Poisson intensity of $(\mu^e_t)$.
+
+### Proof of @thm-eq-Z 
+
+::: prf
+For ease of notation, we prove the case when $\mathcal{P} =\emptyset$ (there are no events with Poisson intensity).
+
+**Step 1** The existence of a solution to @eq-sde-eq-Z is obtained by induction. Let $Z^1$ be the unique solution the thinning equation:
+$$
+    Z_t^1 = Z_0 + \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{0}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{0})\}} Q (\mathrm{d}s,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ), \quad \forall  0 \leq t \leq T.
+$$
+Let $T_1$ be the first jump time of $Z^1$. Since $Z_{s^-}^1 = Z_{0}$ and $N_{s^-}=N_{0}$ on $[0, T_1]$, $Z^1$ is solution of @eq-sde-eq-Z on $[0,T_1]$.
+
+Let us now assume that @eq-sde-eq-Z admits a solution $Z^n$ on $[0,T_n]$, with $T_n$ the $n$--th event time in the population. Let $Z^{n+1}$ be the unique solution of the thinning equation:
+$$
+    Z^{n+1}_t  =  Z_{t\wedge T_n}^n + \int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{T_n}^n)\}} \mathbf{1}_{\{k \leq N_{T_n}^n \} }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).
+$$
+First, observe that $Z^{n+1}$ coincides with $Z^n$ on $[0,T_n]$. Let $T_{n+1}$ be the $(n+1)$--th jump of $Z^{n+1}$. Furthermore, $Z_{s^-}^{n+1} = Z_{T_n}^n$ and $N_{s^-}^{n+1}=N_{T_n}^{n}$ on $[T_n, T_{n+1}]$ (nothing happens between two successive event times), $Z^{n+1}$ verifies for all $t\leq T_{n+1}$: 
+$$
+\begin{aligned}
+    Z^{n+1}_t  =  Z_{t\wedge T_n}^n +\int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-}^{n+1} )\}} \mathbf{1}_{\{k \leq N_{s^-}^{n+1} \} }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).
+\end{aligned}
+$$ 
+Since, $Z^n$ is a solution of @eq-sde-eq-Z on $[0,T_n]$ coinciding with $Z^{n+1}$, this achieves to prove that $Z^{n+1}$ is solution of @eq-sde-eq-Z on $[0,T_{n+1}]$.
+Finally, let $Z =\lim_{n\to \infty } Z^n$. For all $n\geq 1$, $T_n$ is the $n$--th event time of $Z$, and $Z$ is solution of @eq-sde-eq-Z on all time intervals $[0,T_n\wedge T]$ by construction.
+
+By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus, by letting $n\to \infty$ we can conclude that $Z$ is a solution of @eq-sde-eq-Z on $[0,T]$.
+
+**Step 2** Let $\tilde Z$ be a solution of @eq-sde-eq-Z.
+Using the same arguments than in Step 1, it is straight forward to show
+that $\tilde Z$ coincides with $Z^n$ on $[0,T_n]$, for all $n \geq 1$.
+Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.
+:::
 
 # References {.unnumbered}
 
