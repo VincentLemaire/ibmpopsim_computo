@@ -52,8 +52,9 @@ crossref:
     cnj-title: Assumption
     cnj-prefix: Assumption 
 execute:
-    eval: false
+    eval: true
     echo: true
+    warning: false
 ---
 
 # Introduction
@@ -73,9 +74,12 @@ We opted to implement the algorithms of the `IBMPopSim` package using the `Rcpp`
 
 Designed for applications in social sciences, the `R` package `MicSim` [@Zin14] can be used for continuous time microsimulation. In continuous-time microsimulation, individual life-courses are usually specified by sequences of state transitions (events) and the time spans between these transitions. The state space is usually discrete and finite, which is no necessarily the case in `IBMPopSim`, where individuals can have continuous characteristics. But most importantly, microsimulation does not allow for interactions between individuals. Indeed, microsimulation produces separately the life courses of all individuals in the populations, based on the computation of the distribution functions of the waiting times in the distinct states of the state space, for each individual [@Zin14]. This can be slow in comparison to the simulation by thinning of event times occurring in the population, which is based on selecting event times among some competing proposed event times. Finally, `MicSim` simplifies the Mic-Core microsimulation tool implemented in Java [@zinn2009mic]. However, the implementation in `R` of simulation algorithms yields longer simulation run times than when using `Rcpp`. To the best of our knowledge, there are no other `R` packages currently available addressing the issue of IBMs efficient simulation.
 
-In @sec-IBM, we introduce the mathematical framework that characterizes the class of Stochastic Individual-Based Models (IBMs) that can be implemented in the `IBMPopSim` package. In particular, a general pathwise representation of IBMs is presented. The population dynamics is obtained as the solution of an SDE driven by Poisson measures, for which we obtain existence and uniqueness results in Theorem [1](#ThEqZ){reference-type="ref" reference="ThEqZ"}. Additionally, a succinct overview of the package is provided. In @sec-simulation the two main algorithms for simulating the population evolution of an IBM across the interval $[0, T]$ are detailed. In @sec-package we present the main functions of the `IBMPopSim` package, which allow for the definition of events and their intensities, the creation of a model, and the simulation of scenarios. Two examples are detailed in @sec-insurance-portfolio and sec-example-interaction, featuring applications involving an heterogeneous insurance portfolio characterized by entry and exit events, and an age and size-structured population with intricate interactions.
+In @sec-ibm, we introduce the mathematical framework that characterizes the class of Stochastic Individual-Based Models (IBMs) that can be implemented in the `IBMPopSim` package. In particular, a general pathwise representation of IBMs is presented. The population dynamics is obtained as the solution of an SDE driven by Poisson measures, for which we obtain existence and uniqueness results in @thm-eq-Z. Additionally, a succinct overview of the package is provided. 
+In @sec-simulation the two main algorithms for simulating the population evolution of an IBM across the interval $[0, T]$ are detailed. 
+In @sec-package we present the main functions of the `IBMPopSim` package, which allow for the definition of events and their intensities, the creation of a model, and the simulation of scenarios. 
+Two examples are detailed in @sec-insurance-portfolio and sec-example-interaction, featuring applications involving an heterogeneous insurance portfolio characterized by entry and exit events, and an age and size-structured population with intricate interactions.
 
-# Stochastic Individual-Based Models (IBMs) in IBMPopSim {#sec-IBM}
+# Stochastic Individual-Based Models (IBMs) in IBMPopSim {#sec-ibm}
 
 Stochastic Individual-Based Models (IBMs) represent a broad class of random population dynamics models, allowing the description of populations evolution on a microscopic scale. Informally, an IBM can be summarized by the description of the individuals constituting the population, the various types of events that can occur to these individuals, along with their respective frequencies. In `IBMPopSim`, individuals can be characterized by their age and/or a collection of discrete or continuous characteristics. Moreover, the package enables users to simulate efficiently populations in which one or more of the following event types may occur:
 
@@ -106,7 +110,7 @@ with $a(I,t)$ the age of individual $I$ at time $t$.
 Birth events are also characterized with a kernel determining the gender of the newborn, who is male with probability $p_{male}$. 
 
 ### Model creation 
-To implement this model in IBMPopSim, it is necessary to individually define each event type. In this example, the `mk_event_individual` function is used. The creation of an event involves  a few lines of `cpp` instructions defining the intensity and, if applicable, the kernel of the event. For a more in depth description of the event creation step and its parameters, we refer to @sec-package_events.
+To implement this model in IBMPopSim, it is necessary to individually define each event type. In this example, the `mk_event_individual` function is used. The creation of an event involves  a few lines of `cpp` instructions defining the intensity and, if applicable, the kernel of the event. For a more in depth description of the event creation step and its parameters, we refer to @sec-package-events.
 
 The events of this simple model are for example defined through the following calls.
 ```{r}
@@ -294,7 +298,7 @@ where $W^e(t, I, (\tau^b,\tau^d,x))  = 0$ if the individual $J =(\tau^b,\tau^d,x
 To summarize, an individual intensity in IBMPopSim can be written as:
 $$
     \lambda^e_t(I,Z_t) = \lambda^e(t, I) \mathbf{1}_{\{e \in \mathcal{E}\}} + \biggl( \sum_{j=1}^{N_t} W^e(t, I, I_j) \biggr) \mathbf{1}_{\{e \in \mathcal{E}_W\}}.
-$$ {#eq-indiviual-intensity}
+$$ {#eq-individual-intensity}
 
 ::: {#exm-popfinale}
 
@@ -404,24 +408,8 @@ Furthermore, since each event type is characterized by an intensity function, th
 More precisely, we introduce a random Poisson measure $Q$ on $\mathbb R^+ \times \mathcal{J}\times \mathbb{R}^+$, with $\mathcal{J}= \mathbb N \times(\mathcal E \cup \mathcal{E}_W)$. $Q$ is composed of random quadruplets $(\tau, k , e, \theta)$, where $\tau$ represents a potential event time for an individual $I_k$ and event type $e$. 
 The last variable $\theta$ is used to accept/reject this proposed event, depending on the event intensity. Hence, the Poisson measure is restricted to a certain random set and then projected on the space of interest ${\mathbb{R}}^+ \times \mathcal{J}$. If the event is accepted, then a jump $\phi^e(\tau,I_k)$ occurs.
 
-The proof of @thm-eq-Z is detailed in the Appendix @prf-thm-eq-Z. Note that @eq-sde-eq-Z is an SDE describing the evolution of the IBM, the intensity of the events in the right hand side of the equation depending on the population process $Z$ itself. 
-The main idea of the proof of @thm-eq-Z is to use the non explosion property of @lem-non-explosion, and to write the r.h.s of @eq-sde-eq-Z as a sum of simple equations between two successive events, solved by induction.
-
-The proof of @lem-non-explosion
-, detailed in Appendix @prf-lem-non-explosion
-is more technical and rely on pathwise
-comparison result, generalizing those obtained in [@KaaElK20]. An
-alternative pathwise representation of the population process, inspired
-by the randomized Algorithm
-[\[algo::rzndomized\]](#algo::rzndomized){reference-type="ref"
-reference="algo::rzndomized"}, 
-is given as well in Theorem
-[\[ThEqZrandomized\]](#ThEqZrandomized){reference-type="ref"
-reference="ThEqZrandomized"}.
-
 ::: {#thm-eq-Z} 
 ## Pathwise representation
-
 Let $T\in {\mathbb{R}}^+$ and $\mathcal{J}= \mathbb N \times(\mathcal E \cup \mathcal{E}_W)$. 
 Let $Q$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{J}\times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\mathcal{J}}(\mathrm{d}k,\mathrm{d}e)  \mathbf{1}_{[0,\bar \lambda^e]} (\theta)\mathrm{d}\theta$, with $\delta_{\mathcal{J}}$ the counting measure on $\mathcal{J}$. 
 Finally, let $Q^{\mathcal P}$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{P}  \times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\cal P}(\mathrm{d}e)  \mathbf{1}_{[0,\bar \mu^e]} (\theta)\mathrm{d}\theta$, and $Z_0= \sum_{k=1}^{N_0} \delta_{I_k}$ an initial population.
@@ -438,12 +426,17 @@ $$ {#eq-sde-eq-Z}
 and where $I_{s^-}$ is an individual, chosen uniformly among alive individuals in the population $Z_{s^-}$.
 :::
 
+The proof of @thm-eq-Z is detailed in the Appendix, @sec-prf-thm-eq-Z. Note that @eq-sde-eq-Z is an SDE describing the evolution of the IBM, the intensity of the events in the right hand side of the equation depending on the population process $Z$ itself. 
+The main idea of the proof of @thm-eq-Z is to use the non explosion property of @lem-non-explosion, and to write the r.h.s of @eq-sde-eq-Z as a sum of simple equations between two successive events, solved by induction.
+
 ::: {#lem-non-explosion}
 Let $Z$ be a solution of @eq-sde-eq-Z on ${\mathbb{R}}^+$, with $(T_n)_{n\geq 0}$ its jump times, $T_0 = 0$. If @cnj-non-explosion is satisfied, then
 $$
     \lim_{n \to \infty} T_n = \infty, \quad {\mathbb{P}}\text{-a.s.}
 $$
 :::
+
+The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion is more technical and rely on pathwise comparison result, generalizing those obtained in [@KaaElK20]. An alternative pathwise representation of the population process, inspired by the randomized @cnj-randomized is given as well in @thm-randomized.
 
 # Population simulation {#sec-simulation}
 
@@ -580,8 +573,8 @@ The acceptance/rejection @alg-thinning2 can be efficient when the functions $\la
 
 ## Simulation algorithm {#sec-simulation-algo}
 
-Let us now come back to the simulation of the IBM introduced in @sec-ibm. For ease of notations, we assume that there are no event with Poisson intensity ($\mathcal{P} =\emptyset$), so that all events that occur are of type $e \in \mathcal{E} \cup \mathcal{E}_W$, with individual intensity $\lambda_t^e(I,Z_t)$ depending on the population composition $Z_t$ ($e \in \mathcal{E}_W$) or not ($e \in \mathcal{E}$), as defined in @eq-indivual-intensity and verifying either @cnj-intensity1 or @cnj-intensity2.
-The global intensity @eq-global-event-intensity at time $t \in [0,T]$ is thus
+Let us now come back to the simulation of the IBM introduced in @sec-ibm. For ease of notations, we assume that there are no event with Poisson intensity ($\mathcal{P} =\emptyset$), so that all events that occur are of type $e \in \mathcal{E} \cup \mathcal{E}_W$, with individual intensity $\lambda_t^e(I,Z_t)$ depending on the population composition $Z_t$ ($e \in \mathcal{E}_W$) or not ($e \in \mathcal{E}$), as defined in @eq-individual-intensity and verifying either @cnj-intensity1 or @cnj-intensity2.
+The global intensity @eq-global-ev-intensity at time $t \in [0,T]$ is thus
 $$
     \Lambda_t(Z_t) = \sum_{e \in \mathcal{E}} \Big( \sum_{k=1}^{N_t} \lambda^e(t, I_k) \Big)
     + \sum_{e \in \mathcal{E}_W} \Big( \sum_{k=1}^{N_t} \sum_{j=1}^{N_t} W^e(t, I_k, I_j) \Big) \leq \bar \Lambda(N_t),
@@ -707,6 +700,88 @@ We now present the main algorithm implemented in the `popsim` function of the `I
 ::: {#prp-randomized}
 :::
 
+TODO
+
+# Model creation and simulation with IBMPopSim {#sec-package}
+
+The use of the `IBMPopSim` package is mainly done in two steps: a first model creation followed by the simulation of the population evolution. The creation of a model is itself based on two steps: the description of the population $Z_t$, as introduced in @sec-population, and the description of the events types, along with their associated intensities, as detailed in @sec-events and @sec-event-intensity.
+A model is compiled by calling the `mk_model` function, which internally uses a template mechanism to generate automatically the source code describing the model, which is subsequently compiled using the `Rcpp` package to produce the object code.
+
+After the compilation of the model, the simulations are launched by calling the `popsim` function. This function depends on the previously compiled model and simulates a random trajectory of the population evolution based on an initial population and on parameter values, which can change from a call to another.
+
+In this section, we take a closer look at each component of a model in `IBMPopSim`. We also refer to the [IBMPopSim website](https://daphnegiorgi.github.io/IBMPopSim/) and to the `vignettes` of the package for more details on the package and various examples of model creation.
+
+## Population {#sec-population}
+
+A population $Z$ is represented by an object of class `population` containing a data frame where each row corresponds to an individual $I=(\tau^b, \tau^d, x)$, and which has at least two columns, `birth` and `death`, corresponding to the birth date $\tau^b$ and death/exit date $\tau^d$ ($\tau^d$ is set to `NA` for alive individuals). The data frame can contain more than two columns if individuals are described by additional characteristics $x= (x_1,\dots x_n)$.
+
+If entry events can occur in the population, the population shall contain a characteristic named `entry`. This can be done by setting the flag `entry=TRUE` in the `population` function, or by calling the `add_characteristic` function on an existing population. During the simulation, the date at which an individual enters the population is automatically recorded in the variable `I.entry`.
+If exit events can occur, the population shall contain a characteristic named `out`. This can be done by setting the flag `out=TRUE` in the `population` function, or by calling the `add_characteristic` function. When an individual `I` exits the population during the simulation, `I.out` is set to `TRUE` and its exit time is recorded as a "death" date.
+
+In the example below, individuals are described by their birth and death dates, as well a Boolean characteristics called male, and the `entry` characteristic. For instance, the first individual is a female whose age at $t_0=0$ is $107$ and who was originally in the population.
+```{R}
+pop_init <- population(EW_pop_14$sample, entry=TRUE)
+str(pop_init)
+```
+
+### Individual
+
+In the `C++` model which is automatically generated and compiled, an individual `I` is an object of an internal class containing some attributes (`birth_date`, `death_date` and the characteristics), and some methods including:
+
+- `I.age(t)`: a `const` method returning the age of an individual `I` at time `t`,
+- `I.set_age(a, t)`: a method to set the age `a` at time `t` of an individual `I` (set `birth_date` at `t-a`),
+- `I.is_dead(t)`: a `const` method returning `true` if the individual `I` is dead at time `t`.
+
+::: {#rem-characteristics}
+A characteristic $x_i$ must be of atomic type: `logical`, `integer`, `double` or `character`. The function `get_characteristic` allows to easily get characteristics names and their types from a population data frame. We draw the attention to the fact that some names for characteristics are forbidden, or reserved to specific cases : this is the case for `birth`, `death`, `entry`, `out`, `id`.
+:::
+
+## Events {#sec-package-events}
+
+The most important step of the model creation is the events creation. The call to the function creating an event is of form
+```{R}
+#| eval: false 
+mk_event_CLASS(type="TYPE", name="NAME", ...)
+```
+where `CLASS` is replaced by the class of the event intensity, described in @sec-event-intensity , and `type` corresponds to the event type, described in Section @sec-events.
+@tbl-intensity-classes and @tbl-event-types summarize the different possible choices for intensity classes and types of event. The optional argument `name` gives a name to the event. If not specified, the name of the event is its type, for instance `death`. However, a name must be specified if the model is composed of several events with the same type (for instance when there are multiple death events corresponding to different causes of death). The other arguments depend on the intensity class and on the event type.
+
+::: {#tbl-panel layout-ncol=2}
+
+Intensity class         Set               `CLASS`
+----------------------- ----------------- -------------------------
+Individual              $\mathcal{E}$     `individual`
+Interaction             $\mathcal{E}_W$   `interaction`
+Poisson                 $\mathcal{P}$     `poisson`
+Inhomogeneous Poisson   $\mathcal{P}$     `inhomogeneous_poisson`
+
+: Intensity Classes {#tbl-intensity-classes}
+
+Event type   `TYPE`
+------------ ---------
+Birth        `birth`
+Death        `death`
+Entry        `entry`
+Exit         `exit`
+Swap         `swap`
+
+: Event Types {#tbl-event-types}
+
+Main caption
+:::
+
+The intensity function and the kernel of an event are defined through arguments of the function `mk_event_CLASS`. These arguments are strings composed of few lines of code. Since the model is compiled using `Rcpp`, the code should be written in `C++`. However, thanks to the functions/variables of the package, even the non-experienced `C++` user can define a model quite easily. 
+To facilitate the implementation, the user can also define a list of **model parameters**, which can be used in the event and intensity definitions. These parameters are stored in a named list and can be of various types: atomic type, numeric vector or matrix, predefined function of one variable (`stepfun`, `linfun`, `gompertz`, `weibull`, `piecewise_x`), piecewise functions of two variables (`piecewise_xy`). 
+We refer to the `vignette(IBMPopSim_cpp)` for more details on parameters types and basic `C++` tools. Another advantage of the model parameters is that their value can be modified from a simulation to another without changing the model.
+
+
+# Insurance portfolio {#sec-insurance-portfolio}
+
+TODO 
+
+# Population with genetically variable traits {#sec-example-interaction}
+
+TODO
 
 # Appendix {.appendix .unnumbered} 
 
@@ -793,12 +868,12 @@ The population's evolution is described by the measure valued process $(Z_t)_{t\
 If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. 
 If $e \in \mathcal{P}$, then events of type $e$ occur in the population at a Poisson intensity of $(\mu^e_t)$.
 
-### Proof of @thm-eq-Z 
+### Proof of @thm-eq-Z {#sec-prf-thm-eq-Z} 
 
-::: prf
+::: {.proof}
 For ease of notation, we prove the case when $\mathcal{P} =\emptyset$ (there are no events with Poisson intensity).
 
-**Step 1** The existence of a solution to @eq-sde-eq-Z is obtained by induction. Let $Z^1$ be the unique solution the thinning equation:
+- Step 1. The existence of a solution to @eq-sde-eq-Z is obtained by induction. Let $Z^1$ be the unique solution the thinning equation:
 $$
     Z_t^1 = Z_0 + \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{0}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{0})\}} Q (\mathrm{d}s,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ), \quad \forall  0 \leq t \leq T.
 $$
@@ -819,10 +894,7 @@ Finally, let $Z =\lim_{n\to \infty } Z^n$. For all $n\geq 1$, $T_n$ is the $n$--
 
 By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus, by letting $n\to \infty$ we can conclude that $Z$ is a solution of @eq-sde-eq-Z on $[0,T]$.
 
-**Step 2** Let $\tilde Z$ be a solution of @eq-sde-eq-Z.
-Using the same arguments than in Step 1, it is straight forward to show
-that $\tilde Z$ coincides with $Z^n$ on $[0,T_n]$, for all $n \geq 1$.
-Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.
+- Step 2. Let $\tilde Z$ be a solution of @eq-sde-eq-Z. Using the same arguments than in Step 1, it is straight forward to show that $\tilde Z$ coincides with $Z^n$ on $[0,T_n]$, for all $n \geq 1$. Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.
 :::
 
 # References {.unnumbered}
