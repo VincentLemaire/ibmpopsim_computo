@@ -436,7 +436,7 @@ $$
 $$
 :::
 
-The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion is more technical and rely on pathwise comparison result, generalizing those obtained in [@KaaElK20]. An alternative pathwise representation of the population process, inspired by the randomized @cnj-randomized is given as well in @thm-randomized.
+The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion is more technical and rely on pathwise comparison result, generalizing those obtained in [@KaaElK20]. An alternative pathwise representation of the population process, inspired by the randomized @alg-randomized is given as well in @prp-randomized.
 
 # Population simulation {#sec-simulation}
 
@@ -622,7 +622,7 @@ Finally, if $\bar E_\ell=s$, a swap event occurs, the population size stays cons
 The steps for simulating the first event in the population can be iterated in order to simulate the population. At the $k$th step, the same procedure is repeated to simulate the $k$th event, starting from a population $Z_{T_{k-1}}$ of size $N_{T_{k-1}}$.
 
 ```pseudocode
-#| label: alg-no-interaction
+#| label: alg-interaction
 #| html-indent-size: "1.2em"
 #| html-comment-delimiter: "//"
 #| html-line-number: true
@@ -655,11 +655,11 @@ The steps for simulating the first event in the population can be iterated in or
 \end{algorithm}
 ```
 
-::: {#thm-no-interaction}
-@alg-no-interaction are exact simulations of solution of the SDE @eq-sde-eq-Z.
+::: {#thm-interaction}
+A population process $(Z_t)_{t \in [0,T]}$ simulated by the @alg-interaction is an exact solution of the SDE @eq-sde-eq-Z.
 :::
 
-The proof of @thm-no-interaction is detailed in the Appendix @prf-no-interaction.
+The proof of @thm-interaction is detailed in the Appendix @prf-no-interaction.
 
 ::: {#rem-remvoval-dead} 
 The population $Z_{T_k}$ includes dead/exited individuals before the event time $T_k$. Thus, $N_{T_k} > N_{T_k}^a$ is greater than the number of alive individuals at time $T_k$. When a dead individual $I_{\bar K_l}$ is drawn from the population during the rejection/acceptance phase of the algorithm, the proposed event $(\bar T_{\ell}, \bar E_\ell,  I_{\bar K_\ell})$ is automatically rejected since the event intensity is $\lambda^{\bar E_\ell}_{T_\ell}(I_{\bar K_\ell}, Z_{T_k}) = 0$ (nothing can happen to a dead individual). 
@@ -697,10 +697,64 @@ The efficiency of the randomization procedure increases with the population homo
 
 We now present the main algorithm implemented in the `popsim` function of the `IBMPopSim` package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, $\bar \Lambda(n)$ is defined by @eq-def-bar-Lambda.
 
+```pseudocode
+#| label: alg-randomized
+#| html-indent-size: "1.2em"
+#| html-comment-delimiter: "//"
+#| html-line-number: true
+#| html-line-number-punc: ":"
+#| html-no-end: false
+#| pdf-placement: "htb!"
+#| pdf-line-number: true
+
+\begin{algorithm}
+\caption{Randomized IBM simulation algorithm.}
+\begin{algorithmic}
+    \State \textbf{Input:} Initial population $Z_0$, horizon $T > 0$, and events described by
+    \State Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$, $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ and $(\mu^e, \bar \mu^e)$ for $e \in \mathcal{P}$ 
+    \State Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W \cup \mathcal{P}$
+    \State \textbf{Output:} Population $Z_T$
+    \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ 
+    \While{$T_k < T$}
+        \Repeat
+            \State increment iterative variable $\ell \longleftarrow \ell+1$
+            \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + \mathcal{E}\big(\bar \Lambda(N_{T_k}) \big)$
+            \State draw an individual index $\bar K_\ell \sim \mathcal{U}(\{1,\dots,N_{T_k}\})$
+            \State draw a proposed event $\bar E_\ell \sim \mathcal{U}\{p_e\}$ with $p_e = \frac{\bar \mu^e \mathbf{1}_{e \in \mathcal{P}} + \bar \lambda^e  N_{T_k}\mathbf{1}_{e \in \mathcal{E}} + \bar W^e (N_{T_k})^2 \mathbf{1}_{e \in \mathcal{E}_W}}{\bar \Lambda(N_{T_k})}$ 
+            \If{$\bar E_\ell \in \mathcal{E}$ (without interaction)}
+                \State draw $\bar \Theta_\ell \sim \mathcal{U}\big([0, \bar \lambda^{\bar E_\ell}] \big)$ 
+                \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le \lambda^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell})$ 
+            \EndIf
+            \If{$\bar E_\ell \in \mathcal{E}_W$ (with interaction)}
+                \State draw $(\bar \Theta_\ell, J_\ell) \sim  \mathcal{U}\big([0, \bar W^{\bar E_\ell}] \times \{1, \dots, N_{T_k}\} \big)$
+                \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le W^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell}, I_{J_\ell})$
+            \EndIf
+            \If{$\bar E_\ell \in \mathcal{P}$ (Poissonian intensity)}
+                \State draw $\bar \Theta_\ell \sim \mathcal{U}\big([0, \bar \mu^{\bar E_\ell}] \big)$ 
+                \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le \mu^{\bar E_\ell}(\bar T_\ell)$
+            \EndIf
+        \Until{accepted} 
+        \State increment iterative variable $k \longleftarrow k+1$
+        \State record $(T_k, E_k, I_k) \longleftarrow (\bar T_{\ell}, \bar E_\ell, \bar I_{\bar K_\ell})$ as accepted time, event and individual
+        \State update the population $Z_{T_k} = Z_{T_{k-1}} + \phi^{E_k}(T_k, I_k)$
+    \EndWhile
+\end{algorithmic}
+\end{algorithm}
+```
+
 ::: {#prp-randomized}
+The population processes $(Z_t)_{t\in [0,T]}$ simulated by the @alg-interaction and @alg-randomized have the same law.
 :::
 
-TODO
+::: {.proof}
+The only difference between @alg-interaction and @alg-randomized is in the acceptance/rejection step of proposed events, in the presence of interactions.
+In @alg-randomized , a proposed event $(\bar T_\ell, \bar E_\ell, \bar K_\ell)$, with $\bar E_l \in \mathcal{E}_W$ an event with interaction, is accepted as a true event in the population if
+$$
+    \bar \Theta_\ell \le W^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell}, I_{\bar J_\ell}), \text{ with } (\bar \Theta_\ell, \bar J_\ell) \sim  \mathcal{U}\big([0, \bar W^{\bar E_\ell}] \times \{1, \dots, N_{T_k}\} \big).
+$$
+By @eq-randomized-event, the probability of accepting this event is the same than in @alg-interaction, which achieves the proof.
+:::
+
 
 # Model creation and simulation with IBMPopSim {#sec-package}
 
@@ -782,7 +836,7 @@ In `IBMPopSim`, the intensity of an event can belong to three classes @sec-event
 
 An event $e\in \mathcal{E}$ (see @eq-no-interaction) has an intensity of the form $\lambda^e(t, I)$ which depends only on the individual `I` and time. Events with such intensity are created using the function
 ```{R}
-#| eval: False
+#| eval: false
 mk_event_individual(type = "TYPE", 
                     name = "NAME",
                     intensity_code = "INTENSITY", ...)
@@ -840,7 +894,15 @@ In most cases, the `random` algorithm is much faster than the `full` algorithm, 
 For events $e\in\mathcal{P}$ with an intensity $\mu^e(t)$ which does not depend on the population, the event intensity is of class `inhomogeneous_poisson` or `poisson` depending on whether or not the intensity depends on time (in the second case the intensity is constant).
 
 For Poisson (constant) intensities the events are created with the function
+```{R}
+#| eval: false
+```
+
+The following example creates a death event, where individuals die at a constant intensity `lambda` (which has to be in the list of model parameters):
+
 TODO
+
+
 
 # Insurance portfolio {#sec-insurance-portfolio}
 

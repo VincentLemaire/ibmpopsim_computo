@@ -9,7 +9,7 @@
 <meta name="author" content="Daphné Giorgi">
 <meta name="author" content="Vincent Lemaire">
 <meta name="author" content="Sarah Kaakai">
-<meta name="dcterms.date" content="2024-03-18">
+<meta name="dcterms.date" content="2024-03-21">
 <meta name="keywords" content="Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation">
 <meta name="description" content="TODO">
 
@@ -223,14 +223,14 @@ ISSN 2824-7795</p>
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 18, 2024</p>
+        <p class="date">March 21, 2024</p>
       </div>
     </div>
                                     
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">March 18, 2024</p>
+        <p class="date-modified">March 21, 2024</p>
       </div>
     </div>
       
@@ -645,7 +645,7 @@ W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J &gt; t\}}, \quad \forall \; J=(\
     \lim_{n \to \infty} T_n = \infty, \quad {\mathbb{P}}\text{-a.s.}
 </span></p>
 </div>
-<p>The proof of <a href="#lem-non-explosion" class="quarto-xref">Lemma&nbsp;1</a>, detailed in Appendix <strong>?@sec-prf-lem-non-explosion</strong> is more technical and rely on pathwise comparison result, generalizing those obtained in <span class="citation" data-cites="KaaElK20">(<a href="#ref-KaaElK20" role="doc-biblioref">Kaakai and El Karoui 2023</a>)</span>. An alternative pathwise representation of the population process, inspired by the randomized <strong>?@cnj-randomized</strong> is given as well in <strong>?@thm-randomized</strong>.</p>
+<p>The proof of <a href="#lem-non-explosion" class="quarto-xref">Lemma&nbsp;1</a>, detailed in Appendix <strong>?@sec-prf-lem-non-explosion</strong> is more technical and rely on pathwise comparison result, generalizing those obtained in <span class="citation" data-cites="KaaElK20">(<a href="#ref-KaaElK20" role="doc-biblioref">Kaakai and El Karoui 2023</a>)</span>. An alternative pathwise representation of the population process, inspired by the randomized <a href="#alg-randomized">Algorithm 3</a> is given as well in <a href="#prp-randomized" class="quarto-xref">Proposition&nbsp;3</a>.</p>
 </section>
 </section>
 </section>
@@ -720,7 +720,7 @@ Figure&nbsp;1: test
 </span> is an inhomogeneous Poisson process of intensity vector <span class="math inline">(\lambda_j(t))_{j\in\mathcal{J}}</span> on <span class="math inline">[0,T]</span>.</p>
 </div>
 <p><a href="#prp-thinning-vector" class="quarto-xref">Proposition&nbsp;2</a> yields the following simulation <a href="#alg-thinning2">Algorithm 1</a> for multivariate Poisson processes.</p>
-<div id="alg-thinning2" class="pseudocode-container" data-line-number-punc=":" data-indent-size="1.2em" data-no-end="false" data-alg-title="Algorithm" data-line-number="true" data-pseudocode-index="1" data-comment-delimiter="//">
+<div id="alg-thinning2" class="pseudocode-container" data-line-number-punc=":" data-indent-size="1.2em" data-pseudocode-index="1" data-no-end="false" data-line-number="true" data-alg-title="Algorithm" data-comment-delimiter="//">
 <div class="pseudocode">
 \begin{algorithm} \caption{Thinning algorithm for multivariate inhomogeneous Poisson processes.} \begin{algorithmic} \State \textbf{Input:} Functions $\lambda_j: [0,T] \to [0,\bar \lambda]$ and $\bar \lambda_j$, $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$ \State \textbf{Output:} Points $(T_k, J_k)$ of Poisson measure $N$ on $[0,T] \times \mathcal{J}$ \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ \While{$T_k &lt; T$} \Repeat \State increment iterative variable $\ell \longleftarrow \ell+1$ \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + S_\ell$ with $S_\ell \sim \mathcal{E}(\bar \Lambda)$ \State draw $\bar J_\ell \sim \mathcal{U}\big\{ \bar \lambda_j / \bar \Lambda, j \in \mathcal{J} \big\}$ i.e. $\mathbb{P}(\bar J_\ell = j) = \bar \lambda_j / \bar \Lambda$ \State draw $\bar \Theta_\ell \sim \mathcal{U}([0,\bar \lambda_{\bar J_\ell}])$ \Until{accepted event $\bar \Theta_\ell \le \lambda_{\bar J_\ell}(\bar T_{\ell})$} \State record $(T_k, J_k) \longleftarrow (\bar T_{\ell}, \bar J_\ell)$ as accepted point \EndWhile \end{algorithmic} \end{algorithm}
 </div>
@@ -761,15 +761,15 @@ Figure&nbsp;1: test
 <p>Since the first event is the first jump of <span class="math inline">N^0</span>, by <a href="#prp-thinning-vector" class="quarto-xref">Proposition&nbsp;2</a> and <a href="#alg-thinning2">Algorithm 1</a>, the first event time <span class="math inline">T_1</span> is the first jump time <span class="math inline">\bar T_\ell</span> of <span class="math inline">\bar Q^0</span> such that <span class="math inline">\bar \Theta_\ell \leq \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell}, Z_0)</span>.</p>
 <p>At <span class="math inline">T_1 =\bar T_{\ell}</span>, the event <span class="math inline">\bar E_\ell</span> occurs to the individual <span class="math inline">I_{\bar K_\ell} = (\tau^b, \infty, x)</span>. For instance, if <span class="math inline">\bar E_\ell =d</span>, a death/exit event occurs, so that <span class="math inline">Z_{T_1} = Z_{0} + \delta_{(\tau^b, T_1, x)} - \delta_{I_{\bar K_\ell}}</span> and <span class="math inline">N_{T_1} = N_{0}</span>. If <span class="math inline">\bar E_\ell =b</span> or <span class="math inline">en</span>, a birth or entry event occurs, so that <span class="math inline">N_{T_1} = N_{0} + 1</span>, and a new individual <span class="math inline">I_{N_0+1}</span> is added to the population, chosen as described in <a href="#tbl-event-action" class="quarto-xref">Table&nbsp;1</a>. Finally, if <span class="math inline">\bar E_\ell=s</span>, a swap event occurs, the population size stays constant and <span class="math inline">I_{\bar K_\ell}</span> is replaced by an individual <span class="math inline">I_{\bar K_\ell}'</span>, chosen as described in <a href="#tbl-event-action" class="quarto-xref">Table&nbsp;1</a>.</p>
 <p>The steps for simulating the first event in the population can be iterated in order to simulate the population. At the <span class="math inline">k</span>th step, the same procedure is repeated to simulate the <span class="math inline">k</span>th event, starting from a population <span class="math inline">Z_{T_{k-1}}</span> of size <span class="math inline">N_{T_{k-1}}</span>.</p>
-<div id="alg-no-interaction" class="pseudocode-container" data-line-number-punc=":" data-indent-size="1.2em" data-no-end="false" data-alg-title="Algorithm" data-line-number="true" data-pseudocode-index="2" data-comment-delimiter="//">
+<div id="alg-interaction" class="pseudocode-container" data-line-number-punc=":" data-indent-size="1.2em" data-pseudocode-index="2" data-no-end="false" data-line-number="true" data-alg-title="Algorithm" data-comment-delimiter="//">
 <div class="pseudocode">
 \begin{algorithm} \caption{IBM simulation algorithm (without events of Poissonian intensity)} \begin{algorithmic} \State \textbf{Input:} Initial population $Z_0$, horizon $T &gt; 0$, and events described by: \State - Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$ and $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ \State - Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W$ (see @tbl-event-action) \State \textbf{Output:} Population $Z_T$ \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ \While{$T_k &lt; T$} \Repeat \State increment iterative variable $\ell \longleftarrow \ell+1$ \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + \mathcal{E}\big(\bar \Lambda(N_{T_k}) \big)$ \State draw a proposed event $\bar E_\ell \sim \mathcal{U}\{p_e\}$ with $p_e = \frac{\bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_{T_k} \mathbf{1}_{e \in \mathcal{E}_W}}{\sum_{e \in \mathcal{E}} \bar \lambda^e + \sum_{e \in \mathcal{E}_W} \bar W^e N_{T_k}}$ \State draw an individual index $\bar K_\ell \sim \mathcal{U}(\{1,\dots,N_{T_k}\})$ \State draw $\bar \Theta_\ell \sim \mathcal{U}([0, \bar \lambda^{\bar E_\ell}])$ if $\bar E_\ell \in \mathcal{E}$ or $\bar \Theta_\ell \sim \mathcal{U}([0, \bar W^{\bar E_\ell} N_{T_k}])$ if $\bar E_\ell \in \mathcal{E}_W$ \Until{accepted event $\bar \Theta_\ell \le \lambda^{\bar E_\ell}_{\bar T_\ell}(I_{\bar K_\ell},Z_{T_{k}})$} \State increment iterative variable $k \longleftarrow k+1$ \State record $(T_k, E_k, I_k) \longleftarrow (\bar T_{\ell}, \bar E_\ell, I_{\bar K_\ell})$ as accepted time, event and individual \State update the population $Z_{T_k} = Z_{T_{k-1}} + \phi^{E_k}(T_k, I_k)$ \EndWhile \end{algorithmic} \end{algorithm}
 </div>
 </div>
-<div id="thm-no-interaction" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 2</strong></span> <a href="#alg-no-interaction">Algorithm 2</a> are exact simulations of solution of the SDE <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a>.</p>
+<div id="thm-interaction" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 2</strong></span> A population process <span class="math inline">(Z_t)_{t \in [0,T]}</span> simulated by the <a href="#alg-interaction">Algorithm 2</a> is an exact solution of the SDE <a href="#eq-sde-eq-Z" class="quarto-xref">Equation&nbsp;12</a>.</p>
 </div>
-<p>The proof of <a href="#thm-no-interaction" class="quarto-xref">Theorem&nbsp;2</a> is detailed in the Appendix <strong>?@prf-no-interaction</strong>.</p>
+<p>The proof of <a href="#thm-interaction" class="quarto-xref">Theorem&nbsp;2</a> is detailed in the Appendix <strong>?@prf-no-interaction</strong>.</p>
 <div id="rem-remvoval-dead" class="proof remark">
 <p><span class="proof-title"><em>Remark 3</em>. </span>The population <span class="math inline">Z_{T_k}</span> includes dead/exited individuals before the event time <span class="math inline">T_k</span>. Thus, <span class="math inline">N_{T_k} &gt; N_{T_k}^a</span> is greater than the number of alive individuals at time <span class="math inline">T_k</span>. When a dead individual <span class="math inline">I_{\bar K_l}</span> is drawn from the population during the rejection/acceptance phase of the algorithm, the proposed event <span class="math inline">(\bar T_{\ell}, \bar E_\ell,  I_{\bar K_\ell})</span> is automatically rejected since the event intensity is <span class="math inline">\lambda^{\bar E_\ell}_{T_\ell}(I_{\bar K_\ell}, Z_{T_k}) = 0</span> (nothing can happen to a dead individual). This can slow down the algorithm, especially when the proportion of dead/exited individuals in the population increases. However, the computational cost of keeping dead/exited individuals in the population is much lower than the cost of removing an individual from the population at each death/exit event, which is linear in the population size.</p>
 <p>Actually, dead/exited individuals are regularly removed from the population in the <code>IBMPopSim</code> algorithm, in order to optimize the trade-off between having to many dead individuals and removing dead individuals from the population too often. The frequency at which dead individuals are “removed from the population” can be chosen by the user, as an optional argument of the main function <code>popsim</code> (see details in <a href="#sec-simulation" class="quarto-xref">Section&nbsp;3</a>).</p>
@@ -795,10 +795,19 @@ Figure&nbsp;1: test
 <p>The efficiency of the randomization procedure increases with the population homogeneity. If the function <span class="math inline">W^e</span> varies little according to the individuals in the population, the randomization approach is very efficient in practice, especially when the population is large.</p>
 </div>
 <p>We now present the main algorithm implemented in the <code>popsim</code> function of the <code>IBMPopSim</code> package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, <span class="math inline">\bar \Lambda(n)</span> is defined by <a href="#eq-def-bar-Lambda" class="quarto-xref">Equation&nbsp;11</a>.</p>
-<div id="prp-randomized" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 3</strong></span> &nbsp;</p>
+<div id="alg-randomized" class="pseudocode-container" data-line-number-punc=":" data-indent-size="1.2em" data-pseudocode-index="3" data-no-end="false" data-line-number="true" data-alg-title="Algorithm" data-comment-delimiter="//">
+<div class="pseudocode">
+\begin{algorithm} \caption{Randomized IBM simulation algorithm.} \begin{algorithmic} \State \textbf{Input:} Initial population $Z_0$, horizon $T &gt; 0$, and events described by \State Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$, $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ and $(\mu^e, \bar \mu^e)$ for $e \in \mathcal{P}$ \State Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W \cup \mathcal{P}$ \State \textbf{Output:} Population $Z_T$ \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ \While{$T_k &lt; T$} \Repeat \State increment iterative variable $\ell \longleftarrow \ell+1$ \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + \mathcal{E}\big(\bar \Lambda(N_{T_k}) \big)$ \State draw an individual index $\bar K_\ell \sim \mathcal{U}(\{1,\dots,N_{T_k}\})$ \State draw a proposed event $\bar E_\ell \sim \mathcal{U}\{p_e\}$ with $p_e = \frac{\bar \mu^e \mathbf{1}_{e \in \mathcal{P}} + \bar \lambda^e N_{T_k}\mathbf{1}_{e \in \mathcal{E}} + \bar W^e (N_{T_k})^2 \mathbf{1}_{e \in \mathcal{E}_W}}{\bar \Lambda(N_{T_k})}$ \If{$\bar E_\ell \in \mathcal{E}$ (without interaction)} \State draw $\bar \Theta_\ell \sim \mathcal{U}\big([0, \bar \lambda^{\bar E_\ell}] \big)$ \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le \lambda^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell})$ \EndIf \If{$\bar E_\ell \in \mathcal{E}_W$ (with interaction)} \State draw $(\bar \Theta_\ell, J_\ell) \sim \mathcal{U}\big([0, \bar W^{\bar E_\ell}] \times \{1, \dots, N_{T_k}\} \big)$ \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le W^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell}, I_{J_\ell})$ \EndIf \If{$\bar E_\ell \in \mathcal{P}$ (Poissonian intensity)} \State draw $\bar \Theta_\ell \sim \mathcal{U}\big([0, \bar \mu^{\bar E_\ell}] \big)$ \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le \mu^{\bar E_\ell}(\bar T_\ell)$ \EndIf \Until{accepted} \State increment iterative variable $k \longleftarrow k+1$ \State record $(T_k, E_k, I_k) \longleftarrow (\bar T_{\ell}, \bar E_\ell, \bar I_{\bar K_\ell})$ as accepted time, event and individual \State update the population $Z_{T_k} = Z_{T_{k-1}} + \phi^{E_k}(T_k, I_k)$ \EndWhile \end{algorithmic} \end{algorithm}
 </div>
-<p>TODO</p>
+</div>
+<div id="prp-randomized" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 3</strong></span> The population processes <span class="math inline">(Z_t)_{t\in [0,T]}</span> simulated by the <a href="#alg-interaction">Algorithm 2</a> and <a href="#alg-randomized">Algorithm 3</a> have the same law.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>The only difference between <a href="#alg-interaction">Algorithm 2</a> and <a href="#alg-randomized">Algorithm 3</a> is in the acceptance/rejection step of proposed events, in the presence of interactions. In <a href="#alg-randomized">Algorithm 3</a> , a proposed event <span class="math inline">(\bar T_\ell, \bar E_\ell, \bar K_\ell)</span>, with <span class="math inline">\bar E_l \in \mathcal{E}_W</span> an event with interaction, is accepted as a true event in the population if <span class="math display">
+    \bar \Theta_\ell \le W^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell}, I_{\bar J_\ell}), \text{ with } (\bar \Theta_\ell, \bar J_\ell) \sim  \mathcal{U}\big([0, \bar W^{\bar E_\ell}] \times \{1, \dots, N_{T_k}\} \big).
+</span> By <a href="#eq-randomized-event" class="quarto-xref">Equation&nbsp;15</a>, the probability of accepting this event is the same than in <a href="#alg-interaction">Algorithm 2</a>, which achieves the proof.</p>
+</div>
 </section>
 </section>
 <section id="sec-package" class="level1" data-number="4">
@@ -1010,7 +1019,7 @@ Table&nbsp;3: <code>C++</code> variables available for intensity code
 </section>
 <section id="event-creation-with-interaction-intensity" class="level4 unnumbered">
 <h4 class="unnumbered anchored" data-anchor-id="event-creation-with-interaction-intensity">Event creation with interaction intensity</h4>
-<p>An event <span class="math inline">e\in \mathcal{E}_W</span> is an event which occurs to an individual at a frequency which is the result of interactions with other members of the population (see <strong>?@eq-interaction</strong>), and which can be written as <span class="math inline">\lambda^e_t(I, Z_t)=\sum_{J\in Z_t} W^e(t, I, J)</span> where <span class="math inline">W^e(t, I, J)</span> is the intensity of the interaction between individual <span class="math inline">I</span> and individual <span class="math inline">J</span>.</p>
+<p>An event <span class="math inline">e\in \mathcal{E}_W</span> is an event which occurs to an individual at a frequency which is the result of interactions with other members of the population (see <a href="#eq-intensity-interaction" class="quarto-xref">Equation&nbsp;6</a>), and which can be written as <span class="math inline">\lambda^e_t(I, Z_t)=\sum_{J\in Z_t} W^e(t, I, J)</span> where <span class="math inline">W^e(t, I, J)</span> is the intensity of the interaction between individual <span class="math inline">I</span> and individual <span class="math inline">J</span>.</p>
 <p>An event <span class="math inline">e\in \mathcal{E}_W</span> with such intensity is created by calling the function</p>
 <div class="cell">
 <details class="code-fold">
@@ -1028,7 +1037,15 @@ Table&nbsp;3: <code>C++</code> variables available for intensity code
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>death_interaction_code <span class="ot">&lt;-</span> <span class="st">"result = max(J.size - I.size, 0.);"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>the death intensity of an individual <code>I</code> is the result of the competition between individuals, depending on a characteristic named <code>size</code>, as defined in <a href="#ex:interaction" data-reference-type="eqref" data-reference="ex:interaction">[ex:interaction]</a>.</p>
+<p>the death intensity of an individual <code>I</code> is the result of the competition between individuals, depending on a characteristic named <code>size</code>, as defined in <strong>?@eq-ex-interaction</strong>.</p>
+<p>The argument <code>interaction_type</code>, set by default at <code>random</code>, is the algorithm choice for simulating the model. When <code>interaction_type=full</code>, the simulation follows <strong>?@cnj-no-interaction</strong>, <code>interaction_type=random</code> it follows <strong>?@cnj-interaction</strong>. In most cases, the <code>random</code> algorithm is much faster than the <code>full</code> algorithm, as we illustrate for instance in <a href="#sec-example-interaction" class="quarto-xref">Section&nbsp;6</a> , where we observe the gain of a factor of 40 between the two algorithms, on a set of standard parameters. This allows in particular to explore parameter sets that give larger population sizes, without reaching computation times that explode.</p>
+</section>
+<section id="events-creation-with-poisson-and-inhomogeneous-poisson-intensity" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="events-creation-with-poisson-and-inhomogeneous-poisson-intensity">Events creation with Poisson and Inhomogeneous Poisson intensity</h4>
+<p>For events <span class="math inline">e\in\mathcal{P}</span> with an intensity <span class="math inline">\mu^e(t)</span> which does not depend on the population, the event intensity is of class <code>inhomogeneous_poisson</code> or <code>poisson</code> depending on whether or not the intensity depends on time (in the second case the intensity is constant).</p>
+<p>For Poisson (constant) intensities the events are created with the function</p>
+<p>The following example creates a death event, where individuals die at a constant intensity <code>lambda</code> (which has to be in the list of model parameters):</p>
+<p>TODO</p>
 </section>
 </section>
 </section>
@@ -1261,7 +1278,7 @@ loaded via a namespace (and not attached):
   publisher = {Société Française de Statistique},
   title = {Efficient Simulation of Individual-Based Population Models},
   journal = {Computo},
-  date = {2024-03-18},
+  date = {2024-03-21},
   url = {https://computo.sfds.asso.fr/template-computo-quarto},
   doi = {xxxx},
   issn = {2824-7795},
@@ -2191,7 +2208,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb15-448"><a href="#cb15-448" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb15-449"><a href="#cb15-449" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb15-450"><a href="#cb15-450" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-451"><a href="#cb15-451" aria-hidden="true" tabindex="-1"></a>The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion is more technical and rely on pathwise comparison result, generalizing those obtained in <span class="co">[</span><span class="ot">@KaaElK20</span><span class="co">]</span>. An alternative pathwise representation of the population process, inspired by the randomized @cnj-randomized is given as well in @thm-randomized.</span>
+<span id="cb15-451"><a href="#cb15-451" aria-hidden="true" tabindex="-1"></a>The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion is more technical and rely on pathwise comparison result, generalizing those obtained in <span class="co">[</span><span class="ot">@KaaElK20</span><span class="co">]</span>. An alternative pathwise representation of the population process, inspired by the randomized @alg-randomized is given as well in @prp-randomized.</span>
 <span id="cb15-452"><a href="#cb15-452" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-453"><a href="#cb15-453" aria-hidden="true" tabindex="-1"></a><span class="fu"># Population simulation {#sec-simulation}</span></span>
 <span id="cb15-454"><a href="#cb15-454" aria-hidden="true" tabindex="-1"></a></span>
@@ -2377,7 +2394,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb15-634"><a href="#cb15-634" aria-hidden="true" tabindex="-1"></a>The steps for simulating the first event in the population can be iterated in order to simulate the population. At the $k$th step, the same procedure is repeated to simulate the $k$th event, starting from a population $Z_{T_{k-1}}$ of size $N_{T_{k-1}}$.</span>
 <span id="cb15-635"><a href="#cb15-635" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-636"><a href="#cb15-636" aria-hidden="true" tabindex="-1"></a><span class="in">```pseudocode</span></span>
-<span id="cb15-637"><a href="#cb15-637" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: alg-no-interaction</span></span>
+<span id="cb15-637"><a href="#cb15-637" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: alg-interaction</span></span>
 <span id="cb15-638"><a href="#cb15-638" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-indent-size: "1.2em"</span></span>
 <span id="cb15-639"><a href="#cb15-639" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-comment-delimiter: "//"</span></span>
 <span id="cb15-640"><a href="#cb15-640" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number: true</span></span>
@@ -2410,11 +2427,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb15-667"><a href="#cb15-667" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithm}</span></span>
 <span id="cb15-668"><a href="#cb15-668" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb15-669"><a href="#cb15-669" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-670"><a href="#cb15-670" aria-hidden="true" tabindex="-1"></a>::: {#thm-no-interaction}</span>
-<span id="cb15-671"><a href="#cb15-671" aria-hidden="true" tabindex="-1"></a>@alg-no-interaction are exact simulations of solution of the SDE @eq-sde-eq-Z.</span>
+<span id="cb15-670"><a href="#cb15-670" aria-hidden="true" tabindex="-1"></a>::: {#thm-interaction}</span>
+<span id="cb15-671"><a href="#cb15-671" aria-hidden="true" tabindex="-1"></a>A population process $(Z_t)_{t \in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>}$ simulated by the @alg-interaction is an exact solution of the SDE @eq-sde-eq-Z.</span>
 <span id="cb15-672"><a href="#cb15-672" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb15-673"><a href="#cb15-673" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-674"><a href="#cb15-674" aria-hidden="true" tabindex="-1"></a>The proof of @thm-no-interaction is detailed in the Appendix @prf-no-interaction.</span>
+<span id="cb15-674"><a href="#cb15-674" aria-hidden="true" tabindex="-1"></a>The proof of @thm-interaction is detailed in the Appendix @prf-no-interaction.</span>
 <span id="cb15-675"><a href="#cb15-675" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-676"><a href="#cb15-676" aria-hidden="true" tabindex="-1"></a>::: {#rem-remvoval-dead} </span>
 <span id="cb15-677"><a href="#cb15-677" aria-hidden="true" tabindex="-1"></a>The population $Z_{T_k}$ includes dead/exited individuals before the event time $T_k$. Thus, $N_{T_k} &gt; N_{T_k}^a$ is greater than the number of alive individuals at time $T_k$. When a dead individual $I_{\bar K_l}$ is drawn from the population during the rejection/acceptance phase of the algorithm, the proposed event $(\bar T_{\ell}, \bar E_\ell,  I_{\bar K_\ell})$ is automatically rejected since the event intensity is $\lambda^{\bar E_\ell}_{T_\ell}(I_{\bar K_\ell}, Z_{T_k}) = 0$ (nothing can happen to a dead individual). </span>
@@ -2452,279 +2469,371 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb15-709"><a href="#cb15-709" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-710"><a href="#cb15-710" aria-hidden="true" tabindex="-1"></a>We now present the main algorithm implemented in the <span class="in">`popsim`</span> function of the <span class="in">`IBMPopSim`</span> package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, $\bar \Lambda(n)$ is defined by @eq-def-bar-Lambda.</span>
 <span id="cb15-711"><a href="#cb15-711" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-712"><a href="#cb15-712" aria-hidden="true" tabindex="-1"></a>::: {#prp-randomized}</span>
-<span id="cb15-713"><a href="#cb15-713" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-714"><a href="#cb15-714" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-715"><a href="#cb15-715" aria-hidden="true" tabindex="-1"></a>TODO</span>
-<span id="cb15-716"><a href="#cb15-716" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-717"><a href="#cb15-717" aria-hidden="true" tabindex="-1"></a><span class="fu"># Model creation and simulation with IBMPopSim {#sec-package}</span></span>
-<span id="cb15-718"><a href="#cb15-718" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-719"><a href="#cb15-719" aria-hidden="true" tabindex="-1"></a>The use of the <span class="in">`IBMPopSim`</span> package is mainly done in two steps: a first model creation followed by the simulation of the population evolution. The creation of a model is itself based on two steps: the description of the population $Z_t$, as introduced in @sec-population, and the description of the events types, along with their associated intensities, as detailed in @sec-events and @sec-event-intensity.</span>
-<span id="cb15-720"><a href="#cb15-720" aria-hidden="true" tabindex="-1"></a>A model is compiled by calling the <span class="in">`mk_model`</span> function, which internally uses a template mechanism to generate automatically the source code describing the model, which is subsequently compiled using the <span class="in">`Rcpp`</span> package to produce the object code.</span>
+<span id="cb15-712"><a href="#cb15-712" aria-hidden="true" tabindex="-1"></a><span class="in">```pseudocode</span></span>
+<span id="cb15-713"><a href="#cb15-713" aria-hidden="true" tabindex="-1"></a><span class="in">#| label: alg-randomized</span></span>
+<span id="cb15-714"><a href="#cb15-714" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-indent-size: "1.2em"</span></span>
+<span id="cb15-715"><a href="#cb15-715" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-comment-delimiter: "//"</span></span>
+<span id="cb15-716"><a href="#cb15-716" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number: true</span></span>
+<span id="cb15-717"><a href="#cb15-717" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-line-number-punc: ":"</span></span>
+<span id="cb15-718"><a href="#cb15-718" aria-hidden="true" tabindex="-1"></a><span class="in">#| html-no-end: false</span></span>
+<span id="cb15-719"><a href="#cb15-719" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-placement: "htb!"</span></span>
+<span id="cb15-720"><a href="#cb15-720" aria-hidden="true" tabindex="-1"></a><span class="in">#| pdf-line-number: true</span></span>
 <span id="cb15-721"><a href="#cb15-721" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-722"><a href="#cb15-722" aria-hidden="true" tabindex="-1"></a>After the compilation of the model, the simulations are launched by calling the <span class="in">`popsim`</span> function. This function depends on the previously compiled model and simulates a random trajectory of the population evolution based on an initial population and on parameter values, which can change from a call to another.</span>
-<span id="cb15-723"><a href="#cb15-723" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-724"><a href="#cb15-724" aria-hidden="true" tabindex="-1"></a>In this section, we take a closer look at each component of a model in <span class="in">`IBMPopSim`</span>. We also refer to the <span class="co">[</span><span class="ot">IBMPopSim website</span><span class="co">](https://daphnegiorgi.github.io/IBMPopSim/)</span> and to the <span class="in">`vignettes`</span> of the package for more details on the package and various examples of model creation.</span>
-<span id="cb15-725"><a href="#cb15-725" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-726"><a href="#cb15-726" aria-hidden="true" tabindex="-1"></a><span class="fu">## Population {#sec-population}</span></span>
-<span id="cb15-727"><a href="#cb15-727" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-728"><a href="#cb15-728" aria-hidden="true" tabindex="-1"></a>A population $Z$ is represented by an object of class <span class="in">`population`</span> containing a data frame where each row corresponds to an individual $I=(\tau^b, \tau^d, x)$, and which has at least two columns, <span class="in">`birth`</span> and <span class="in">`death`</span>, corresponding to the birth date $\tau^b$ and death/exit date $\tau^d$ ($\tau^d$ is set to <span class="in">`NA`</span> for alive individuals). The data frame can contain more than two columns if individuals are described by additional characteristics $x= (x_1,\dots x_n)$.</span>
-<span id="cb15-729"><a href="#cb15-729" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-730"><a href="#cb15-730" aria-hidden="true" tabindex="-1"></a>If entry events can occur in the population, the population shall contain a characteristic named <span class="in">`entry`</span>. This can be done by setting the flag <span class="in">`entry=TRUE`</span> in the <span class="in">`population`</span> function, or by calling the <span class="in">`add_characteristic`</span> function on an existing population. During the simulation, the date at which an individual enters the population is automatically recorded in the variable <span class="in">`I.entry`</span>.</span>
-<span id="cb15-731"><a href="#cb15-731" aria-hidden="true" tabindex="-1"></a>If exit events can occur, the population shall contain a characteristic named <span class="in">`out`</span>. This can be done by setting the flag <span class="in">`out=TRUE`</span> in the <span class="in">`population`</span> function, or by calling the <span class="in">`add_characteristic`</span> function. When an individual <span class="in">`I`</span> exits the population during the simulation, <span class="in">`I.out`</span> is set to <span class="in">`TRUE`</span> and its exit time is recorded as a "death" date.</span>
-<span id="cb15-732"><a href="#cb15-732" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-733"><a href="#cb15-733" aria-hidden="true" tabindex="-1"></a>In the example below, individuals are described by their birth and death dates, as well a Boolean characteristics called male, and the <span class="in">`entry`</span> characteristic. For instance, the first individual is a female whose age at $t_0=0$ is $107$ and who was originally in the population.</span>
-<span id="cb15-736"><a href="#cb15-736" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
-<span id="cb15-737"><a href="#cb15-737" aria-hidden="true" tabindex="-1"></a>pop_init <span class="ot">&lt;-</span> <span class="fu">population</span>(EW_pop_14<span class="sc">$</span>sample, <span class="at">entry=</span><span class="cn">TRUE</span>)</span>
-<span id="cb15-738"><a href="#cb15-738" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pop_init)</span>
-<span id="cb15-739"><a href="#cb15-739" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-740"><a href="#cb15-740" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-741"><a href="#cb15-741" aria-hidden="true" tabindex="-1"></a><span class="fu">### Individual</span></span>
-<span id="cb15-742"><a href="#cb15-742" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-743"><a href="#cb15-743" aria-hidden="true" tabindex="-1"></a>In the <span class="in">`C++`</span> model which is automatically generated and compiled, an individual <span class="in">`I`</span> is an object of an internal class containing some attributes (<span class="in">`birth_date`</span>, <span class="in">`death_date`</span> and the characteristics), and some methods including:</span>
-<span id="cb15-744"><a href="#cb15-744" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-745"><a href="#cb15-745" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`I.age(t)`</span>: a <span class="in">`const`</span> method returning the age of an individual <span class="in">`I`</span> at time <span class="in">`t`</span>,</span>
-<span id="cb15-746"><a href="#cb15-746" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`I.set_age(a, t)`</span>: a method to set the age <span class="in">`a`</span> at time <span class="in">`t`</span> of an individual <span class="in">`I`</span> (set <span class="in">`birth_date`</span> at <span class="in">`t-a`</span>),</span>
-<span id="cb15-747"><a href="#cb15-747" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`I.is_dead(t)`</span>: a <span class="in">`const`</span> method returning <span class="in">`true`</span> if the individual <span class="in">`I`</span> is dead at time <span class="in">`t`</span>.</span>
-<span id="cb15-748"><a href="#cb15-748" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-749"><a href="#cb15-749" aria-hidden="true" tabindex="-1"></a>::: {#rem-characteristics}</span>
-<span id="cb15-750"><a href="#cb15-750" aria-hidden="true" tabindex="-1"></a>A characteristic $x_i$ must be of atomic type: <span class="in">`logical`</span>, <span class="in">`integer`</span>, <span class="in">`double`</span> or <span class="in">`character`</span>. The function <span class="in">`get_characteristic`</span> allows to easily get characteristics names and their types from a population data frame. We draw the attention to the fact that some names for characteristics are forbidden, or reserved to specific cases : this is the case for <span class="in">`birth`</span>, <span class="in">`death`</span>, <span class="in">`entry`</span>, <span class="in">`out`</span>, <span class="in">`id`</span>.</span>
-<span id="cb15-751"><a href="#cb15-751" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-752"><a href="#cb15-752" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-753"><a href="#cb15-753" aria-hidden="true" tabindex="-1"></a><span class="fu">## Events {#sec-package-events}</span></span>
-<span id="cb15-754"><a href="#cb15-754" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-755"><a href="#cb15-755" aria-hidden="true" tabindex="-1"></a>The most important step of the model creation is the events creation. The call to the function creating an event is of form</span>
-<span id="cb15-758"><a href="#cb15-758" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
-<span id="cb15-759"><a href="#cb15-759" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false </span></span>
-<span id="cb15-760"><a href="#cb15-760" aria-hidden="true" tabindex="-1"></a><span class="fu">mk_event_CLASS</span>(<span class="at">type=</span><span class="st">"TYPE"</span>, <span class="at">name=</span><span class="st">"NAME"</span>, ...)</span>
-<span id="cb15-761"><a href="#cb15-761" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-762"><a href="#cb15-762" aria-hidden="true" tabindex="-1"></a>where <span class="in">`CLASS`</span> is replaced by the class of the event intensity, described in @sec-event-intensity , and <span class="in">`type`</span> corresponds to the event type, described in Section&nbsp;@sec-events.</span>
-<span id="cb15-763"><a href="#cb15-763" aria-hidden="true" tabindex="-1"></a>@tbl-intensity-classes and @tbl-event-types summarize the different possible choices for intensity classes and types of event. The optional argument <span class="in">`name`</span> gives a name to the event. If not specified, the name of the event is its type, for instance <span class="in">`death`</span>. However, a name must be specified if the model is composed of several events with the same type (for instance when there are multiple death events corresponding to different causes of death). The other arguments depend on the intensity class and on the event type.</span>
-<span id="cb15-764"><a href="#cb15-764" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-765"><a href="#cb15-765" aria-hidden="true" tabindex="-1"></a>::: {#tbl-panel layout-ncol=2}</span>
-<span id="cb15-766"><a href="#cb15-766" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-767"><a href="#cb15-767" aria-hidden="true" tabindex="-1"></a>Intensity class         Set               <span class="in">`CLASS`</span></span>
-<span id="cb15-768"><a href="#cb15-768" aria-hidden="true" tabindex="-1"></a>----------------------- ----------------- -------------------------</span>
-<span id="cb15-769"><a href="#cb15-769" aria-hidden="true" tabindex="-1"></a>Individual              $\mathcal{E}$     <span class="in">`individual`</span></span>
-<span id="cb15-770"><a href="#cb15-770" aria-hidden="true" tabindex="-1"></a>Interaction             $\mathcal{E}_W$   <span class="in">`interaction`</span></span>
-<span id="cb15-771"><a href="#cb15-771" aria-hidden="true" tabindex="-1"></a>Poisson                 $\mathcal{P}$     <span class="in">`poisson`</span></span>
-<span id="cb15-772"><a href="#cb15-772" aria-hidden="true" tabindex="-1"></a>Inhomogeneous Poisson   $\mathcal{P}$     <span class="in">`inhomogeneous_poisson`</span></span>
-<span id="cb15-773"><a href="#cb15-773" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-774"><a href="#cb15-774" aria-hidden="true" tabindex="-1"></a>: Intensity Classes {#tbl-intensity-classes}</span>
+<span id="cb15-722"><a href="#cb15-722" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithm}</span></span>
+<span id="cb15-723"><a href="#cb15-723" aria-hidden="true" tabindex="-1"></a><span class="in">\caption{Randomized IBM simulation algorithm.}</span></span>
+<span id="cb15-724"><a href="#cb15-724" aria-hidden="true" tabindex="-1"></a><span class="in">\begin{algorithmic}</span></span>
+<span id="cb15-725"><a href="#cb15-725" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Input:} Initial population $Z_0$, horizon $T &gt; 0$, and events described by</span></span>
+<span id="cb15-726"><a href="#cb15-726" aria-hidden="true" tabindex="-1"></a><span class="in">    \State Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$, $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ and $(\mu^e, \bar \mu^e)$ for $e \in \mathcal{P}$ </span></span>
+<span id="cb15-727"><a href="#cb15-727" aria-hidden="true" tabindex="-1"></a><span class="in">    \State Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W \cup \mathcal{P}$</span></span>
+<span id="cb15-728"><a href="#cb15-728" aria-hidden="true" tabindex="-1"></a><span class="in">    \State \textbf{Output:} Population $Z_T$</span></span>
+<span id="cb15-729"><a href="#cb15-729" aria-hidden="true" tabindex="-1"></a><span class="in">    \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$ </span></span>
+<span id="cb15-730"><a href="#cb15-730" aria-hidden="true" tabindex="-1"></a><span class="in">    \While{$T_k &lt; T$}</span></span>
+<span id="cb15-731"><a href="#cb15-731" aria-hidden="true" tabindex="-1"></a><span class="in">        \Repeat</span></span>
+<span id="cb15-732"><a href="#cb15-732" aria-hidden="true" tabindex="-1"></a><span class="in">            \State increment iterative variable $\ell \longleftarrow \ell+1$</span></span>
+<span id="cb15-733"><a href="#cb15-733" aria-hidden="true" tabindex="-1"></a><span class="in">            \State compute next proposed time $\bar T_{\ell} \longleftarrow \bar T_{\ell-1} + \mathcal{E}\big(\bar \Lambda(N_{T_k}) \big)$</span></span>
+<span id="cb15-734"><a href="#cb15-734" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw an individual index $\bar K_\ell \sim \mathcal{U}(\{1,\dots,N_{T_k}\})$</span></span>
+<span id="cb15-735"><a href="#cb15-735" aria-hidden="true" tabindex="-1"></a><span class="in">            \State draw a proposed event $\bar E_\ell \sim \mathcal{U}\{p_e\}$ with $p_e = \frac{\bar \mu^e \mathbf{1}_{e \in \mathcal{P}} + \bar \lambda^e  N_{T_k}\mathbf{1}_{e \in \mathcal{E}} + \bar W^e (N_{T_k})^2 \mathbf{1}_{e \in \mathcal{E}_W}}{\bar \Lambda(N_{T_k})}$ </span></span>
+<span id="cb15-736"><a href="#cb15-736" aria-hidden="true" tabindex="-1"></a><span class="in">            \If{$\bar E_\ell \in \mathcal{E}$ (without interaction)}</span></span>
+<span id="cb15-737"><a href="#cb15-737" aria-hidden="true" tabindex="-1"></a><span class="in">                \State draw $\bar \Theta_\ell \sim \mathcal{U}\big([0, \bar \lambda^{\bar E_\ell}] \big)$ </span></span>
+<span id="cb15-738"><a href="#cb15-738" aria-hidden="true" tabindex="-1"></a><span class="in">                \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le \lambda^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell})$ </span></span>
+<span id="cb15-739"><a href="#cb15-739" aria-hidden="true" tabindex="-1"></a><span class="in">            \EndIf</span></span>
+<span id="cb15-740"><a href="#cb15-740" aria-hidden="true" tabindex="-1"></a><span class="in">            \If{$\bar E_\ell \in \mathcal{E}_W$ (with interaction)}</span></span>
+<span id="cb15-741"><a href="#cb15-741" aria-hidden="true" tabindex="-1"></a><span class="in">                \State draw $(\bar \Theta_\ell, J_\ell) \sim  \mathcal{U}\big([0, \bar W^{\bar E_\ell}] \times \{1, \dots, N_{T_k}\} \big)$</span></span>
+<span id="cb15-742"><a href="#cb15-742" aria-hidden="true" tabindex="-1"></a><span class="in">                \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le W^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell}, I_{J_\ell})$</span></span>
+<span id="cb15-743"><a href="#cb15-743" aria-hidden="true" tabindex="-1"></a><span class="in">            \EndIf</span></span>
+<span id="cb15-744"><a href="#cb15-744" aria-hidden="true" tabindex="-1"></a><span class="in">            \If{$\bar E_\ell \in \mathcal{P}$ (Poissonian intensity)}</span></span>
+<span id="cb15-745"><a href="#cb15-745" aria-hidden="true" tabindex="-1"></a><span class="in">                \State draw $\bar \Theta_\ell \sim \mathcal{U}\big([0, \bar \mu^{\bar E_\ell}] \big)$ </span></span>
+<span id="cb15-746"><a href="#cb15-746" aria-hidden="true" tabindex="-1"></a><span class="in">                \State \emph{accepted} $\longleftarrow \bar \Theta_\ell \le \mu^{\bar E_\ell}(\bar T_\ell)$</span></span>
+<span id="cb15-747"><a href="#cb15-747" aria-hidden="true" tabindex="-1"></a><span class="in">            \EndIf</span></span>
+<span id="cb15-748"><a href="#cb15-748" aria-hidden="true" tabindex="-1"></a><span class="in">        \Until{accepted} </span></span>
+<span id="cb15-749"><a href="#cb15-749" aria-hidden="true" tabindex="-1"></a><span class="in">        \State increment iterative variable $k \longleftarrow k+1$</span></span>
+<span id="cb15-750"><a href="#cb15-750" aria-hidden="true" tabindex="-1"></a><span class="in">        \State record $(T_k, E_k, I_k) \longleftarrow (\bar T_{\ell}, \bar E_\ell, \bar I_{\bar K_\ell})$ as accepted time, event and individual</span></span>
+<span id="cb15-751"><a href="#cb15-751" aria-hidden="true" tabindex="-1"></a><span class="in">        \State update the population $Z_{T_k} = Z_{T_{k-1}} + \phi^{E_k}(T_k, I_k)$</span></span>
+<span id="cb15-752"><a href="#cb15-752" aria-hidden="true" tabindex="-1"></a><span class="in">    \EndWhile</span></span>
+<span id="cb15-753"><a href="#cb15-753" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithmic}</span></span>
+<span id="cb15-754"><a href="#cb15-754" aria-hidden="true" tabindex="-1"></a><span class="in">\end{algorithm}</span></span>
+<span id="cb15-755"><a href="#cb15-755" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-756"><a href="#cb15-756" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-757"><a href="#cb15-757" aria-hidden="true" tabindex="-1"></a>::: {#prp-randomized}</span>
+<span id="cb15-758"><a href="#cb15-758" aria-hidden="true" tabindex="-1"></a>The population processes $(Z_t)_{t\in <span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>}$ simulated by the @alg-interaction and @alg-randomized have the same law.</span>
+<span id="cb15-759"><a href="#cb15-759" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-760"><a href="#cb15-760" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-761"><a href="#cb15-761" aria-hidden="true" tabindex="-1"></a>::: {.proof}</span>
+<span id="cb15-762"><a href="#cb15-762" aria-hidden="true" tabindex="-1"></a>The only difference between @alg-interaction and @alg-randomized is in the acceptance/rejection step of proposed events, in the presence of interactions.</span>
+<span id="cb15-763"><a href="#cb15-763" aria-hidden="true" tabindex="-1"></a>In @alg-randomized , a proposed event $(\bar T_\ell, \bar E_\ell, \bar K_\ell)$, with $\bar E_l \in \mathcal{E}_W$ an event with interaction, is accepted as a true event in the population if</span>
+<span id="cb15-764"><a href="#cb15-764" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-765"><a href="#cb15-765" aria-hidden="true" tabindex="-1"></a>    \bar \Theta_\ell \le W^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell}, I_{\bar J_\ell}), \text{ with } (\bar \Theta_\ell, \bar J_\ell) \sim  \mathcal{U}\big(<span class="co">[</span><span class="ot">0, \bar W^{\bar E_\ell}</span><span class="co">]</span> \times <span class="sc">\{</span>1, \dots, N_{T_k}<span class="sc">\}</span> \big).</span>
+<span id="cb15-766"><a href="#cb15-766" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-767"><a href="#cb15-767" aria-hidden="true" tabindex="-1"></a>By @eq-randomized-event, the probability of accepting this event is the same than in @alg-interaction, which achieves the proof.</span>
+<span id="cb15-768"><a href="#cb15-768" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-769"><a href="#cb15-769" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-770"><a href="#cb15-770" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-771"><a href="#cb15-771" aria-hidden="true" tabindex="-1"></a><span class="fu"># Model creation and simulation with IBMPopSim {#sec-package}</span></span>
+<span id="cb15-772"><a href="#cb15-772" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-773"><a href="#cb15-773" aria-hidden="true" tabindex="-1"></a>The use of the <span class="in">`IBMPopSim`</span> package is mainly done in two steps: a first model creation followed by the simulation of the population evolution. The creation of a model is itself based on two steps: the description of the population $Z_t$, as introduced in @sec-population, and the description of the events types, along with their associated intensities, as detailed in @sec-events and @sec-event-intensity.</span>
+<span id="cb15-774"><a href="#cb15-774" aria-hidden="true" tabindex="-1"></a>A model is compiled by calling the <span class="in">`mk_model`</span> function, which internally uses a template mechanism to generate automatically the source code describing the model, which is subsequently compiled using the <span class="in">`Rcpp`</span> package to produce the object code.</span>
 <span id="cb15-775"><a href="#cb15-775" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-776"><a href="#cb15-776" aria-hidden="true" tabindex="-1"></a>Event type   <span class="in">`TYPE`</span></span>
-<span id="cb15-777"><a href="#cb15-777" aria-hidden="true" tabindex="-1"></a>------------ ---------</span>
-<span id="cb15-778"><a href="#cb15-778" aria-hidden="true" tabindex="-1"></a>Birth        <span class="in">`birth`</span></span>
-<span id="cb15-779"><a href="#cb15-779" aria-hidden="true" tabindex="-1"></a>Death        <span class="in">`death`</span></span>
-<span id="cb15-780"><a href="#cb15-780" aria-hidden="true" tabindex="-1"></a>Entry        <span class="in">`entry`</span></span>
-<span id="cb15-781"><a href="#cb15-781" aria-hidden="true" tabindex="-1"></a>Exit         <span class="in">`exit`</span></span>
-<span id="cb15-782"><a href="#cb15-782" aria-hidden="true" tabindex="-1"></a>Swap         <span class="in">`swap`</span></span>
+<span id="cb15-776"><a href="#cb15-776" aria-hidden="true" tabindex="-1"></a>After the compilation of the model, the simulations are launched by calling the <span class="in">`popsim`</span> function. This function depends on the previously compiled model and simulates a random trajectory of the population evolution based on an initial population and on parameter values, which can change from a call to another.</span>
+<span id="cb15-777"><a href="#cb15-777" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-778"><a href="#cb15-778" aria-hidden="true" tabindex="-1"></a>In this section, we take a closer look at each component of a model in <span class="in">`IBMPopSim`</span>. We also refer to the <span class="co">[</span><span class="ot">IBMPopSim website</span><span class="co">](https://daphnegiorgi.github.io/IBMPopSim/)</span> and to the <span class="in">`vignettes`</span> of the package for more details on the package and various examples of model creation.</span>
+<span id="cb15-779"><a href="#cb15-779" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-780"><a href="#cb15-780" aria-hidden="true" tabindex="-1"></a><span class="fu">## Population {#sec-population}</span></span>
+<span id="cb15-781"><a href="#cb15-781" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-782"><a href="#cb15-782" aria-hidden="true" tabindex="-1"></a>A population $Z$ is represented by an object of class <span class="in">`population`</span> containing a data frame where each row corresponds to an individual $I=(\tau^b, \tau^d, x)$, and which has at least two columns, <span class="in">`birth`</span> and <span class="in">`death`</span>, corresponding to the birth date $\tau^b$ and death/exit date $\tau^d$ ($\tau^d$ is set to <span class="in">`NA`</span> for alive individuals). The data frame can contain more than two columns if individuals are described by additional characteristics $x= (x_1,\dots x_n)$.</span>
 <span id="cb15-783"><a href="#cb15-783" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-784"><a href="#cb15-784" aria-hidden="true" tabindex="-1"></a>: Event Types {#tbl-event-types}</span>
-<span id="cb15-785"><a href="#cb15-785" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-786"><a href="#cb15-786" aria-hidden="true" tabindex="-1"></a>Choices of <span class="in">`CLASS`</span> and <span class="in">`TYPE`</span> arguments for an event creation.</span>
-<span id="cb15-787"><a href="#cb15-787" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-788"><a href="#cb15-788" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-789"><a href="#cb15-789" aria-hidden="true" tabindex="-1"></a>The intensity function and the kernel of an event are defined through arguments of the function <span class="in">`mk_event_CLASS`</span>. These arguments are strings composed of few lines of code. Since the model is compiled using <span class="in">`Rcpp`</span>, the code should be written in <span class="in">`C++`</span>. However, thanks to the functions/variables of the package, even the non-experienced <span class="in">`C++`</span> user can define a model quite easily. </span>
-<span id="cb15-790"><a href="#cb15-790" aria-hidden="true" tabindex="-1"></a>To facilitate the implementation, the user can also define a list of **model parameters**, which can be used in the event and intensity definitions. These parameters are stored in a named list and can be of various types: atomic type, numeric vector or matrix, predefined function of one variable (<span class="in">`stepfun`</span>, <span class="in">`linfun`</span>, <span class="in">`gompertz`</span>, <span class="in">`weibull`</span>, <span class="in">`piecewise_x`</span>), piecewise functions of two variables (<span class="in">`piecewise_xy`</span>). </span>
-<span id="cb15-791"><a href="#cb15-791" aria-hidden="true" tabindex="-1"></a>We refer to the <span class="in">`vignette(IBMPopSim_cpp)`</span> for more details on parameters types and basic <span class="in">`C++`</span> tools. Another advantage of the model parameters is that their value can be modified from a simulation to another without changing the model.</span>
-<span id="cb15-792"><a href="#cb15-792" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-793"><a href="#cb15-793" aria-hidden="true" tabindex="-1"></a><span class="fu">### Intensities</span></span>
+<span id="cb15-784"><a href="#cb15-784" aria-hidden="true" tabindex="-1"></a>If entry events can occur in the population, the population shall contain a characteristic named <span class="in">`entry`</span>. This can be done by setting the flag <span class="in">`entry=TRUE`</span> in the <span class="in">`population`</span> function, or by calling the <span class="in">`add_characteristic`</span> function on an existing population. During the simulation, the date at which an individual enters the population is automatically recorded in the variable <span class="in">`I.entry`</span>.</span>
+<span id="cb15-785"><a href="#cb15-785" aria-hidden="true" tabindex="-1"></a>If exit events can occur, the population shall contain a characteristic named <span class="in">`out`</span>. This can be done by setting the flag <span class="in">`out=TRUE`</span> in the <span class="in">`population`</span> function, or by calling the <span class="in">`add_characteristic`</span> function. When an individual <span class="in">`I`</span> exits the population during the simulation, <span class="in">`I.out`</span> is set to <span class="in">`TRUE`</span> and its exit time is recorded as a "death" date.</span>
+<span id="cb15-786"><a href="#cb15-786" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-787"><a href="#cb15-787" aria-hidden="true" tabindex="-1"></a>In the example below, individuals are described by their birth and death dates, as well a Boolean characteristics called male, and the <span class="in">`entry`</span> characteristic. For instance, the first individual is a female whose age at $t_0=0$ is $107$ and who was originally in the population.</span>
+<span id="cb15-790"><a href="#cb15-790" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
+<span id="cb15-791"><a href="#cb15-791" aria-hidden="true" tabindex="-1"></a>pop_init <span class="ot">&lt;-</span> <span class="fu">population</span>(EW_pop_14<span class="sc">$</span>sample, <span class="at">entry=</span><span class="cn">TRUE</span>)</span>
+<span id="cb15-792"><a href="#cb15-792" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pop_init)</span>
+<span id="cb15-793"><a href="#cb15-793" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb15-794"><a href="#cb15-794" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-795"><a href="#cb15-795" aria-hidden="true" tabindex="-1"></a>In <span class="in">`IBMPopSim`</span>, the intensity of an event can belong to three classes @sec-event-intensity: individual intensities without interaction between individuals, corresponding to events $e\in\mathcal{E}$, individual intensities with interaction, corresponding to events $e\in\mathcal{E}_W$, and Poisson intensities (homogeneous and inhomogeneous), corresponding to events $e\in\mathcal{P}$.</span>
+<span id="cb15-795"><a href="#cb15-795" aria-hidden="true" tabindex="-1"></a><span class="fu">### Individual</span></span>
 <span id="cb15-796"><a href="#cb15-796" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-797"><a href="#cb15-797" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Event creation with individual intensity {.unnumbered}</span></span>
+<span id="cb15-797"><a href="#cb15-797" aria-hidden="true" tabindex="-1"></a>In the <span class="in">`C++`</span> model which is automatically generated and compiled, an individual <span class="in">`I`</span> is an object of an internal class containing some attributes (<span class="in">`birth_date`</span>, <span class="in">`death_date`</span> and the characteristics), and some methods including:</span>
 <span id="cb15-798"><a href="#cb15-798" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-799"><a href="#cb15-799" aria-hidden="true" tabindex="-1"></a>An event $e\in \mathcal{E}$ (see @eq-no-interaction) has an intensity of the form $\lambda^e(t, I)$ which depends only on the individual <span class="in">`I`</span> and time. Events with such intensity are created using the function</span>
-<span id="cb15-802"><a href="#cb15-802" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
-<span id="cb15-803"><a href="#cb15-803" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: False</span></span>
-<span id="cb15-804"><a href="#cb15-804" aria-hidden="true" tabindex="-1"></a><span class="fu">mk_event_individual</span>(<span class="at">type =</span> <span class="st">"TYPE"</span>, </span>
-<span id="cb15-805"><a href="#cb15-805" aria-hidden="true" tabindex="-1"></a>                    <span class="at">name =</span> <span class="st">"NAME"</span>,</span>
-<span id="cb15-806"><a href="#cb15-806" aria-hidden="true" tabindex="-1"></a>                    <span class="at">intensity_code =</span> <span class="st">"INTENSITY"</span>, ...)</span>
-<span id="cb15-807"><a href="#cb15-807" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-808"><a href="#cb15-808" aria-hidden="true" tabindex="-1"></a>The <span class="in">`intensity_code`</span> argument is a character string containing few lines of <span class="in">`C++`</span> code describing the intensity function $\lambda^e(t, I)$. The intensity value has to be stored in a variable called <span class="in">`result`</span> and the available variables for the intensity code are given in @tbl-intensity-variables.</span>
-<span id="cb15-809"><a href="#cb15-809" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-810"><a href="#cb15-810" aria-hidden="true" tabindex="-1"></a>::: {#tbl-intensity-variables}</span>
-<span id="cb15-811"><a href="#cb15-811" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-812"><a href="#cb15-812" aria-hidden="true" tabindex="-1"></a>Variable           Description</span>
-<span id="cb15-813"><a href="#cb15-813" aria-hidden="true" tabindex="-1"></a>------------------ -------------------------------------------------------------</span>
-<span id="cb15-814"><a href="#cb15-814" aria-hidden="true" tabindex="-1"></a>Variable           Description</span>
-<span id="cb15-815"><a href="#cb15-815" aria-hidden="true" tabindex="-1"></a><span class="in">`I`</span>                Current individual</span>
-<span id="cb15-816"><a href="#cb15-816" aria-hidden="true" tabindex="-1"></a><span class="in">`J`</span>                Another individual in the population (only for interaction)</span>
-<span id="cb15-817"><a href="#cb15-817" aria-hidden="true" tabindex="-1"></a><span class="in">`t`</span>                Current time</span>
-<span id="cb15-818"><a href="#cb15-818" aria-hidden="true" tabindex="-1"></a>Model parameters   Depends on the model</span>
-<span id="cb15-819"><a href="#cb15-819" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-820"><a href="#cb15-820" aria-hidden="true" tabindex="-1"></a><span class="in">`C++`</span> variables available for intensity code</span>
-<span id="cb15-821"><a href="#cb15-821" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-822"><a href="#cb15-822" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-823"><a href="#cb15-823" aria-hidden="true" tabindex="-1"></a>For instance, the intensity code below corresponds to an individual death intensity $\lambda^d(t,I)$ equal to $d_1(a(I,t)) = \alpha_1 \exp(\beta_1 a(I,t))$ for males and $d_2(a(I,t)) = \alpha_2 \exp(\beta_2 a(I,t))$ for females, where $a(I,t)=t-\tau^b$ is the age of the individual $I=(\tau^b, \tau^d,x)$ at time $t$. </span>
-<span id="cb15-824"><a href="#cb15-824" aria-hidden="true" tabindex="-1"></a>In this case, the intensity function depends on the individuals' age, gender, and on the model parameters $\alpha = (\alpha_1, \alpha_2)$ and $\beta = (\beta_1, \beta_2)$.</span>
-<span id="cb15-827"><a href="#cb15-827" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
-<span id="cb15-828"><a href="#cb15-828" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb15-829"><a href="#cb15-829" aria-hidden="true" tabindex="-1"></a>death_intensity <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb15-830"><a href="#cb15-830" aria-hidden="true" tabindex="-1"></a><span class="st">    if (I.male) result = alpha_1 * exp(beta_1 * I.age(t));</span></span>
-<span id="cb15-831"><a href="#cb15-831" aria-hidden="true" tabindex="-1"></a><span class="st">    else result = alpha_2 * exp(beta_2 * I.age(t));</span></span>
-<span id="cb15-832"><a href="#cb15-832" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb15-833"><a href="#cb15-833" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-834"><a href="#cb15-834" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-835"><a href="#cb15-835" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Event creation with interaction intensity {.unnumbered}</span></span>
-<span id="cb15-836"><a href="#cb15-836" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb15-837"><a href="#cb15-837" aria-hidden="true" tabindex="-1"></a>An event $e\in \mathcal{E}_W$ is an event which occurs to an individual at a frequency which is the result of interactions with other members of the population (see @eq-interaction), and which can be written as $\lambda^e_t(I, Z_t)=\sum_{J\in Z_t} W^e(t, I, J)$ where $W^e(t, I, J)$ is the intensity of the interaction between individual $I$ and individual $J$.</span>
-<span id="cb15-838"><a href="#cb15-838" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-839"><a href="#cb15-839" aria-hidden="true" tabindex="-1"></a>An event $e\in \mathcal{E}_W$ with such intensity is created by calling the function</span>
-<span id="cb15-842"><a href="#cb15-842" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
-<span id="cb15-843"><a href="#cb15-843" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb15-844"><a href="#cb15-844" aria-hidden="true" tabindex="-1"></a><span class="fu">mk_event_interaction</span>(<span class="at">type =</span> <span class="st">"TYPE"</span>,</span>
-<span id="cb15-845"><a href="#cb15-845" aria-hidden="true" tabindex="-1"></a>                     <span class="at">name =</span> <span class="st">"NAME"</span>,</span>
-<span id="cb15-846"><a href="#cb15-846" aria-hidden="true" tabindex="-1"></a>                     <span class="at">interaction_code =</span> <span class="st">"INTERACTION_CODE"</span>,</span>
-<span id="cb15-847"><a href="#cb15-847" aria-hidden="true" tabindex="-1"></a>                     <span class="at">interaction_type =</span> <span class="st">"random"</span>, ...)</span>
-<span id="cb15-848"><a href="#cb15-848" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-849"><a href="#cb15-849" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-850"><a href="#cb15-850" aria-hidden="true" tabindex="-1"></a>The <span class="in">`interaction_code`</span> argument contains few lines of <span class="in">`C++`</span> code describing the interaction function $W^e(t, I, J)$. The interaction function value has to be stored in a variable called <span class="in">`result`</span> and the available variables for the intensity code are given in @tbl-intensity-variables. For example, if we set</span>
-<span id="cb15-853"><a href="#cb15-853" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
-<span id="cb15-854"><a href="#cb15-854" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb15-855"><a href="#cb15-855" aria-hidden="true" tabindex="-1"></a>death_interaction_code <span class="ot">&lt;-</span> <span class="st">"result = max(J.size - I.size, 0.);"</span></span>
-<span id="cb15-856"><a href="#cb15-856" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-857"><a href="#cb15-857" aria-hidden="true" tabindex="-1"></a>the death intensity of an individual <span class="in">`I`</span> is the result of the competition between individuals, depending on a characteristic named <span class="in">`size`</span>, as defined in </span>
-<span id="cb15-858"><a href="#cb15-858" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">\[ex:interaction\]</span><span class="co">](#ex:interaction)</span>{reference-type="eqref"</span>
-<span id="cb15-859"><a href="#cb15-859" aria-hidden="true" tabindex="-1"></a>reference="ex:interaction"}.</span>
-<span id="cb15-860"><a href="#cb15-860" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-861"><a href="#cb15-861" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-862"><a href="#cb15-862" aria-hidden="true" tabindex="-1"></a><span class="fu"># Insurance portfolio {#sec-insurance-portfolio}</span></span>
+<span id="cb15-799"><a href="#cb15-799" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`I.age(t)`</span>: a <span class="in">`const`</span> method returning the age of an individual <span class="in">`I`</span> at time <span class="in">`t`</span>,</span>
+<span id="cb15-800"><a href="#cb15-800" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`I.set_age(a, t)`</span>: a method to set the age <span class="in">`a`</span> at time <span class="in">`t`</span> of an individual <span class="in">`I`</span> (set <span class="in">`birth_date`</span> at <span class="in">`t-a`</span>),</span>
+<span id="cb15-801"><a href="#cb15-801" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`I.is_dead(t)`</span>: a <span class="in">`const`</span> method returning <span class="in">`true`</span> if the individual <span class="in">`I`</span> is dead at time <span class="in">`t`</span>.</span>
+<span id="cb15-802"><a href="#cb15-802" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-803"><a href="#cb15-803" aria-hidden="true" tabindex="-1"></a>::: {#rem-characteristics}</span>
+<span id="cb15-804"><a href="#cb15-804" aria-hidden="true" tabindex="-1"></a>A characteristic $x_i$ must be of atomic type: <span class="in">`logical`</span>, <span class="in">`integer`</span>, <span class="in">`double`</span> or <span class="in">`character`</span>. The function <span class="in">`get_characteristic`</span> allows to easily get characteristics names and their types from a population data frame. We draw the attention to the fact that some names for characteristics are forbidden, or reserved to specific cases : this is the case for <span class="in">`birth`</span>, <span class="in">`death`</span>, <span class="in">`entry`</span>, <span class="in">`out`</span>, <span class="in">`id`</span>.</span>
+<span id="cb15-805"><a href="#cb15-805" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-806"><a href="#cb15-806" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-807"><a href="#cb15-807" aria-hidden="true" tabindex="-1"></a><span class="fu">## Events {#sec-package-events}</span></span>
+<span id="cb15-808"><a href="#cb15-808" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-809"><a href="#cb15-809" aria-hidden="true" tabindex="-1"></a>The most important step of the model creation is the events creation. The call to the function creating an event is of form</span>
+<span id="cb15-812"><a href="#cb15-812" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
+<span id="cb15-813"><a href="#cb15-813" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false </span></span>
+<span id="cb15-814"><a href="#cb15-814" aria-hidden="true" tabindex="-1"></a><span class="fu">mk_event_CLASS</span>(<span class="at">type=</span><span class="st">"TYPE"</span>, <span class="at">name=</span><span class="st">"NAME"</span>, ...)</span>
+<span id="cb15-815"><a href="#cb15-815" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-816"><a href="#cb15-816" aria-hidden="true" tabindex="-1"></a>where <span class="in">`CLASS`</span> is replaced by the class of the event intensity, described in @sec-event-intensity , and <span class="in">`type`</span> corresponds to the event type, described in Section&nbsp;@sec-events.</span>
+<span id="cb15-817"><a href="#cb15-817" aria-hidden="true" tabindex="-1"></a>@tbl-intensity-classes and @tbl-event-types summarize the different possible choices for intensity classes and types of event. The optional argument <span class="in">`name`</span> gives a name to the event. If not specified, the name of the event is its type, for instance <span class="in">`death`</span>. However, a name must be specified if the model is composed of several events with the same type (for instance when there are multiple death events corresponding to different causes of death). The other arguments depend on the intensity class and on the event type.</span>
+<span id="cb15-818"><a href="#cb15-818" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-819"><a href="#cb15-819" aria-hidden="true" tabindex="-1"></a>::: {#tbl-panel layout-ncol=2}</span>
+<span id="cb15-820"><a href="#cb15-820" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-821"><a href="#cb15-821" aria-hidden="true" tabindex="-1"></a>Intensity class         Set               <span class="in">`CLASS`</span></span>
+<span id="cb15-822"><a href="#cb15-822" aria-hidden="true" tabindex="-1"></a>----------------------- ----------------- -------------------------</span>
+<span id="cb15-823"><a href="#cb15-823" aria-hidden="true" tabindex="-1"></a>Individual              $\mathcal{E}$     <span class="in">`individual`</span></span>
+<span id="cb15-824"><a href="#cb15-824" aria-hidden="true" tabindex="-1"></a>Interaction             $\mathcal{E}_W$   <span class="in">`interaction`</span></span>
+<span id="cb15-825"><a href="#cb15-825" aria-hidden="true" tabindex="-1"></a>Poisson                 $\mathcal{P}$     <span class="in">`poisson`</span></span>
+<span id="cb15-826"><a href="#cb15-826" aria-hidden="true" tabindex="-1"></a>Inhomogeneous Poisson   $\mathcal{P}$     <span class="in">`inhomogeneous_poisson`</span></span>
+<span id="cb15-827"><a href="#cb15-827" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-828"><a href="#cb15-828" aria-hidden="true" tabindex="-1"></a>: Intensity Classes {#tbl-intensity-classes}</span>
+<span id="cb15-829"><a href="#cb15-829" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-830"><a href="#cb15-830" aria-hidden="true" tabindex="-1"></a>Event type   <span class="in">`TYPE`</span></span>
+<span id="cb15-831"><a href="#cb15-831" aria-hidden="true" tabindex="-1"></a>------------ ---------</span>
+<span id="cb15-832"><a href="#cb15-832" aria-hidden="true" tabindex="-1"></a>Birth        <span class="in">`birth`</span></span>
+<span id="cb15-833"><a href="#cb15-833" aria-hidden="true" tabindex="-1"></a>Death        <span class="in">`death`</span></span>
+<span id="cb15-834"><a href="#cb15-834" aria-hidden="true" tabindex="-1"></a>Entry        <span class="in">`entry`</span></span>
+<span id="cb15-835"><a href="#cb15-835" aria-hidden="true" tabindex="-1"></a>Exit         <span class="in">`exit`</span></span>
+<span id="cb15-836"><a href="#cb15-836" aria-hidden="true" tabindex="-1"></a>Swap         <span class="in">`swap`</span></span>
+<span id="cb15-837"><a href="#cb15-837" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-838"><a href="#cb15-838" aria-hidden="true" tabindex="-1"></a>: Event Types {#tbl-event-types}</span>
+<span id="cb15-839"><a href="#cb15-839" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-840"><a href="#cb15-840" aria-hidden="true" tabindex="-1"></a>Choices of <span class="in">`CLASS`</span> and <span class="in">`TYPE`</span> arguments for an event creation.</span>
+<span id="cb15-841"><a href="#cb15-841" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-842"><a href="#cb15-842" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-843"><a href="#cb15-843" aria-hidden="true" tabindex="-1"></a>The intensity function and the kernel of an event are defined through arguments of the function <span class="in">`mk_event_CLASS`</span>. These arguments are strings composed of few lines of code. Since the model is compiled using <span class="in">`Rcpp`</span>, the code should be written in <span class="in">`C++`</span>. However, thanks to the functions/variables of the package, even the non-experienced <span class="in">`C++`</span> user can define a model quite easily. </span>
+<span id="cb15-844"><a href="#cb15-844" aria-hidden="true" tabindex="-1"></a>To facilitate the implementation, the user can also define a list of **model parameters**, which can be used in the event and intensity definitions. These parameters are stored in a named list and can be of various types: atomic type, numeric vector or matrix, predefined function of one variable (<span class="in">`stepfun`</span>, <span class="in">`linfun`</span>, <span class="in">`gompertz`</span>, <span class="in">`weibull`</span>, <span class="in">`piecewise_x`</span>), piecewise functions of two variables (<span class="in">`piecewise_xy`</span>). </span>
+<span id="cb15-845"><a href="#cb15-845" aria-hidden="true" tabindex="-1"></a>We refer to the <span class="in">`vignette(IBMPopSim_cpp)`</span> for more details on parameters types and basic <span class="in">`C++`</span> tools. Another advantage of the model parameters is that their value can be modified from a simulation to another without changing the model.</span>
+<span id="cb15-846"><a href="#cb15-846" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-847"><a href="#cb15-847" aria-hidden="true" tabindex="-1"></a><span class="fu">### Intensities</span></span>
+<span id="cb15-848"><a href="#cb15-848" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-849"><a href="#cb15-849" aria-hidden="true" tabindex="-1"></a>In <span class="in">`IBMPopSim`</span>, the intensity of an event can belong to three classes @sec-event-intensity: individual intensities without interaction between individuals, corresponding to events $e\in\mathcal{E}$, individual intensities with interaction, corresponding to events $e\in\mathcal{E}_W$, and Poisson intensities (homogeneous and inhomogeneous), corresponding to events $e\in\mathcal{P}$.</span>
+<span id="cb15-850"><a href="#cb15-850" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-851"><a href="#cb15-851" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Event creation with individual intensity {.unnumbered}</span></span>
+<span id="cb15-852"><a href="#cb15-852" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-853"><a href="#cb15-853" aria-hidden="true" tabindex="-1"></a>An event $e\in \mathcal{E}$ (see @eq-no-interaction) has an intensity of the form $\lambda^e(t, I)$ which depends only on the individual <span class="in">`I`</span> and time. Events with such intensity are created using the function</span>
+<span id="cb15-856"><a href="#cb15-856" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
+<span id="cb15-857"><a href="#cb15-857" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb15-858"><a href="#cb15-858" aria-hidden="true" tabindex="-1"></a><span class="fu">mk_event_individual</span>(<span class="at">type =</span> <span class="st">"TYPE"</span>, </span>
+<span id="cb15-859"><a href="#cb15-859" aria-hidden="true" tabindex="-1"></a>                    <span class="at">name =</span> <span class="st">"NAME"</span>,</span>
+<span id="cb15-860"><a href="#cb15-860" aria-hidden="true" tabindex="-1"></a>                    <span class="at">intensity_code =</span> <span class="st">"INTENSITY"</span>, ...)</span>
+<span id="cb15-861"><a href="#cb15-861" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-862"><a href="#cb15-862" aria-hidden="true" tabindex="-1"></a>The <span class="in">`intensity_code`</span> argument is a character string containing few lines of <span class="in">`C++`</span> code describing the intensity function $\lambda^e(t, I)$. The intensity value has to be stored in a variable called <span class="in">`result`</span> and the available variables for the intensity code are given in @tbl-intensity-variables.</span>
 <span id="cb15-863"><a href="#cb15-863" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-864"><a href="#cb15-864" aria-hidden="true" tabindex="-1"></a>TODO </span>
+<span id="cb15-864"><a href="#cb15-864" aria-hidden="true" tabindex="-1"></a>::: {#tbl-intensity-variables}</span>
 <span id="cb15-865"><a href="#cb15-865" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-866"><a href="#cb15-866" aria-hidden="true" tabindex="-1"></a><span class="fu"># Population with genetically variable traits {#sec-example-interaction}</span></span>
-<span id="cb15-867"><a href="#cb15-867" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-868"><a href="#cb15-868" aria-hidden="true" tabindex="-1"></a>TODO</span>
-<span id="cb15-869"><a href="#cb15-869" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-870"><a href="#cb15-870" aria-hidden="true" tabindex="-1"></a><span class="fu"># Appendix {.appendix .unnumbered} </span></span>
-<span id="cb15-871"><a href="#cb15-871" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-872"><a href="#cb15-872" aria-hidden="true" tabindex="-1"></a><span class="fu">## Recall on Poisson random measures {#sec-recall-poisson}</span></span>
+<span id="cb15-866"><a href="#cb15-866" aria-hidden="true" tabindex="-1"></a>Variable           Description</span>
+<span id="cb15-867"><a href="#cb15-867" aria-hidden="true" tabindex="-1"></a>------------------ -------------------------------------------------------------</span>
+<span id="cb15-868"><a href="#cb15-868" aria-hidden="true" tabindex="-1"></a>Variable           Description</span>
+<span id="cb15-869"><a href="#cb15-869" aria-hidden="true" tabindex="-1"></a><span class="in">`I`</span>                Current individual</span>
+<span id="cb15-870"><a href="#cb15-870" aria-hidden="true" tabindex="-1"></a><span class="in">`J`</span>                Another individual in the population (only for interaction)</span>
+<span id="cb15-871"><a href="#cb15-871" aria-hidden="true" tabindex="-1"></a><span class="in">`t`</span>                Current time</span>
+<span id="cb15-872"><a href="#cb15-872" aria-hidden="true" tabindex="-1"></a>Model parameters   Depends on the model</span>
 <span id="cb15-873"><a href="#cb15-873" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-874"><a href="#cb15-874" aria-hidden="true" tabindex="-1"></a>We recall below some useful properties of Poisson random measures,</span>
-<span id="cb15-875"><a href="#cb15-875" aria-hidden="true" tabindex="-1"></a>mainly following Chapter&nbsp;6 of&nbsp;<span class="co">[</span><span class="ot">@Cin11</span><span class="co">]</span>. We also refer to&nbsp;<span class="co">[</span><span class="ot">@Kal17</span><span class="co">]</span> for a</span>
-<span id="cb15-876"><a href="#cb15-876" aria-hidden="true" tabindex="-1"></a>more comprehensive presentation of random counting measures.</span>
-<span id="cb15-877"><a href="#cb15-877" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-878"><a href="#cb15-878" aria-hidden="true" tabindex="-1"></a>::: {#def-poisson-random-measure} </span>
-<span id="cb15-879"><a href="#cb15-879" aria-hidden="true" tabindex="-1"></a><span class="fu">## Poisson Random Measures</span></span>
-<span id="cb15-880"><a href="#cb15-880" aria-hidden="true" tabindex="-1"></a>Let $\mu$ be a $\sigma$-finite diffuse measure on a Borel subspace $(E,\mathcal{E})$ of $({\mathbb{R}}^d, \mathcal{B}({\mathbb{R}}^d))$. A random counting measure $Q= \sum_{k\geq 1} \delta_{X_k}$ is a Poisson (counting) random measure of *mean measure* $\mu$ if</span>
-<span id="cb15-881"><a href="#cb15-881" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-882"><a href="#cb15-882" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>$\forall A \in \mathcal{E}$, $Q(A)$ is a Poisson random variable with ${\mathbb{E}}<span class="co">[</span><span class="ot">Q(A)</span><span class="co">]</span>= \mu(A)$. </span>
-<span id="cb15-883"><a href="#cb15-883" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>For all disjoints subsets $A_1, \dots, A_n \in \mathcal{E}$, $Q(A_1), \dots, Q(A_n)$ are independent Poisson random variables.</span>
-<span id="cb15-884"><a href="#cb15-884" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-885"><a href="#cb15-885" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-886"><a href="#cb15-886" aria-hidden="true" tabindex="-1"></a>Let us briefly recall here some simple but useful operations on Poisson measures. In the following, $Q$ is a Poisson measure of mean measure $\mu$, unless stated otherwise.</span>
-<span id="cb15-887"><a href="#cb15-887" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-888"><a href="#cb15-888" aria-hidden="true" tabindex="-1"></a>::: {#prp-restriction-poisson-measure}</span>
-<span id="cb15-889"><a href="#cb15-889" aria-hidden="true" tabindex="-1"></a><span class="fu">## Restricted Poisson measure</span></span>
-<span id="cb15-890"><a href="#cb15-890" aria-hidden="true" tabindex="-1"></a>If $B \in \mathcal{E}$, then, the restriction of $Q$ to $B$ defined by </span>
-<span id="cb15-891"><a href="#cb15-891" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-892"><a href="#cb15-892" aria-hidden="true" tabindex="-1"></a>    Q^B = \boldsymbol{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}</span>
-<span id="cb15-893"><a href="#cb15-893" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-894"><a href="#cb15-894" aria-hidden="true" tabindex="-1"></a>is also a Poisson random measure, of mean measure $\mu^B = \mu(\cdot \cap B)$.</span>
-<span id="cb15-895"><a href="#cb15-895" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-896"><a href="#cb15-896" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-897"><a href="#cb15-897" aria-hidden="true" tabindex="-1"></a>::: {#prp-proj-poisson-measure}</span>
-<span id="cb15-898"><a href="#cb15-898" aria-hidden="true" tabindex="-1"></a><span class="fu">## Projection of Poisson measure</span></span>
-<span id="cb15-899"><a href="#cb15-899" aria-hidden="true" tabindex="-1"></a>If $E = F_1 \times F_2$ is a product space, then the projection</span>
-<span id="cb15-900"><a href="#cb15-900" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-901"><a href="#cb15-901" aria-hidden="true" tabindex="-1"></a>    Q_1(\mathrm{d}x) = \int_{F_2} Q(\mathrm{d}x , \mathrm{d}y)</span>
-<span id="cb15-902"><a href="#cb15-902" aria-hidden="true" tabindex="-1"></a>$$ </span>
-<span id="cb15-903"><a href="#cb15-903" aria-hidden="true" tabindex="-1"></a>is a Poisson random measure of mean measure $\mu_1 (\mathrm{d}x ) = \int_{F_2} \mu(\mathrm{d}x, \mathrm{d}y)$.</span>
-<span id="cb15-904"><a href="#cb15-904" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-905"><a href="#cb15-905" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-906"><a href="#cb15-906" aria-hidden="true" tabindex="-1"></a><span class="fu">### Link with Poisson processes</span></span>
-<span id="cb15-907"><a href="#cb15-907" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-908"><a href="#cb15-908" aria-hidden="true" tabindex="-1"></a>Let $Q= \sum_{k\geq 1} \delta_{T_k}$ a Poisson random measure on $E={\mathbb{R}}^+$ with mean measure $\mu(\mathrm{d}t) = \Lambda (t) \mathrm{d}t$ absolutely continuous with respect to the Lebesgue measure, $\mu(A) = \int_A \Lambda(t) \mathrm{d}t$. </span>
-<span id="cb15-909"><a href="#cb15-909" aria-hidden="true" tabindex="-1"></a>The counting process</span>
-<span id="cb15-910"><a href="#cb15-910" aria-hidden="true" tabindex="-1"></a>$(N_t)_{t \ge 0}$ defined by </span>
-<span id="cb15-911"><a href="#cb15-911" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-912"><a href="#cb15-912" aria-hidden="true" tabindex="-1"></a>    N_t = Q(<span class="co">[</span><span class="ot">0,t</span><span class="co">]</span>) = \sum_{k \geq 1} \boldsymbol{1}_{<span class="sc">\{</span>T_k \leq t<span class="sc">\}</span>}, \quad \forall \; t\geq 0,</span>
-<span id="cb15-913"><a href="#cb15-913" aria-hidden="true" tabindex="-1"></a>$$ {#eq-inhomogeneous-pp}</span>
-<span id="cb15-914"><a href="#cb15-914" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process with intensity function (or rate) $t \mapsto \Lambda(t)$. In particular, when $\Lambda(t) \equiv c$ is a constant, $N$ is a homogeneous Poisson process with rate $c$. Assuming that the atoms are ordered $T_1&lt; T_2&lt; \dots$, we recall that the sequence $(T_{k+1}-T_k)_{k\geq 1}$ is a sequence of *i.i.d.* exponential variables of parameter $c$.</span>
+<span id="cb15-874"><a href="#cb15-874" aria-hidden="true" tabindex="-1"></a><span class="in">`C++`</span> variables available for intensity code</span>
+<span id="cb15-875"><a href="#cb15-875" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-876"><a href="#cb15-876" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-877"><a href="#cb15-877" aria-hidden="true" tabindex="-1"></a>For instance, the intensity code below corresponds to an individual death intensity $\lambda^d(t,I)$ equal to $d_1(a(I,t)) = \alpha_1 \exp(\beta_1 a(I,t))$ for males and $d_2(a(I,t)) = \alpha_2 \exp(\beta_2 a(I,t))$ for females, where $a(I,t)=t-\tau^b$ is the age of the individual $I=(\tau^b, \tau^d,x)$ at time $t$. </span>
+<span id="cb15-878"><a href="#cb15-878" aria-hidden="true" tabindex="-1"></a>In this case, the intensity function depends on the individuals' age, gender, and on the model parameters $\alpha = (\alpha_1, \alpha_2)$ and $\beta = (\beta_1, \beta_2)$.</span>
+<span id="cb15-881"><a href="#cb15-881" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
+<span id="cb15-882"><a href="#cb15-882" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb15-883"><a href="#cb15-883" aria-hidden="true" tabindex="-1"></a>death_intensity <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb15-884"><a href="#cb15-884" aria-hidden="true" tabindex="-1"></a><span class="st">    if (I.male) result = alpha_1 * exp(beta_1 * I.age(t));</span></span>
+<span id="cb15-885"><a href="#cb15-885" aria-hidden="true" tabindex="-1"></a><span class="st">    else result = alpha_2 * exp(beta_2 * I.age(t));</span></span>
+<span id="cb15-886"><a href="#cb15-886" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb15-887"><a href="#cb15-887" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-888"><a href="#cb15-888" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-889"><a href="#cb15-889" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Event creation with interaction intensity {.unnumbered}</span></span>
+<span id="cb15-890"><a href="#cb15-890" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb15-891"><a href="#cb15-891" aria-hidden="true" tabindex="-1"></a>An event $e\in \mathcal{E}_W$ is an event which occurs to an individual at a frequency which is the result of interactions with other members of the population (see @eq-intensity-interaction), and which can be written as $\lambda^e_t(I, Z_t)=\sum_{J\in Z_t} W^e(t, I, J)$ where $W^e(t, I, J)$ is the intensity of the interaction between individual $I$ and individual $J$.</span>
+<span id="cb15-892"><a href="#cb15-892" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-893"><a href="#cb15-893" aria-hidden="true" tabindex="-1"></a>An event $e\in \mathcal{E}_W$ with such intensity is created by calling the function</span>
+<span id="cb15-896"><a href="#cb15-896" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
+<span id="cb15-897"><a href="#cb15-897" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb15-898"><a href="#cb15-898" aria-hidden="true" tabindex="-1"></a><span class="fu">mk_event_interaction</span>(<span class="at">type =</span> <span class="st">"TYPE"</span>,</span>
+<span id="cb15-899"><a href="#cb15-899" aria-hidden="true" tabindex="-1"></a>                     <span class="at">name =</span> <span class="st">"NAME"</span>,</span>
+<span id="cb15-900"><a href="#cb15-900" aria-hidden="true" tabindex="-1"></a>                     <span class="at">interaction_code =</span> <span class="st">"INTERACTION_CODE"</span>,</span>
+<span id="cb15-901"><a href="#cb15-901" aria-hidden="true" tabindex="-1"></a>                     <span class="at">interaction_type =</span> <span class="st">"random"</span>, ...)</span>
+<span id="cb15-902"><a href="#cb15-902" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-903"><a href="#cb15-903" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-904"><a href="#cb15-904" aria-hidden="true" tabindex="-1"></a>The <span class="in">`interaction_code`</span> argument contains few lines of <span class="in">`C++`</span> code describing the interaction function $W^e(t, I, J)$. The interaction function value has to be stored in a variable called <span class="in">`result`</span> and the available variables for the intensity code are given in @tbl-intensity-variables. For example, if we set</span>
+<span id="cb15-907"><a href="#cb15-907" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
+<span id="cb15-908"><a href="#cb15-908" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb15-909"><a href="#cb15-909" aria-hidden="true" tabindex="-1"></a>death_interaction_code <span class="ot">&lt;-</span> <span class="st">"result = max(J.size - I.size, 0.);"</span></span>
+<span id="cb15-910"><a href="#cb15-910" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-911"><a href="#cb15-911" aria-hidden="true" tabindex="-1"></a>the death intensity of an individual <span class="in">`I`</span> is the result of the competition between individuals, depending on a characteristic named <span class="in">`size`</span>, as defined in @eq-ex-interaction. </span>
+<span id="cb15-912"><a href="#cb15-912" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-913"><a href="#cb15-913" aria-hidden="true" tabindex="-1"></a>The argument <span class="in">`interaction_type`</span>, set by default at <span class="in">`random`</span>, is the algorithm choice for simulating the model. When <span class="in">`interaction_type=full`</span>, the simulation follows @cnj-no-interaction, <span class="in">`interaction_type=random`</span> it follows @cnj-interaction.</span>
+<span id="cb15-914"><a href="#cb15-914" aria-hidden="true" tabindex="-1"></a>In most cases, the <span class="in">`random`</span> algorithm is much faster than the <span class="in">`full`</span> algorithm, as we illustrate for instance in @sec-example-interaction , where we observe the gain of a factor of 40 between the two algorithms, on a set of standard parameters. This allows in particular to explore parameter sets that give larger population sizes, without reaching computation times that explode.</span>
 <span id="cb15-915"><a href="#cb15-915" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-916"><a href="#cb15-916" aria-hidden="true" tabindex="-1"></a><span class="fu">### Marked Poisson measures on $E = {\mathbb{R}}^+ \times F$</span></span>
+<span id="cb15-916"><a href="#cb15-916" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Events creation with Poisson and Inhomogeneous Poisson intensity {.unnumbered}</span></span>
 <span id="cb15-917"><a href="#cb15-917" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-918"><a href="#cb15-918" aria-hidden="true" tabindex="-1"></a>We are interested in the particular case when $E$ is the product space ${\mathbb{R}}^+ \times F$, with $(F,\mathcal{F})$ a Borel subspace of ${\mathbb{R}}^d$. Then, a random counting measure is defined by a random set $S =<span class="sc">\{</span> (T_k, \Theta_k ), k \geq 1<span class="sc">\}</span>$. The random variables $T_k\geq 0$ can be considered as time variables, and constitute the jump times of the random measure, while the variables $\Theta_k \in F$ represent space variables.</span>
+<span id="cb15-918"><a href="#cb15-918" aria-hidden="true" tabindex="-1"></a>For events $e\in\mathcal{P}$ with an intensity $\mu^e(t)$ which does not depend on the population, the event intensity is of class <span class="in">`inhomogeneous_poisson`</span> or <span class="in">`poisson`</span> depending on whether or not the intensity depends on time (in the second case the intensity is constant).</span>
 <span id="cb15-919"><a href="#cb15-919" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-920"><a href="#cb15-920" aria-hidden="true" tabindex="-1"></a>We recall in this special case the Theorem&nbsp;VI.3.2 in&nbsp;<span class="co">[</span><span class="ot">@Cin11</span><span class="co">]</span>.</span>
-<span id="cb15-921"><a href="#cb15-921" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-922"><a href="#cb15-922" aria-hidden="true" tabindex="-1"></a>::: {#prp-marked-poisson}</span>
-<span id="cb15-923"><a href="#cb15-923" aria-hidden="true" tabindex="-1"></a><span class="fu">## Marked Poisson measure </span></span>
-<span id="cb15-924"><a href="#cb15-924" aria-hidden="true" tabindex="-1"></a>Let $m$ be a $\sigma$--finite diffuse measure on ${\mathbb{R}}^+$, and $K$ a transition probability kernel from $({\mathbb{R}}^+,\mathcal{B}({\mathbb{R}}^+))$ into $(F, \mathcal{F})$. </span>
-<span id="cb15-925"><a href="#cb15-925" aria-hidden="true" tabindex="-1"></a>Assume that the collection $(T_k)_{k \ge 1}$ forms a Poisson process $(N_t) =(\sum_{k\geq 1} \mathsf{1}_{\{T_k \leq t\}})$ with mean $m(\mathrm{d}t) =\Lambda(t) \mathrm{d}t$, and that given $(T_k)_{k \ge 1}$, the variables $\Theta_k$ are conditionally independent and have the respective distributions $K(T_k, \cdot)$.</span>
+<span id="cb15-920"><a href="#cb15-920" aria-hidden="true" tabindex="-1"></a>For Poisson (constant) intensities the events are created with the function</span>
+<span id="cb15-923"><a href="#cb15-923" aria-hidden="true" tabindex="-1"></a><span class="in">```{R}</span></span>
+<span id="cb15-924"><a href="#cb15-924" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb15-925"><a href="#cb15-925" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb15-926"><a href="#cb15-926" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-927"><a href="#cb15-927" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Then, $<span class="sc">\{</span> (T_k, \Theta_k) ;\; k \ge 1\}$ forms a Poisson random measure $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ on $({\mathbb{R}}^+ \times F, \mathcal{B}({\mathbb{R}}^+) \otimes \mathcal{F})$, called a *Marked point process* , with mean $\mu$ defined by </span>
-<span id="cb15-928"><a href="#cb15-928" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-929"><a href="#cb15-929" aria-hidden="true" tabindex="-1"></a>    \mu(\mathrm{d}t, \mathrm{d}y) = \Lambda(t) \mathrm{d}t K(t, \mathrm{d}y).</span>
-<span id="cb15-930"><a href="#cb15-930" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-927"><a href="#cb15-927" aria-hidden="true" tabindex="-1"></a>The following example creates a death event, where individuals die at a constant intensity <span class="in">`lambda`</span> (which has to be in the list of model parameters):</span>
+<span id="cb15-928"><a href="#cb15-928" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-929"><a href="#cb15-929" aria-hidden="true" tabindex="-1"></a>TODO</span>
+<span id="cb15-930"><a href="#cb15-930" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-931"><a href="#cb15-931" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-932"><a href="#cb15-932" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Reciprocally let $Q$ be a Poisson random measure of mean measure $\mu(\mathrm{d}t, \mathrm{d}y)$, admitting the following disintegration with respect to the first coordinate: $\mu(\mathrm{d}t , \mathrm{d}y) =\tilde  \Lambda(t) \mathrm{d}t \nu(t, \mathrm{d}y)$, with $\nu(t, F)&lt;\infty$. </span>
-<span id="cb15-933"><a href="#cb15-933" aria-hidden="true" tabindex="-1"></a>Let $K(t, \mathrm{d}y) = \dfrac{\nu(t,\mathrm{d}y) }{\nu(t, F) }$ and $\Lambda(t) = \nu(t, F)\tilde  \Lambda(t)$. Then, $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ is a marked Poisson measure with $(T_k,\Theta_k)_{k\in {\mathbb{N}}^*}$ defined as above. </span>
-<span id="cb15-934"><a href="#cb15-934" aria-hidden="true" tabindex="-1"></a>In particular, the projection $N= (N_t)_{t\geq0}$ of the Poisson measure on the first coordinate,</span>
-<span id="cb15-935"><a href="#cb15-935" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-936"><a href="#cb15-936" aria-hidden="true" tabindex="-1"></a>    N_t = Q([0,t] \times F) = \sum_{k\geq 1} \boldsymbol{1}_{[0,t] \times F} (T_k, \Theta_k)  = \sum_{k\geq 1} \boldsymbol{1}_{<span class="sc">\{</span>T_k \leq t<span class="sc">\}</span>}, \quad \forall \; t \geq 0,</span>
-<span id="cb15-937"><a href="#cb15-937" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-938"><a href="#cb15-938" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process of rate $\Lambda(t)= \nu(t, F)\tilde  \Lambda(t)$.</span>
-<span id="cb15-939"><a href="#cb15-939" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-932"><a href="#cb15-932" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-933"><a href="#cb15-933" aria-hidden="true" tabindex="-1"></a><span class="fu"># Insurance portfolio {#sec-insurance-portfolio}</span></span>
+<span id="cb15-934"><a href="#cb15-934" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-935"><a href="#cb15-935" aria-hidden="true" tabindex="-1"></a>TODO </span>
+<span id="cb15-936"><a href="#cb15-936" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-937"><a href="#cb15-937" aria-hidden="true" tabindex="-1"></a><span class="fu"># Population with genetically variable traits {#sec-example-interaction}</span></span>
+<span id="cb15-938"><a href="#cb15-938" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-939"><a href="#cb15-939" aria-hidden="true" tabindex="-1"></a>TODO</span>
 <span id="cb15-940"><a href="#cb15-940" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-941"><a href="#cb15-941" aria-hidden="true" tabindex="-1"></a>::: {#rem}</span>
-<span id="cb15-942"><a href="#cb15-942" aria-hidden="true" tabindex="-1"></a>When the transition probability kernel $K$ does not depend on the time: $K(t, A) = \nu(A)$ for some probability measure $\nu$, then the marks $(\Theta_k)_{k \ge 1}$ form an *i.i.d.* sequence with distribution $\nu$, independent of $(T_k)_{k \ge 1}$.</span>
-<span id="cb15-943"><a href="#cb15-943" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-941"><a href="#cb15-941" aria-hidden="true" tabindex="-1"></a><span class="fu"># Appendix {.appendix .unnumbered} </span></span>
+<span id="cb15-942"><a href="#cb15-942" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-943"><a href="#cb15-943" aria-hidden="true" tabindex="-1"></a><span class="fu">## Recall on Poisson random measures {#sec-recall-poisson}</span></span>
 <span id="cb15-944"><a href="#cb15-944" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-945"><a href="#cb15-945" aria-hidden="true" tabindex="-1"></a>The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c&gt;0$. The procedure is described in @alg-marked-poisson.</span>
-<span id="cb15-946"><a href="#cb15-946" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-947"><a href="#cb15-947" aria-hidden="true" tabindex="-1"></a><span class="fu">## Pathwise representation of IBMs {#sec-pathwise-representation}</span></span>
+<span id="cb15-945"><a href="#cb15-945" aria-hidden="true" tabindex="-1"></a>We recall below some useful properties of Poisson random measures,</span>
+<span id="cb15-946"><a href="#cb15-946" aria-hidden="true" tabindex="-1"></a>mainly following Chapter&nbsp;6 of&nbsp;<span class="co">[</span><span class="ot">@Cin11</span><span class="co">]</span>. We also refer to&nbsp;<span class="co">[</span><span class="ot">@Kal17</span><span class="co">]</span> for a</span>
+<span id="cb15-947"><a href="#cb15-947" aria-hidden="true" tabindex="-1"></a>more comprehensive presentation of random counting measures.</span>
 <span id="cb15-948"><a href="#cb15-948" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-949"><a href="#cb15-949" aria-hidden="true" tabindex="-1"></a><span class="fu">### Notation reminder</span></span>
-<span id="cb15-950"><a href="#cb15-950" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-951"><a href="#cb15-951" aria-hidden="true" tabindex="-1"></a>The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. In an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. </span>
-<span id="cb15-952"><a href="#cb15-952" aria-hidden="true" tabindex="-1"></a>If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. </span>
-<span id="cb15-953"><a href="#cb15-953" aria-hidden="true" tabindex="-1"></a>If $e \in \mathcal{P}$, then events of type $e$ occur in the population at a Poisson intensity of $(\mu^e_t)$.</span>
-<span id="cb15-954"><a href="#cb15-954" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-955"><a href="#cb15-955" aria-hidden="true" tabindex="-1"></a><span class="fu">### Proof of @thm-eq-Z {#sec-prf-thm-eq-Z} </span></span>
+<span id="cb15-949"><a href="#cb15-949" aria-hidden="true" tabindex="-1"></a>::: {#def-poisson-random-measure} </span>
+<span id="cb15-950"><a href="#cb15-950" aria-hidden="true" tabindex="-1"></a><span class="fu">## Poisson Random Measures</span></span>
+<span id="cb15-951"><a href="#cb15-951" aria-hidden="true" tabindex="-1"></a>Let $\mu$ be a $\sigma$-finite diffuse measure on a Borel subspace $(E,\mathcal{E})$ of $({\mathbb{R}}^d, \mathcal{B}({\mathbb{R}}^d))$. A random counting measure $Q= \sum_{k\geq 1} \delta_{X_k}$ is a Poisson (counting) random measure of *mean measure* $\mu$ if</span>
+<span id="cb15-952"><a href="#cb15-952" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-953"><a href="#cb15-953" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>$\forall A \in \mathcal{E}$, $Q(A)$ is a Poisson random variable with ${\mathbb{E}}<span class="co">[</span><span class="ot">Q(A)</span><span class="co">]</span>= \mu(A)$. </span>
+<span id="cb15-954"><a href="#cb15-954" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>For all disjoints subsets $A_1, \dots, A_n \in \mathcal{E}$, $Q(A_1), \dots, Q(A_n)$ are independent Poisson random variables.</span>
+<span id="cb15-955"><a href="#cb15-955" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb15-956"><a href="#cb15-956" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-957"><a href="#cb15-957" aria-hidden="true" tabindex="-1"></a>::: {.proof}</span>
-<span id="cb15-958"><a href="#cb15-958" aria-hidden="true" tabindex="-1"></a>For ease of notation, we prove the case when $\mathcal{P} =\emptyset$ (there are no events with Poisson intensity).</span>
-<span id="cb15-959"><a href="#cb15-959" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-960"><a href="#cb15-960" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Step 1. The existence of a solution to @eq-sde-eq-Z is obtained by induction. Let $Z^1$ be the unique solution the thinning equation:</span>
-<span id="cb15-961"><a href="#cb15-961" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-962"><a href="#cb15-962" aria-hidden="true" tabindex="-1"></a>    Z_t^1 = Z_0 + \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{0}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{0})<span class="sc">\}</span>} Q (\mathrm{d}s,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ), \quad \forall  0 \leq t \leq T.</span>
-<span id="cb15-963"><a href="#cb15-963" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-964"><a href="#cb15-964" aria-hidden="true" tabindex="-1"></a>Let $T_1$ be the first jump time of $Z^1$. Since $Z_{s^-}^1 = Z_{0}$ and $N_{s^-}=N_{0}$ on $<span class="co">[</span><span class="ot">0, T_1</span><span class="co">]</span>$, $Z^1$ is solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_1</span><span class="co">]</span>$.</span>
-<span id="cb15-965"><a href="#cb15-965" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-966"><a href="#cb15-966" aria-hidden="true" tabindex="-1"></a>Let us now assume that @eq-sde-eq-Z admits a solution $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$, with $T_n$ the $n$--th event time in the population. Let $Z^{n+1}$ be the unique solution of the thinning equation:</span>
-<span id="cb15-967"><a href="#cb15-967" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-968"><a href="#cb15-968" aria-hidden="true" tabindex="-1"></a>    Z^{n+1}_t  =  Z_{t\wedge T_n}^n + \int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{T_n}^n)\}} \mathbf{1}_{\{k \leq N_{T_n}^n <span class="sc">\}</span> }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).</span>
-<span id="cb15-969"><a href="#cb15-969" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-970"><a href="#cb15-970" aria-hidden="true" tabindex="-1"></a>First, observe that $Z^{n+1}$ coincides with $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$. Let $T_{n+1}$ be the $(n+1)$--th jump of $Z^{n+1}$. Furthermore, $Z_{s^-}^{n+1} = Z_{T_n}^n$ and $N_{s^-}^{n+1}=N_{T_n}^{n}$ on $<span class="co">[</span><span class="ot">T_n, T_{n+1}</span><span class="co">]</span>$ (nothing happens between two successive event times), $Z^{n+1}$ verifies for all $t\leq T_{n+1}$: </span>
+<span id="cb15-957"><a href="#cb15-957" aria-hidden="true" tabindex="-1"></a>Let us briefly recall here some simple but useful operations on Poisson measures. In the following, $Q$ is a Poisson measure of mean measure $\mu$, unless stated otherwise.</span>
+<span id="cb15-958"><a href="#cb15-958" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-959"><a href="#cb15-959" aria-hidden="true" tabindex="-1"></a>::: {#prp-restriction-poisson-measure}</span>
+<span id="cb15-960"><a href="#cb15-960" aria-hidden="true" tabindex="-1"></a><span class="fu">## Restricted Poisson measure</span></span>
+<span id="cb15-961"><a href="#cb15-961" aria-hidden="true" tabindex="-1"></a>If $B \in \mathcal{E}$, then, the restriction of $Q$ to $B$ defined by </span>
+<span id="cb15-962"><a href="#cb15-962" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-963"><a href="#cb15-963" aria-hidden="true" tabindex="-1"></a>    Q^B = \boldsymbol{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}</span>
+<span id="cb15-964"><a href="#cb15-964" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-965"><a href="#cb15-965" aria-hidden="true" tabindex="-1"></a>is also a Poisson random measure, of mean measure $\mu^B = \mu(\cdot \cap B)$.</span>
+<span id="cb15-966"><a href="#cb15-966" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-967"><a href="#cb15-967" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-968"><a href="#cb15-968" aria-hidden="true" tabindex="-1"></a>::: {#prp-proj-poisson-measure}</span>
+<span id="cb15-969"><a href="#cb15-969" aria-hidden="true" tabindex="-1"></a><span class="fu">## Projection of Poisson measure</span></span>
+<span id="cb15-970"><a href="#cb15-970" aria-hidden="true" tabindex="-1"></a>If $E = F_1 \times F_2$ is a product space, then the projection</span>
 <span id="cb15-971"><a href="#cb15-971" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb15-972"><a href="#cb15-972" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
-<span id="cb15-973"><a href="#cb15-973" aria-hidden="true" tabindex="-1"></a>    Z^{n+1}_t  =  Z_{t\wedge T_n}^n +\int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-}^{n+1} )\}} \mathbf{1}_{\{k \leq N_{s^-}^{n+1} <span class="sc">\}</span> }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).</span>
-<span id="cb15-974"><a href="#cb15-974" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
-<span id="cb15-975"><a href="#cb15-975" aria-hidden="true" tabindex="-1"></a>$$ </span>
-<span id="cb15-976"><a href="#cb15-976" aria-hidden="true" tabindex="-1"></a>Since, $Z^n$ is a solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$ coinciding with $Z^{n+1}$, this achieves to prove that $Z^{n+1}$ is solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_{n+1}</span><span class="co">]</span>$.</span>
-<span id="cb15-977"><a href="#cb15-977" aria-hidden="true" tabindex="-1"></a>Finally, let $Z =\lim_{n\to \infty } Z^n$. For all $n\geq 1$, $T_n$ is the $n$--th event time of $Z$, and $Z$ is solution of @eq-sde-eq-Z on all time intervals $<span class="co">[</span><span class="ot">0,T_n\wedge T</span><span class="co">]</span>$ by construction.</span>
+<span id="cb15-972"><a href="#cb15-972" aria-hidden="true" tabindex="-1"></a>    Q_1(\mathrm{d}x) = \int_{F_2} Q(\mathrm{d}x , \mathrm{d}y)</span>
+<span id="cb15-973"><a href="#cb15-973" aria-hidden="true" tabindex="-1"></a>$$ </span>
+<span id="cb15-974"><a href="#cb15-974" aria-hidden="true" tabindex="-1"></a>is a Poisson random measure of mean measure $\mu_1 (\mathrm{d}x ) = \int_{F_2} \mu(\mathrm{d}x, \mathrm{d}y)$.</span>
+<span id="cb15-975"><a href="#cb15-975" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-976"><a href="#cb15-976" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-977"><a href="#cb15-977" aria-hidden="true" tabindex="-1"></a><span class="fu">### Link with Poisson processes</span></span>
 <span id="cb15-978"><a href="#cb15-978" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-979"><a href="#cb15-979" aria-hidden="true" tabindex="-1"></a>By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus, by letting $n\to \infty$ we can conclude that $Z$ is a solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$.</span>
-<span id="cb15-980"><a href="#cb15-980" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-981"><a href="#cb15-981" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Step 2. Let $\tilde Z$ be a solution of @eq-sde-eq-Z. Using the same arguments than in Step 1, it is straight forward to show that $\tilde Z$ coincides with $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$, for all $n \geq 1$. Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.</span>
-<span id="cb15-982"><a href="#cb15-982" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb15-983"><a href="#cb15-983" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-984"><a href="#cb15-984" aria-hidden="true" tabindex="-1"></a><span class="fu"># References {.unnumbered}</span></span>
-<span id="cb15-985"><a href="#cb15-985" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-986"><a href="#cb15-986" aria-hidden="true" tabindex="-1"></a>::: {#refs}</span>
-<span id="cb15-987"><a href="#cb15-987" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-979"><a href="#cb15-979" aria-hidden="true" tabindex="-1"></a>Let $Q= \sum_{k\geq 1} \delta_{T_k}$ a Poisson random measure on $E={\mathbb{R}}^+$ with mean measure $\mu(\mathrm{d}t) = \Lambda (t) \mathrm{d}t$ absolutely continuous with respect to the Lebesgue measure, $\mu(A) = \int_A \Lambda(t) \mathrm{d}t$. </span>
+<span id="cb15-980"><a href="#cb15-980" aria-hidden="true" tabindex="-1"></a>The counting process</span>
+<span id="cb15-981"><a href="#cb15-981" aria-hidden="true" tabindex="-1"></a>$(N_t)_{t \ge 0}$ defined by </span>
+<span id="cb15-982"><a href="#cb15-982" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-983"><a href="#cb15-983" aria-hidden="true" tabindex="-1"></a>    N_t = Q(<span class="co">[</span><span class="ot">0,t</span><span class="co">]</span>) = \sum_{k \geq 1} \boldsymbol{1}_{<span class="sc">\{</span>T_k \leq t<span class="sc">\}</span>}, \quad \forall \; t\geq 0,</span>
+<span id="cb15-984"><a href="#cb15-984" aria-hidden="true" tabindex="-1"></a>$$ {#eq-inhomogeneous-pp}</span>
+<span id="cb15-985"><a href="#cb15-985" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process with intensity function (or rate) $t \mapsto \Lambda(t)$. In particular, when $\Lambda(t) \equiv c$ is a constant, $N$ is a homogeneous Poisson process with rate $c$. Assuming that the atoms are ordered $T_1&lt; T_2&lt; \dots$, we recall that the sequence $(T_{k+1}-T_k)_{k\geq 1}$ is a sequence of *i.i.d.* exponential variables of parameter $c$.</span>
+<span id="cb15-986"><a href="#cb15-986" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-987"><a href="#cb15-987" aria-hidden="true" tabindex="-1"></a><span class="fu">### Marked Poisson measures on $E = {\mathbb{R}}^+ \times F$</span></span>
 <span id="cb15-988"><a href="#cb15-988" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-989"><a href="#cb15-989" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session information {.appendix .unnumbered}</span></span>
+<span id="cb15-989"><a href="#cb15-989" aria-hidden="true" tabindex="-1"></a>We are interested in the particular case when $E$ is the product space ${\mathbb{R}}^+ \times F$, with $(F,\mathcal{F})$ a Borel subspace of ${\mathbb{R}}^d$. Then, a random counting measure is defined by a random set $S =<span class="sc">\{</span> (T_k, \Theta_k ), k \geq 1<span class="sc">\}</span>$. The random variables $T_k\geq 0$ can be considered as time variables, and constitute the jump times of the random measure, while the variables $\Theta_k \in F$ represent space variables.</span>
 <span id="cb15-990"><a href="#cb15-990" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-991"><a href="#cb15-991" aria-hidden="true" tabindex="-1"></a><span class="in">```{r session-info}</span></span>
-<span id="cb15-992"><a href="#cb15-992" aria-hidden="true" tabindex="-1"></a><span class="in">sessionInfo()</span></span>
-<span id="cb15-993"><a href="#cb15-993" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-991"><a href="#cb15-991" aria-hidden="true" tabindex="-1"></a>We recall in this special case the Theorem&nbsp;VI.3.2 in&nbsp;<span class="co">[</span><span class="ot">@Cin11</span><span class="co">]</span>.</span>
+<span id="cb15-992"><a href="#cb15-992" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-993"><a href="#cb15-993" aria-hidden="true" tabindex="-1"></a>::: {#prp-marked-poisson}</span>
+<span id="cb15-994"><a href="#cb15-994" aria-hidden="true" tabindex="-1"></a><span class="fu">## Marked Poisson measure </span></span>
+<span id="cb15-995"><a href="#cb15-995" aria-hidden="true" tabindex="-1"></a>Let $m$ be a $\sigma$--finite diffuse measure on ${\mathbb{R}}^+$, and $K$ a transition probability kernel from $({\mathbb{R}}^+,\mathcal{B}({\mathbb{R}}^+))$ into $(F, \mathcal{F})$. </span>
+<span id="cb15-996"><a href="#cb15-996" aria-hidden="true" tabindex="-1"></a>Assume that the collection $(T_k)_{k \ge 1}$ forms a Poisson process $(N_t) =(\sum_{k\geq 1} \mathsf{1}_{\{T_k \leq t\}})$ with mean $m(\mathrm{d}t) =\Lambda(t) \mathrm{d}t$, and that given $(T_k)_{k \ge 1}$, the variables $\Theta_k$ are conditionally independent and have the respective distributions $K(T_k, \cdot)$.</span>
+<span id="cb15-997"><a href="#cb15-997" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-998"><a href="#cb15-998" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Then, $<span class="sc">\{</span> (T_k, \Theta_k) ;\; k \ge 1\}$ forms a Poisson random measure $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ on $({\mathbb{R}}^+ \times F, \mathcal{B}({\mathbb{R}}^+) \otimes \mathcal{F})$, called a *Marked point process* , with mean $\mu$ defined by </span>
+<span id="cb15-999"><a href="#cb15-999" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1000"><a href="#cb15-1000" aria-hidden="true" tabindex="-1"></a>    \mu(\mathrm{d}t, \mathrm{d}y) = \Lambda(t) \mathrm{d}t K(t, \mathrm{d}y).</span>
+<span id="cb15-1001"><a href="#cb15-1001" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1002"><a href="#cb15-1002" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1003"><a href="#cb15-1003" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Reciprocally let $Q$ be a Poisson random measure of mean measure $\mu(\mathrm{d}t, \mathrm{d}y)$, admitting the following disintegration with respect to the first coordinate: $\mu(\mathrm{d}t , \mathrm{d}y) =\tilde  \Lambda(t) \mathrm{d}t \nu(t, \mathrm{d}y)$, with $\nu(t, F)&lt;\infty$. </span>
+<span id="cb15-1004"><a href="#cb15-1004" aria-hidden="true" tabindex="-1"></a>Let $K(t, \mathrm{d}y) = \dfrac{\nu(t,\mathrm{d}y) }{\nu(t, F) }$ and $\Lambda(t) = \nu(t, F)\tilde  \Lambda(t)$. Then, $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ is a marked Poisson measure with $(T_k,\Theta_k)_{k\in {\mathbb{N}}^*}$ defined as above. </span>
+<span id="cb15-1005"><a href="#cb15-1005" aria-hidden="true" tabindex="-1"></a>In particular, the projection $N= (N_t)_{t\geq0}$ of the Poisson measure on the first coordinate,</span>
+<span id="cb15-1006"><a href="#cb15-1006" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1007"><a href="#cb15-1007" aria-hidden="true" tabindex="-1"></a>    N_t = Q([0,t] \times F) = \sum_{k\geq 1} \boldsymbol{1}_{[0,t] \times F} (T_k, \Theta_k)  = \sum_{k\geq 1} \boldsymbol{1}_{<span class="sc">\{</span>T_k \leq t<span class="sc">\}</span>}, \quad \forall \; t \geq 0,</span>
+<span id="cb15-1008"><a href="#cb15-1008" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1009"><a href="#cb15-1009" aria-hidden="true" tabindex="-1"></a>is an inhomogeneous Poisson process of rate $\Lambda(t)= \nu(t, F)\tilde  \Lambda(t)$.</span>
+<span id="cb15-1010"><a href="#cb15-1010" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-1011"><a href="#cb15-1011" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1012"><a href="#cb15-1012" aria-hidden="true" tabindex="-1"></a>::: {#rem}</span>
+<span id="cb15-1013"><a href="#cb15-1013" aria-hidden="true" tabindex="-1"></a>When the transition probability kernel $K$ does not depend on the time: $K(t, A) = \nu(A)$ for some probability measure $\nu$, then the marks $(\Theta_k)_{k \ge 1}$ form an *i.i.d.* sequence with distribution $\nu$, independent of $(T_k)_{k \ge 1}$.</span>
+<span id="cb15-1014"><a href="#cb15-1014" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-1015"><a href="#cb15-1015" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1016"><a href="#cb15-1016" aria-hidden="true" tabindex="-1"></a>The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c&gt;0$. The procedure is described in @alg-marked-poisson.</span>
+<span id="cb15-1017"><a href="#cb15-1017" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1018"><a href="#cb15-1018" aria-hidden="true" tabindex="-1"></a><span class="fu">## Pathwise representation of IBMs {#sec-pathwise-representation}</span></span>
+<span id="cb15-1019"><a href="#cb15-1019" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1020"><a href="#cb15-1020" aria-hidden="true" tabindex="-1"></a><span class="fu">### Notation reminder</span></span>
+<span id="cb15-1021"><a href="#cb15-1021" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1022"><a href="#cb15-1022" aria-hidden="true" tabindex="-1"></a>The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. In an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. </span>
+<span id="cb15-1023"><a href="#cb15-1023" aria-hidden="true" tabindex="-1"></a>If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. </span>
+<span id="cb15-1024"><a href="#cb15-1024" aria-hidden="true" tabindex="-1"></a>If $e \in \mathcal{P}$, then events of type $e$ occur in the population at a Poisson intensity of $(\mu^e_t)$.</span>
+<span id="cb15-1025"><a href="#cb15-1025" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1026"><a href="#cb15-1026" aria-hidden="true" tabindex="-1"></a><span class="fu">### Proof of @thm-eq-Z {#sec-prf-thm-eq-Z} </span></span>
+<span id="cb15-1027"><a href="#cb15-1027" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1028"><a href="#cb15-1028" aria-hidden="true" tabindex="-1"></a>::: {.proof}</span>
+<span id="cb15-1029"><a href="#cb15-1029" aria-hidden="true" tabindex="-1"></a>For ease of notation, we prove the case when $\mathcal{P} =\emptyset$ (there are no events with Poisson intensity).</span>
+<span id="cb15-1030"><a href="#cb15-1030" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1031"><a href="#cb15-1031" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Step 1. The existence of a solution to @eq-sde-eq-Z is obtained by induction. Let $Z^1$ be the unique solution the thinning equation:</span>
+<span id="cb15-1032"><a href="#cb15-1032" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1033"><a href="#cb15-1033" aria-hidden="true" tabindex="-1"></a>    Z_t^1 = Z_0 + \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{0}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{0})<span class="sc">\}</span>} Q (\mathrm{d}s,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ), \quad \forall  0 \leq t \leq T.</span>
+<span id="cb15-1034"><a href="#cb15-1034" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1035"><a href="#cb15-1035" aria-hidden="true" tabindex="-1"></a>Let $T_1$ be the first jump time of $Z^1$. Since $Z_{s^-}^1 = Z_{0}$ and $N_{s^-}=N_{0}$ on $<span class="co">[</span><span class="ot">0, T_1</span><span class="co">]</span>$, $Z^1$ is solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_1</span><span class="co">]</span>$.</span>
+<span id="cb15-1036"><a href="#cb15-1036" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1037"><a href="#cb15-1037" aria-hidden="true" tabindex="-1"></a>Let us now assume that @eq-sde-eq-Z admits a solution $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$, with $T_n$ the $n$--th event time in the population. Let $Z^{n+1}$ be the unique solution of the thinning equation:</span>
+<span id="cb15-1038"><a href="#cb15-1038" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1039"><a href="#cb15-1039" aria-hidden="true" tabindex="-1"></a>    Z^{n+1}_t  =  Z_{t\wedge T_n}^n + \int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{T_n}^n)\}} \mathbf{1}_{\{k \leq N_{T_n}^n <span class="sc">\}</span> }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).</span>
+<span id="cb15-1040"><a href="#cb15-1040" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1041"><a href="#cb15-1041" aria-hidden="true" tabindex="-1"></a>First, observe that $Z^{n+1}$ coincides with $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$. Let $T_{n+1}$ be the $(n+1)$--th jump of $Z^{n+1}$. Furthermore, $Z_{s^-}^{n+1} = Z_{T_n}^n$ and $N_{s^-}^{n+1}=N_{T_n}^{n}$ on $<span class="co">[</span><span class="ot">T_n, T_{n+1}</span><span class="co">]</span>$ (nothing happens between two successive event times), $Z^{n+1}$ verifies for all $t\leq T_{n+1}$: </span>
+<span id="cb15-1042"><a href="#cb15-1042" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb15-1043"><a href="#cb15-1043" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb15-1044"><a href="#cb15-1044" aria-hidden="true" tabindex="-1"></a>    Z^{n+1}_t  =  Z_{t\wedge T_n}^n +\int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-}^{n+1} )\}} \mathbf{1}_{\{k \leq N_{s^-}^{n+1} <span class="sc">\}</span> }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).</span>
+<span id="cb15-1045"><a href="#cb15-1045" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb15-1046"><a href="#cb15-1046" aria-hidden="true" tabindex="-1"></a>$$ </span>
+<span id="cb15-1047"><a href="#cb15-1047" aria-hidden="true" tabindex="-1"></a>Since, $Z^n$ is a solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$ coinciding with $Z^{n+1}$, this achieves to prove that $Z^{n+1}$ is solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T_{n+1}</span><span class="co">]</span>$.</span>
+<span id="cb15-1048"><a href="#cb15-1048" aria-hidden="true" tabindex="-1"></a>Finally, let $Z =\lim_{n\to \infty } Z^n$. For all $n\geq 1$, $T_n$ is the $n$--th event time of $Z$, and $Z$ is solution of @eq-sde-eq-Z on all time intervals $<span class="co">[</span><span class="ot">0,T_n\wedge T</span><span class="co">]</span>$ by construction.</span>
+<span id="cb15-1049"><a href="#cb15-1049" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1050"><a href="#cb15-1050" aria-hidden="true" tabindex="-1"></a>By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus, by letting $n\to \infty$ we can conclude that $Z$ is a solution of @eq-sde-eq-Z on $<span class="co">[</span><span class="ot">0,T</span><span class="co">]</span>$.</span>
+<span id="cb15-1051"><a href="#cb15-1051" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1052"><a href="#cb15-1052" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Step 2. Let $\tilde Z$ be a solution of @eq-sde-eq-Z. Using the same arguments than in Step 1, it is straight forward to show that $\tilde Z$ coincides with $Z^n$ on $<span class="co">[</span><span class="ot">0,T_n</span><span class="co">]</span>$, for all $n \geq 1$. Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.</span>
+<span id="cb15-1053"><a href="#cb15-1053" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-1054"><a href="#cb15-1054" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1055"><a href="#cb15-1055" aria-hidden="true" tabindex="-1"></a><span class="fu"># References {.unnumbered}</span></span>
+<span id="cb15-1056"><a href="#cb15-1056" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1057"><a href="#cb15-1057" aria-hidden="true" tabindex="-1"></a>::: {#refs}</span>
+<span id="cb15-1058"><a href="#cb15-1058" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb15-1059"><a href="#cb15-1059" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1060"><a href="#cb15-1060" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session information {.appendix .unnumbered}</span></span>
+<span id="cb15-1061"><a href="#cb15-1061" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-1062"><a href="#cb15-1062" aria-hidden="true" tabindex="-1"></a><span class="in">```{r session-info}</span></span>
+<span id="cb15-1063"><a href="#cb15-1063" aria-hidden="true" tabindex="-1"></a><span class="in">sessionInfo()</span></span>
+<span id="cb15-1064"><a href="#cb15-1064" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+<script>
+(function(d) {
+  d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+    let pseudocodeOptions = {
+      indentSize: el.dataset.indentSize || "1.2em",
+      commentDelimiter: el.dataset.commentDelimiter || "//",
+      lineNumber: el.dataset.lineNumber === "true" ? true : false,
+      lineNumberPunc: el.dataset.lineNumberPunc || ":",
+      noEnd: el.dataset.noEnd === "true" ? true : false,
+      titlePrefix: el.dataset.algTitle || "Algorithm"
+    };
+    pseudocode.renderElement(el.querySelector(".pseudocode"), pseudocodeOptions);
+  });
+})(document);
+(function(d) {
+  d.querySelectorAll(".pseudocode-container").forEach(function(el) {
+    titleSpan = el.querySelector(".ps-root > .ps-algorithm > .ps-line > .ps-keyword")
+    titlePrefix = el.dataset.algTitle;
+    titleIndex = el.dataset.chapterLevel ? el.dataset.chapterLevel + "." + el.dataset.pseudocodeIndex : el.dataset.pseudocodeIndex;
+    titleSpan.innerHTML = titlePrefix + " " + titleIndex + " ";
+  });
+})(document);
+</script>
 <script>
 (function(d) {
   d.querySelectorAll(".pseudocode-container").forEach(function(el) {
