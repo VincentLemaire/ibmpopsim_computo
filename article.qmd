@@ -77,7 +77,7 @@ Designed for applications in social sciences, the `R` package `MicSim` [@Zin14]
 In @sec-ibm, we introduce the mathematical framework that characterizes the class of Stochastic Individual-Based Models (IBMs) that can be implemented in the `IBMPopSim` package. In particular, a general pathwise representation of IBMs is presented. The population dynamics is obtained as the solution of an SDE driven by Poisson measures, for which we obtain existence and uniqueness results in @thm-eq-Z. Additionally, a succinct overview of the package is provided. 
 In @sec-simulation the two main algorithms for simulating the population evolution of an IBM across the interval $[0, T]$ are detailed. 
 In @sec-package we present the main functions of the `IBMPopSim` package, which allow for the definition of events and their intensities, the creation of a model, and the simulation of scenarios. 
-Two examples are detailed in @sec-insurance-portfolio and sec-example-interaction, featuring applications involving an heterogeneous insurance portfolio characterized by entry and exit events, and an age and size-structured population with intricate interactions.
+Two examples are detailed in @sec-insurance-portfolio and @sec-example-interaction, featuring applications involving an heterogeneous insurance portfolio characterized by entry and exit events, and an age and size-structured population with intricate interactions.
 
 # Stochastic Individual-Based Models (IBMs) in IBMPopSim {#sec-ibm}
 
@@ -311,7 +311,7 @@ is the age of the individual $I$ at time $t$. In this classical case, the death 
 2. In the presence of competition between individuals, the death intensity of an individual $I$ also depend on other individuals $J$ in the population. For example, if $I=(\tau^b,\tau^d, x)$, with $x$ its size, then we can have: 
 $$
     W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J > t\}}, \quad \forall \; J=(\tau^b_J,\tau^d_J , x_J).
-$$ {#eq-ex-interation}
+$$ {#eq-ex-interaction}
 This can be interpreted as follows: if the individual $I$ meets randomly an individual $J$ alive at time $t$, and of bigger size $x_J > x$, then he can die at the intensity $x_J-x$. If $J$ is smaller than $I$, then he cannot kill $I$. The bigger is the size $x$ of $I$, the lower is his death intensity $\lambda^d_t(I,Z_t)$ defined by 
 $$
     \lambda^d_t(I,Z_t) = \sum_{\genfrac{}{}{0pt}{2}{J\in Z_t,}{x_J > x}} (x_J -x)\mathbf{1}_{\{\tau^d_J > t\}}.
@@ -659,7 +659,7 @@ The steps for simulating the first event in the population can be iterated in or
 A population process $(Z_t)_{t \in [0,T]}$ simulated by the @alg-interaction is an exact solution of the SDE @eq-sde-eq-Z.
 :::
 
-The proof of @thm-interaction is detailed in the Appendix @prf-no-interaction.
+The proof of @thm-interaction is detailed in the Appendix @sec-prf-thm-interaction.
 
 ::: {#rem-remvoval-dead} 
 The population $Z_{T_k}$ includes dead/exited individuals before the event time $T_k$. Thus, $N_{T_k} > N_{T_k}^a$ is greater than the number of alive individuals at time $T_k$. When a dead individual $I_{\bar K_l}$ is drawn from the population during the rejection/acceptance phase of the algorithm, the proposed event $(\bar T_{\ell}, \bar E_\ell,  I_{\bar K_\ell})$ is automatically rejected since the event intensity is $\lambda^{\bar E_\ell}_{T_\ell}(I_{\bar K_\ell}, Z_{T_k}) = 0$ (nothing can happen to a dead individual). 
@@ -765,7 +765,7 @@ After the compilation of the model, the simulations are launched by calling the 
 
 In this section, we take a closer look at each component of a model in `IBMPopSim`. We also refer to the [IBMPopSim website](https://daphnegiorgi.github.io/IBMPopSim/) and to the `vignettes` of the package for more details on the package and various examples of model creation.
 
-## Population {#sec-population}
+## Population {#sec-package-population}
 
 A population $Z$ is represented by an object of class `population` containing a data frame where each row corresponds to an individual $I=(\tau^b, \tau^d, x)$, and which has at least two columns, `birth` and `death`, corresponding to the birth date $\tau^b$ and death/exit date $\tau^d$ ($\tau^d$ is set to `NA` for alive individuals). The data frame can contain more than two columns if individuals are described by additional characteristics $x= (x_1,\dots x_n)$.
 
@@ -834,7 +834,7 @@ In `IBMPopSim`, the intensity of an event can belong to three classes @sec-event
 
 #### Event creation with individual intensity {.unnumbered}
 
-An event $e\in \mathcal{E}$ (see @eq-no-interaction) has an intensity of the form $\lambda^e(t, I)$ which depends only on the individual `I` and time. Events with such intensity are created using the function
+An event $e\in \mathcal{E}$ (see @eq-intensity-no-interaction) has an intensity of the form $\lambda^e(t, I)$ which depends only on the individual `I` and time. Events with such intensity are created using the function
 ```{R}
 #| eval: false
 mk_event_individual(type = "TYPE", 
@@ -886,7 +886,7 @@ death_interaction_code <- "result = max(J.size - I.size, 0.);"
 ```
 the death intensity of an individual `I` is the result of the competition between individuals, depending on a characteristic named `size`, as defined in @eq-ex-interaction. 
 
-The argument `interaction_type`, set by default at `random`, is the algorithm choice for simulating the model. When `interaction_type=full`, the simulation follows @cnj-no-interaction, `interaction_type=random` it follows @cnj-interaction.
+The argument `interaction_type`, set by default at `random`, is the algorithm choice for simulating the model. When `interaction_type=full`, the simulation follows @alg-no-interaction, `interaction_type=random` it follows @alg-interaction.
 In most cases, the `random` algorithm is much faster than the `full` algorithm, as we illustrate for instance in @sec-example-interaction , where we observe the gain of a factor of 40 between the two algorithms, on a set of standard parameters. This allows in particular to explore parameter sets that give larger population sizes, without reaching computation times that explode.
 
 #### Events creation with Poisson and Inhomogeneous Poisson intensity {.unnumbered}
@@ -912,7 +912,7 @@ TODO
 
 TODO
 
-# Appendix {.appendix .unnumbered} 
+# Appendix {.appendix} 
 
 ## Recall on Poisson random measures {#sec-recall-poisson}
 
@@ -1025,6 +1025,21 @@ By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus
 
 - Step 2. Let $\tilde Z$ be a solution of @eq-sde-eq-Z. Using the same arguments than in Step 1, it is straight forward to show that $\tilde Z$ coincides with $Z^n$ on $[0,T_n]$, for all $n \geq 1$. Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.
 :::
+
+### Proof of @lem-non-explosion {#sec-prf-lem-non-explosion} 
+
+The proof is obtained using pathwise comparison result, generalizing those obtained in [@KaaElK20].
+
+::: {.proof}
+TODO
+:::
+
+### Alternative pathwise representation 
+TODO
+
+## Proof of @thm-interaction {#sec-prf-thm-interaction}
+
+TODO
 
 # References {.unnumbered}
 
