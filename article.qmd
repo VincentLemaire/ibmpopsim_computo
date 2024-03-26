@@ -57,14 +57,18 @@ execute:
     warning: false
 ---
 
+```{r echo=FALSE}
+library(ggplot2)
+```
+
 # Introduction
 
 In various fields, advances in probability have contributed to the development of a new mathematical framework for so-called individual-based stochastic population dynamics, also called stochastic Individual-Based Models (IBMs).
 
-Stochastic IBMs allow the modeling in continuous time of populations dynamics structured by age and/or characteristics. In the field of mathematical biology and ecology, a large community has used this formalism for the study of the evolution of structured populations (see e.g. [@FerTra09; @collet2013rigorous; @BanMel15; @costa2016stochastic; @billiard2016effect; @lavallee2019stochastic; @meleard2019birth; @calvez2020horizontal]), after the pioneer works [@FouMel04; @champagnat2006unifying; @tran_2008].
+Stochastic IBMs allow the modeling in continuous time of populations dynamics structured by age and/or characteristics. In the field of mathematical biology and ecology, a large community has used this formalism for the study of the evolution of structured populations (see e.g. [@FerTra09; @collet2013rigorous; @BanMel15; @costa2016stochastic; @billiard2016effect; @lavallee2019stochastic; @meleard2019birth; @calvez2020horizontal]), after the pioneer works [@FouMel04;@tran_2008;@meleard2009trait].
 
 IBMs are also useful in demography and actuarial sciences, for the modeling of human populations dynamics (see e.g. [@Ben10; @Bou16; @karoui2021simulating]). They allow the modeling of heterogeneous and complex population dynamics, which can be used to compute demographic indicators or simulate the evolution of insurance portfolios in order to study the basis risk, compute cash flows for annuity products or pension schemes, or for a fine assessment of mortality models [@barrieu2012understanding]. There are other domains in which stochastic IBMs can be used, for example in epidemiology with stochastic compartmental models, neurosciences, cyber risk, or Agent-Based Models (ABMs) in economy and social sciences, which can be seen as IBMs.
-Many mathematical results have been obtained in the literature cited above, for quantifying the limit behaviors of IBMs in long time or in large population. In particular, pathwise representations of IBMs have been introduced in [@FouMel04] (and extended to age-structured populations in [@tran_2008]), as measure-valued pure jumps Markov processes, solutions of SDEs driven by Poisson measures. These pathwise representations are based on the *thinning* and projection of Poisson random measures defined on extended spaces. However, the simulation of large and interacting populations is often referred as computationally expensive.
+Many mathematical results have been obtained in the literature cited above, for quantifying the limit behaviors of IBMs in long time or in large population. In particular, pathwise representations of IBMs have been introduced in [@FouMel04] (and extended to age-structured populations in [@tran_2008;@meleard2009trait]), as measure-valued pure jumps Markov processes, solutions of SDEs driven by Poisson measures. These pathwise representations are based on the *thinning* and projection of Poisson random measures defined on extended spaces. However, the simulation of large and interacting populations is often referred as computationally expensive.
 
 The aim of the `R` package `IBMPopSim` is to meet the needs of the various communities for efficient tools in order to simulate the evolution of stochastic IBMs. `IBMPopSim` provides a general framework for the simulation of a wide class of IBMs, where individuals are characterized by their age and/or a set of characteristics. Different types of events can be included in the modeling by users, depending on their needs: births, deaths, entry or exit in/to the population and changes of characteristics (swap events). Furthermore, the various events that can happen to individuals in the population can occur at a non-stationary frequency, depending on the individuals' characteristics and time, and also including potential interactions between individuals.
 
@@ -164,7 +168,7 @@ sim_out <- popsim(
 ```
 The data frame `sim_out$population` contains the information (birth, death, gender) on individuals who lived in the population over the period $[0,30]$. Functions of the package allows to provide aggregated information on the population.
 
-In the remainder of this section,  we define rigorously the class of IBMs that can be simulated in `IBMPopSim`, along with the assumptions that are required in order for the population to be simulatable. The representation of age-structured IBMs based on measure-valued processes, as introduced in [@tran_2008], is generalized to a wider class of abstract population dynamics. The modeling differs slightly here, since individuals are _kept in the population_ after their death (or exit), by including the death/exit date as an individual trait. 
+In the remainder of this section,  we define rigorously the class of IBMs that can be simulated in `IBMPopSim`, along with the assumptions that are required in order for the population to be simulatable. The representation of age-structured IBMs based on measure-valued processes, as introduced in @tran_2008, is generalized to a wider class of abstract population dynamics. The modeling differs slightly here, since individuals are _kept in the population_ after their death (or exit), by including the death/exit date as an individual trait. 
 
 ## Population {#sec-population}
 
@@ -323,7 +327,7 @@ $$
     \Lambda_t(Z_t) = \sum_{e\in \mathcal{P}} \mu^e(t) + \sum_{e \in \mathcal E} \Big(\sum_{k=1}^{N_t} \lambda^e(t, I_k)\Big) + \sum_{e \in \mathcal E_W} \Big(\sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)\Big).
 $$ {#eq-global-ev-intensity}
 An important point is that for events $e \in \mathcal E$ without interactions, the global event intensity $\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t} \lambda^e(t, I_k)$ is _of order_ $N_t^a$ defined in @eq-Nta (number of alive individuals at time $t$). On the other hand, for events $e \in \mathcal{E}_W$ with interactions, $\Lambda^e_t(Z_t) = \sum_{k=1}^{N_t}\sum_{j=1}^{N_t} W^e(t, I_k, I_j)$ is of order $(N_t^a)^2$. 
-Informally, this means that when the population size increases, events with interaction are more costly to simulate. Furthermore, the numerous computations of the interaction kernel $W^e$ can also be quite costly. The randomized Algorithm [\[algo::rzndomized\]](#algo::rzndomized){reference-type="ref" reference="algo::rzndomized"}, detailed in Section [2.3](#sec::simulation_algo_randomized){reference-type="ref" reference="sec::simulation_algo_randomized"}, allows us to overcome these limitations.
+Informally, this means that when the population size increases, events with interaction are more costly to simulate. Furthermore, the numerous computations of the interaction kernel $W^e$ can also be quite costly. The randomized Algorithm @alg-randomized, detailed in Section [2.3](#sec::simulation_algo_randomized){reference-type="ref" reference="sec::simulation_algo_randomized"}, allows us to overcome these limitations.
 
 :::
 
@@ -440,8 +444,8 @@ The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion
 
 # Population simulation {#sec-simulation}
 
-We now present the main algorithm for simulating the evolution of an IBM over $[0,T]$.The algorithm implemented in `IBMPopSim` allows the exact simulation of @eq-sde-eq-Z, based on an acceptance/reject algorithm for simulating random times called *thinning*. The exact simulation of event times with this acceptance/reject procedure is closely related to the simulations of inhomogeneous Poisson processes by the so-called thinning algorithm, often attributed to [@LewShe79]. 
-The simulation methods for inhomogeneous Poisson processes can be adapted to IBMs, and we introduce in this section a general algorithm extending those by [@FouMel04] (see also [@FerTra09], [@Ben10]).
+We now present the main algorithm for simulating the evolution of an IBM over $[0,T]$.The algorithm implemented in `IBMPopSim` allows the exact simulation of @eq-sde-eq-Z, based on an acceptance/reject algorithm for simulating random times called *thinning*. The exact simulation of event times with this acceptance/reject procedure is closely related to the simulations of inhomogeneous Poisson processes by the so-called thinning algorithm, often attributed to @LewShe79. 
+The simulation methods for inhomogeneous Poisson processes can be adapted to IBMs, and we introduce in this section a general algorithm extending those by @FouMel04 (see also @FerTra09, @Ben10).
 
 The algorithm is based on exponential "candidate" event times, chosen with a (constant) intensity which must be greater than the global event intensity $\Lambda_t(Z_t)$ (@eq-global-intensity). Starting from time $t$, once a candidate event time $t + \bar T_\ell$ has been proposed, a candidate event type $e$ (birth, death,\...) is chosen with a probability $p^e$ depending on the event intensity bounds $\bar \mu^e$, $\bar \lambda^e$ and $\bar W^e$, as defined in @cnj-intensity1 and @cnj-intensity2. 
 An individual $I$ is then drawn from the population. 
@@ -490,7 +494,7 @@ $$
 \end{aligned}
 $$
 
-![test](img/plot_thinning.tex){#fig-thinning}
+![Realization of a Marked Poisson measure $\bar Q$ on $[0,T]$ with mean measure $\bar \mu(\mathrm{d} t, \mathrm{d} \theta) = \mathrm{d} t \mathbf{1}_{[0, \bar \Lambda]}(\theta) \mathrm{d} \theta$ (red crosses), and realization of the restriction $\bar Q^\Delta$ where $\Delta = \{ (t,\theta)\in [0,T]\times[0, \bar \Lambda], \theta \leq \Lambda(t) \}$ (blue circles). The projection of $\bar Q^\Delta$ on first component is an inhomogeneous Poisson process on $[0,T]$ of intensity $(\Lambda(t))$ and jump times $(T_k)_{k \ge 1}$.](img/plot_thinning.tex){#fig-thinning}
 
 Finally, the inhomogeneous Poisson process is obtained by the projection @prp-proj-poisson-measure, which states that the jump times of $Q^\Delta$ are the jump times of an inhomogeneous Poisson process of intensity $(\Lambda(t))$.
 
@@ -680,7 +684,7 @@ The sharper the bounds $\bar \lambda^e$ and $\bar W^e$ are, the higher is the ac
 ## Simulation algorithm with randomization {#sec-simulation-randomized}
 
 Let $e \in \cal E_W$ be an event with interactions. In order to evaluate the individual intensity $\lambda^e_t (I,Z_t) = \sum_{j=1}^{N_t} W^e(t, I,I_j)$ one must compute $W^e(t, I_l, I_j)$ for all individuals in the population. This step can be computationally costly, especially for large populations. 
-One way to avoid this summation is to use randomization (see also [@FouMel04] in a model without age). The randomization consists in replacing the summation by an evaluation of the interaction function $W^e$ using an individual $J$ drawn uniformly from the population.
+One way to avoid this summation is to use randomization (see also @FouMel04 in a model without age). The randomization consists in replacing the summation by an evaluation of the interaction function $W^e$ using an individual $J$ drawn uniformly from the population.
 
 More precisely, if $J \sim \mathcal{U}(\{1, \dots, N_{T_k}\})$ is independent of $\bar \Theta_\ell$, we have 
 $$
@@ -886,7 +890,7 @@ death_interaction_code <- "result = max(J.size - I.size, 0.);"
 ```
 the death intensity of an individual `I` is the result of the competition between individuals, depending on a characteristic named `size`, as defined in @eq-ex-interaction. 
 
-The argument `interaction_type`, set by default at `random`, is the algorithm choice for simulating the model. When `interaction_type=full`, the simulation follows @alg-no-interaction, `interaction_type=random` it follows @alg-interaction.
+The argument `interaction_type`, set by default at `random`, is the algorithm choice for simulating the model. When `interaction_type=full`, the simulation follows @alg-interaction, `interaction_type=random` it follows @alg-randomized.
 In most cases, the `random` algorithm is much faster than the `full` algorithm, as we illustrate for instance in @sec-example-interaction , where we observe the gain of a factor of 40 between the two algorithms, on a set of standard parameters. This allows in particular to explore parameter sets that give larger population sizes, without reaching computation times that explode.
 
 #### Events creation with Poisson and Inhomogeneous Poisson intensity {.unnumbered}
@@ -910,11 +914,226 @@ TODO
 
 # Population with genetically variable traits {#sec-example-interaction}
 
-TODO
+This section provides an example of how to use the `IBMPopSim` package to simulate an age-structured population with interactions, based on the model proposed in Example 1 of @FerTra09 (see also @meleard2009trait).
+
+In this model, individuals are characterized by their body size at birth
+$x_0 \in [0,4]$ and by their physical age $a \in [0,2]$. The body size
+of an individual $I=(\tau^b,\infty, x_0)$ at time $t$ is a linear
+function of its age $a(I,t) = t-\tau^b$: $$x(t)= x_0 + ga(I,t),$$ where
+$g$ is a constant growth rate assumed to be identical for all
+individuals.
+
+
+**Birth events** The birth intensity of each individual
+$I=(\tau^b, \infty, x_0)$ depends on a parameter $\alpha > 0$ and on its
+initial size, as given by the equation
+$$
+\lambda^b(t,I) = \alpha (4 - x_0) \leq \bar \lambda^b = 4\alpha.
+$${#eq-interaction-birth-intensity}
+Thus,
+smaller individuals have a higher birth intensity. When a birth occurs,
+the new individual inherit the same birth size $x_0$ as its parent with
+high probability $1-p$, or a mutation can occur with probability $p$,
+resulting in a birth size given by
+$$
+    x_0' = \min(\max(0, x_0 + G), 4),
+$${#eq-interaction-birth-kernel}
+where $G$ is a Gaussian random
+variable with mean 0 and variance $\sigma^2$.
+
+**Death events** Due to competition between individuals, the death
+intensity of an individual depends on the size of other individuals in
+the population. Bigger individuals have a better chance of survival. If
+an individual $I= (\tau^b, \infty, x_0)$ of size $x(t)= x_0 +ga(I,t)$
+encounters an individual $J= (\tau^{b}_J, \infty, x_0')$ of size
+$x'(t) = x_0'+ ga(J,t)$, then it can die with the intensity
+$$W(t, I,J) = U(x(t),x'(t)),$$ where the interaction function $U$ is
+defined by 
+$$
+    U(x,y) = \beta \left(1- \frac{1}{1+ c\exp(-4(x-y))}\right) \leq \bar W = \beta.
+$${#eq-interaction-death-intensity}
+The death intensity of an individual $I$ at time $t$ and in a population
+$Z$ is the result of interactions with all individuals in the
+population, including itself, and is given by
+$$\lambda^d_t(I,Z) = \sum_{J = (\tau^b,\infty, x_0') \in Z}  W (x_0 + g a(I,t), x_0' + g a(J,t)),$$
+
+## Population
+
+We use an initial population of 900 living individuals, all of whom have
+the same size and ages uniformly distributed between 0 and 2 years.
+
+```{r}
+N <- 900 
+x0 <- 1.06
+agemin <- 0.
+agemax <- 2.
+```
+
+```{r}
+pop_df <- data.frame(
+  "birth" = -runif(N, agemin, agemax), # Uniform age in [0,2]
+  "death" = as.double(NA), # All individuals are alive
+  "birth_size" = x0) # All individuals have the same initial birth size x0
+pop_init <- population(pop_df)
+```
+
+## Events 
+
+### Birth events
+
+The parameters involved in a birth event are the probability of mutation
+$p$, the variance of the Gaussian random variable and the coefficient
+$\alpha$ of the intensity.
+```{r}
+params_birth <- list("p" = 0.03, "sigma" = sqrt(0.01), "alpha" = 1)
+```
+
+The birth
+intensity @eq-interaction-birth-intensity is of class `individual`.
+Hence, the event is created by calling the `mk_event_individual`
+function. The size of the new individual is given in the kernel
+following @eq-interaction-birth-kernel.
+
+```{r}
+birth_event <- mk_event_individual( 
+  type = "birth",
+  intensity_code = "result = alpha*(4 - I.birth_size);",
+  kernel_code = "if (CUnif() < p)
+                   newI.birth_size = min(max(0.,CNorm(I.birth_size,sigma)),4.);
+                 else
+                   newI.birth_size = I.birth_size;")
+```
+
+
+### Death events
+
+The death
+intensity @eq-interaction-death-intensity is of class `interaction`.
+Hence, the event is created by calling the `mk_event_interaction`
+function. The parameters used for this event are the growth rate $g$,
+the amplitude of the interaction function $\beta$, and the strength of
+competition $c$.
+
+```{r}
+params_death <- list("g" = 1, "beta" = 2./300., "c" = 1.2)
+death_event <- mk_event_interaction(
+  type = "death",
+  interaction_code = "double x_I = I.birth_size + g * age(I,t);
+                      double x_J = J.birth_size + g * age(J,t);
+                      result = beta*(1.-1./(1.+c*exp(-4.*(x_I-x_J))));")
+```
+
+
+## Model creation and simulation
+
+The model is created using the `mk_model` function.
+
+The simulation of one scenario can then be launched with the call of the
+`popsim` function, after computing the events bounds
+$\bar \lambda^b=4 \alpha$ and $\bar W= \beta$.
+
+```{r}
+model <- mk_model(
+    characteristics = get_characteristics(pop_init),
+    events = list(birth_event, death_event),
+    parameters = c(params_birth, params_death))
+```
+
+
+The simulation of one scenario can then be launched with the call of the
+`popsim` function, after computing the events bounds
+$\bar \lambda^b=4 \alpha$ and $\bar W= \beta$.
+
+```{r}
+sim_out <- popsim(model = model,
+    initial_population = pop_init,
+    events_bounds = c("birth" = 4 * params_birth$alpha, 
+                      "death" = params_death$beta),
+    parameters = c(params_birth, params_death),
+    age_max = 2,
+    time = 500)
+```
+Based on the results of a simulation, we can reproduce the numerical
+results of @FerTra09. In @fig-birth-size, we draw a line for each individual in the population to represent their birth size during their lifetime. 
+
+```{r, echo=FALSE, fig.width=10}
+#| label: fig-birth-size
+#| fig-cap: "Evolution of birth size"
+#| fig-pos: 'h'
+
+pop_out <- sim_out$population
+
+ggplot(pop_out) + geom_segment(
+  aes(x=birth, xend=death, y=birth_size, yend=birth_size),
+  na.rm=TRUE, colour="blue", alpha=0.2) +
+  xlab("Time") +
+  ylab("Birth size")
+```
+
+In this example, the randomized
+@alg-randomized allows for much faster computation
+times than the model implemented below with
+@alg-interaction ("full" algorithm):
+
+```{r}
+death_event_full <- mk_event_interaction(type = "death",
+                             interaction_type= "full",
+                             interaction_code = "double x_I = I.birth_size + g * age(I,t);
+                                                 double x_J = J.birth_size + g * age(J,t);
+                                result = beta * ( 1.- 1./(1. + c * exp(-4. * (x_I-x_J))));"
+)
+
+model_full <- mk_model(characteristics = get_characteristics(pop_init),
+                       events = list(birth_event, death_event_full),
+                       parameters = c(params_birth, params_death))
+
+sim_out_full <- popsim(model = model_full,
+                       initial_population = pop_init,
+                       events_bounds =c("birth" = 4 * params_birth$alpha,
+                                        "death" = params_death$beta),
+                       parameters = c(params_birth, params_death),
+                       age_max = 2,
+                       time = 500)
+
+```
+
+```{r echo=FALSE}
+
+print(paste("The full algorithm is " ,sim_out_full$logs["duration_ns"]/sim_out$logs["duration_ns"], " times slower than the randomized version", sep=""))
+```
+
+
+
+In @fig-fullvsrandom, the two algorithms are compared for different population sizes.  
+We progressively decrease the value of the mortality rate parameter $\beta$ and increase the birth
+rate parameter $\alpha$. Starting with the values provided
+in @FerTra09, $\alpha=1$ and $\beta=2/300$, resulting in a stationary
+population size of approximately $N=360$ individuals for a sample of 50
+simulations, we can easily increase the stationary population size to
+approximately $N=2600$ individuals with $\alpha=2$ and $\beta=1/300$
+.^[The choices
+    $(\alpha, \beta) \in \{(1,2/300),(1, 1/300), (1.5, 1/300), (2, 1/300)\}$
+    lead to the stationary population sizes
+    $N \in \{360, 900, 1800, 2600\}$. For each set of parameters, we
+    generated a new initial population, which was used for a benchmark
+    of 50 simulations with both randomized and full algorithm. The
+    simulations run on a Intel Core i7-8550U CPU 1.80GHz × 8 processor,
+    with 15.3 GiB of RAM, under Debian GNU/Linux 11.] In the log-scaled figure, we can observe the trend of computation
+time as a function of the population size $N$, which is linear for the
+randomized algorithm and quadratic for the full one (
+ @alg-interaction). We can also see that the
+randomized version of the algorithm is between 17 to 100 times faster
+than the full one in this example, taking only 2 seconds in average for
+the randomized version versus 211 seconds for 
+@alg-interaction for the biggest population size
+($N=2600$) and $T=500$.
+
+
+![Full vs random algorithm computztion time](img/time_pop_size.png){#fig-fullvsrandom width=80%}
 
 # Appendix {.appendix} 
 
-## Recall on Poisson random measures {#sec-recall-poisson}
+## Recall on Poisson random measures {#sec-recall-poisson} 
 
 We recall below some useful properties of Poisson random measures,
 mainly following Chapter 6 of [@Cin11]. We also refer to [@Kal17] for a
@@ -988,6 +1207,12 @@ When the transition probability kernel $K$ does not depend on the time: $K(t, A)
 :::
 
 The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on $[0,T]\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c>0$. The procedure is described in @alg-marked-poisson.
+
+
+
+
+![Example of Marked Poisson measure on $[0,T]$ with $m(\mathrm{d} t) = L \mathrm{d} t$ (jump times occur at Poisson arrival times of rate $L$) and with $\nu(\mathrm{d} y) = \frac{1}{L} \mathbf{1}_{[0, L]}(y) \mathrm{d} y$ (marks are drawn uniformly on $[0,L]$).
+The mean measure is then $\mu(\mathrm{d} t, \mathrm{d} y) = \mathrm{d} t {1}_{[0,L]}(y) \mathrm{d} y$.](img/plot_poisson.tex){#fig-poisson}
 
 ## Pathwise representation of IBMs {#sec-pathwise-representation}
 
