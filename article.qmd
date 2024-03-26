@@ -910,7 +910,297 @@ TODO
 
 # Insurance portfolio {#sec-insurance-portfolio}
 
-TODO 
+
+This section provides an example of how to use the `IBMPopSim` package
+to simulate a heterogeneous life insurance portfolio (see
+also `vignette(IBMPopSim_insurance_portfolio)`).
+
+We consider an insurance portfolio consisting of male policyholders, of
+age greater than 65. These policyholders are characterized by their age,
+assumed to be less than $a_{max} = 110$, and risk class
+$x\in \mathcal X =\{1,2\}$.
+
+**Entries in the portfolio** New policyholders enter the population at a
+constant Poisson rate $\mu^{en}=\lambda$, which means that on average,
+$\lambda$ individuals enter the portfolio each year. A new individual
+enters the population at an age a that is uniformly distributed between
+65 and 70, and is in risk class 1 with probability $p$.
+
+**Death events** A baseline age and time specific death rate is first
+calibrated on "England and Wales (EW)" males mortality historic
+data[^1], and projected for 30 years using the Lee-Carter model with the
+package `StMoMo` (see [@stmomo]). The forecasted baseline death
+intensity is denoted by $d(t,a)$, defined by:
+$$
+d(t,a) = \sum_{k=0}^{29}\mathbf{1}_{\{k\leq t < k+1\}} d_k(a), \quad \forall \; t\in [0,30] \text{ and } a \in [65, a_{max}],
+$$ {#eq-insurance-baseline}
+with $d_k(a)$ the point estimate of the forecasted mortality rate for
+age $a$ and year $k$.\
+Individuals in risk class 1 are assumed to have mortality rates that are
+20% higher than the baseline mortality (for instance, the risk class
+could refer to smokers), while individuals in risk class 2 are assumed
+to have mortality rates that are 20% lower than the baseline (non
+smokers). The death intensity of an individual $I= (\tau_b, \infty, x)$,
+of age $a(I,t) = t - \tau_b$ at time $t$ and in risk class
+$x \in \{1, 2\}$ is thus the function $$\label{eq-insurance-deathrates}
+\lambda^d(t,I) = \alpha_x d(t,a(I,t)), \quad \alpha_1 = 1.2, \quad \alpha_2 = 0.8.$$
+In particular, the death intensity verifies Assumption TODO
+[2](#AssumptionIntensity1){reference-type="ref"
+reference="AssumptionIntensity1"} since:
+$$
+\lambda^d(t,I) \leq \bar d : = \alpha_1 \sup_{t \in [0,30]} d(t,a_{max}).
+$$ {#eq-insurance-bound-deathrates}
+
+**Exits from the portfolio** Individuals exit the portfolio at a
+constant (individual) rate $\lambda^{ex}(t,I) = \mu^{i}$ only depending
+on their risk class $i\in \{1,2\}$.
+
+## Population {#insurance-population}
+
+We start with an initial population of $30\,000$ males of age 65,
+distributed uniformly in each risk class. The population data frame has
+thus the two (mandatory) columns `birth` (here the initial time is
+$t_0=0$) and `death` (`NA` if alive), and an additional column
+`risk_cls` corresponding to the policyholders risk class. Since there
+are entry and exit events, the `entry` and `out` flags of the population
+constructor are set to `TRUE`.
+
+```{r}
+N <- 30000
+pop_df <- data.frame("birth" = rep(-65,N), "death" = rep(NA,N),
+                     "risk_cls" = rep(1:2,each=N/2))
+pop_init <- population(pop_df, entry=TRUE, out=TRUE)
+```
+
+## Events {#insurance-events}
+
+#### Entry events
+
+The age of the new individual is determined by the `kernel_code`
+argument in the `mk_event_poisson` function.
+
+```{r}
+entry_params <- list("lambda" = 30000, "p" = 0.5)
+entry_event <- mk_event_poisson(
+    type = "entry",
+    intensity = "lambda",
+    kernel_code = "if (CUnif() < p) newI.risk_cls =1;
+                   else newI.risk_cls= 2;
+                   double a = CUnif(65, 70);
+                   newI.set_age(a, t);")
+```
+
+Note that the variables `newI` and `t`, as well as the function
+`CUnif()`, are implicitly defined and usable in the `kernel_code`. The
+field `risk_cls` comes from the names of characteristics of individuals
+in the population. The names `lambda` and `p` are parameter names that
+will be specified in the `R` named list `params`.
+
+Here we use a constant $\lambda$ as the event intensity, but we could
+also use a rate $\lambda(t)$ that depends on time, using the function
+`mk_event_poisson_inhomogeneous`.
+
+#### Death and exit events
+
+The baseline death intensity defined
+in @eq-insurance-baseline and obtained with the package
+`StMoMo` is stored in the variable `death_male`.
+
+```{r}
+# StMoMo death rates
+library('StMoMo')
+library('reshape2')
+EWStMoMoMale <- StMoMoData(EWdata_hmd, series = "male")
+LC <- lc()
+ages.fit <- 65:100
+years.fit <- 1950:2016
+LCfitMale <- fit(LC, data = EWStMoMoMale, ages.fit = ages.fit, years.fit = years.fit)
+t <- 30
+LCforecastMale <- forecast(LCfitMale, h = t)
+d_k <- apply(LCforecastMale$rates, 2, function(x) stepfun(66:100, x))
+breaks <- 1:29
+death_male <- piecewise_xy(breaks,d_k)
+
+death_max <- max(sapply(d_k, function(x) { max(x) }))
+
+death_params <- list("death_male" = death_male, "alpha" = c(1.2, 0.8))
+death_event <- mk_event_individual(
+    type = "death",
+    intensity_code = "result = alpha[I.risk_cls-1] * death_male(t, I.age(t));")
+```
+
+The death and exit intensities are of class `individual` (see Table
+@tbl-intensity-classes). Hence, the death and exit events
+are created with the `mk_event_individual` function.
+
+```{r}
+death_params <- list("death_male" = death_male, "alpha" = c(1.2, 0.8))
+death_event <- mk_event_individual(
+    type = "death",
+    intensity_code = "result = alpha[I.risk_cls-1] * death_male(t, I.age(t));")
+```
+    
+```{r}
+exit_params = list("mu" = c(0.001, 0.06))
+exit_event <- mk_event_individual(
+    type = "exit",
+    intensity_code = "result = mu[I.risk_cls-1]; ")
+```
+
+## Model creation and simulation {#insurance-simulation}
+
+The model is created from all the previously defined building blocks, by
+calling the `mk_model`.
+
+```{r}
+model <- mk_model(
+    characteristics = get_characteristics(pop_init),
+    events = list(entry_event, death_event, exit_event),
+    parameters = c(entry_params, death_params, exit_params))
+```
+
+Once the model is compiled, it can be used with different parameters and
+run simulations for various scenarios. Similarly, the initial population
+(here `pop_df`) can be modified without rerunning the `mk_model`
+function. The bounds for entry events is simply the intensity $\lambda$.
+For death events, the bound is given by $\bar{d}$ defined in
+@eq-insurance-bound-deathrates, which is stored in the
+`death_max` variable.
+
+```{r}
+bounds <- c("entry" = entry_params$lambda,
+            "death" = death_max,
+            "exit" = max(exit_params$mu))
+
+sim_out <- popsim(
+    model = model,
+    initial_population = pop_init,
+    events_bounds = bounds,
+    parameters = c(entry_params, death_params, exit_params),
+    time = 30,
+    age_max = 110,
+    multithreading = TRUE)
+```
+
+## Outputs
+
+The data frame `sim_out$population` consists of all individuals present
+in the portfolio during the period of $[0, 30]$, including the
+individuals in the initial population and those who entered the
+portfolio. Each row represents an individual, with their date of birth,
+date of death (`NA` if still alive at the end of the simulation), risk
+class, and characteristics `entry` and `out`. Recall that if an
+individual enters the population at time $t$, his `entry` characteristic
+is automatically set up to be equal to $t$. The characteristics `out` is
+set to `TRUE` for individuals who left the portfolio due to an exit
+event.
+
+In this example, the simulation time over 30 years, starting from an
+initial population of 30 000 individuals is of $2\times 10^{-4}$
+seconds, for an acceptance rate of proposed event of approximately 25%.
+At the end of the simulation, the number of alive individuals is
+approximately 430 000.
+
+Initially in the portfolio (at $t=0$), there is the same number of 65
+years old policyholders in each risk class. However, policyholders in
+the risk class 2 with lower mortality rates leave the portfolio at
+higher rate than policyholders in the risk class 1 : $\mu^2 > \mu^1$.
+Therefore, the heterogeneous portfolio composition changes with time,
+including more and more individuals in risk class 1 with higher
+mortality rates, but with variations across age classes. To illustrate
+the composition of the total population at the end of the simulation
+($t=30$), we present in Figure @fig-insur-a the age pyramid of the final composition of
+the portfolio obtained with the `age_pyramid` and `plot` function of the
+`pyramid` class.
+
+`IBMPopSim` also allows the fast computation of exact life tables from
+truncated and censored individual data (due to entry and exit events),
+using the functions `death_table` and `exposure_table`. These function
+are particularly efficient, since the computations are made using the
+`Rccp` library.
+
+In Figure @fig-insur-b, we illustrate the central death rates in the
+simulated portfolio at final time. Due to the mortality differential
+between risk class 1 and 2, one would expect to observe more individuals
+in risk class 2 at higher ages. However, due to exit events, a higher
+proportion of individuals in risk class 1 exit the portfolio over time,
+resulting in a greater proportion of individuals in risk class 1 at
+higher ages than what would be expected in the absence of exit events.
+Consequently, the mortality rates in the portfolio are more aligned with
+those of risk class 1 at higher ages. This is a simple example of how
+composition changes in the portfolio can impact aggregated mortality
+rates and potentially compensate or reduce an overall mortality
+reduction (see also [@KAAKAI201916]).
+
+```{r, echo=FALSE, fig.width=10}
+#| label: fig-insur-a
+#| fig-cap: "Portfolio age pyramid at t = 30 for individuals in risk class 1 (blue) and 2 (red)."
+#| fig-pos: 'h'
+
+dim(population_alive(sim_out$population,t = 30))
+
+sim_out$logs[["duration_ns"]]/1e9
+
+sim_out$logs[["effective_events"]] / sim_out$logs[["proposed_events"]]
+
+# Age pyramid (Figure 2(a))
+
+age_grp <- 65:98
+pyr = age_pyramid(sim_out$population, time = 30, ages=age_grp)
+colnames(pyr)[2]<- "group_name"
+pyr$group_name <- as.character(pyr$group_name)
+colors <- c("1"="#00AFBB","2"="#FC4E07")
+plot(pyr,colors,age_breaks = as.integer(seq(1,length(age_grp)-1,by=2)))
+```
+
+```{r, echo=FALSE, fig.width=10}
+#| label: fig-insur-b
+#| fig-cap: "Portfolio central death rates at t = 30 (black)."
+#| fig-pos: 'h'
+
+
+# Portofolio death rates
+
+age_grp <- 65:95
+Dx_pop <- death_table(sim_out$population, ages = age_grp, period = 0:30)
+Ex_pop <- exposure_table(sim_out$population, ages = age_grp, period = 0:30)
+mx_pop <- Dx_pop/Ex_pop
+
+# Figure 2(b)
+
+Dx <- death_table(sim_out$population[sim_out$population$risk_cls==1,],
+                  ages = age_grp, period = 0:30)
+Ex <- exposure_table(sim_out$population[sim_out$population$risk_cls==1,],
+                     ages = age_grp, period = 0:30)
+
+
+LC <- lc()
+LCfitSim1 <- fit(LC, Dxt = Dx , Ext = Ex,ages=age_grp[-length(age_grp)])
+time <- 30
+age <- age_grp[-length(age_grp)]
+estimated <- LCfitSim1$ax + LCfitSim1$bx*LCfitSim1$kt[time]
+forecast_1 <- log(1.3*LCforecastMale$rates[1:(length(age_grp)-1),time])
+forecast_2 <- log(0.8*LCforecastMale$rates[1:(length(age_grp)-1),time])
+portfolio <- log((mx_pop)[,time])
+
+
+df <- data.frame(age=age, portfolio=portfolio, forecast_1=forecast_1, forecast_1=forecast_2)
+colnames(df) <- c("Age", "Portfolio", "Risk class 1", "Risk class 2")
+df_melt <- melt(df, id="Age")
+
+ggplot(data=df_melt, aes(x=Age, y=value)) +
+  geom_point(aes(color=variable, shape=variable)) +
+  geom_line(aes(color=variable, linetype=variable)) +
+  xlab("Age") +
+  ylab("Log mortality rates") +
+  scale_color_manual(values = c("Portfolio" = "black", "Risk class 1" = "blue", "Risk class 2" = "red")) +
+  scale_shape_manual(values = c("Portfolio" = 1, "Risk class 1" = NA, "Risk class 2" = NA)) +
+  scale_linetype_manual(values = c("Portfolio" = 0, "Risk class 1" = 2, "Risk class 2" = 1)) +
+  theme(legend.title = element_blank(), legend.position = c(0.9,0.2), plot.title = element_text(hjust = 0.5))
+
+
+```
+
 
 # Population with genetically variable traits {#sec-example-interaction}
 
