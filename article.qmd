@@ -640,7 +640,7 @@ The steps for simulating the first event in the population can be iterated in or
 \begin{algorithmic}
     \State \textbf{Input:} Initial population $Z_0$, horizon $T > 0$, and events described by:
         \State - Intensity functions and bounds $(\lambda^e, \bar \lambda^e)$ for $e \in \mathcal{E}$ and $(W^e, \bar W^e)$ for $e \in \mathcal{E}_W$ 
-        \State - Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W$ (see @tbl-event-action)
+        \State - Event action functions $\phi^e(t, I)$ for $e \in \mathcal{E} \cup \mathcal{E}_W$ 
     \State \textbf{Output:} Population $Z_T$
     \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$
     \While{$T_k < T$}
@@ -836,7 +836,7 @@ We refer to the `vignette(IBMPopSim_cpp)` for more details on parameters types a
 
 In `IBMPopSim`, the intensity of an event can belong to three classes @sec-event-intensity: individual intensities without interaction between individuals, corresponding to events $e\in\mathcal{E}$, individual intensities with interaction, corresponding to events $e\in\mathcal{E}_W$, and Poisson intensities (homogeneous and inhomogeneous), corresponding to events $e\in\mathcal{P}$.
 
-#### Event creation with individual intensity {.unnumbered}
+_Event creation with individual intensity_  
 
 An event $e\in \mathcal{E}$ (see @eq-intensity-no-interaction) has an intensity of the form $\lambda^e(t, I)$ which depends only on the individual `I` and time. Events with such intensity are created using the function
 ```{R}
@@ -870,7 +870,7 @@ death_intensity <- "
 "
 ```
 
-#### Event creation with interaction intensity {.unnumbered}
+_Event creation with interaction intensity_  
  
 An event $e\in \mathcal{E}_W$ is an event which occurs to an individual at a frequency which is the result of interactions with other members of the population (see @eq-intensity-interaction), and which can be written as $\lambda^e_t(I, Z_t)=\sum_{J\in Z_t} W^e(t, I, J)$ where $W^e(t, I, J)$ is the intensity of the interaction between individual $I$ and individual $J$.
 
@@ -893,38 +893,166 @@ the death intensity of an individual `I` is the result of the competition betwee
 The argument `interaction_type`, set by default at `random`, is the algorithm choice for simulating the model. When `interaction_type=full`, the simulation follows @alg-interaction, `interaction_type=random` it follows @alg-randomized.
 In most cases, the `random` algorithm is much faster than the `full` algorithm, as we illustrate for instance in @sec-example-interaction , where we observe the gain of a factor of 40 between the two algorithms, on a set of standard parameters. This allows in particular to explore parameter sets that give larger population sizes, without reaching computation times that explode.
 
-#### Events creation with Poisson and Inhomogeneous Poisson intensity {.unnumbered}
+_Events creation with Poisson and Inhomogeneous Poisson intensity_  
 
 For events $e\in\mathcal{P}$ with an intensity $\mu^e(t)$ which does not depend on the population, the event intensity is of class `inhomogeneous_poisson` or `poisson` depending on whether or not the intensity depends on time (in the second case the intensity is constant).
 
 For Poisson (constant) intensities the events are created with the function
-```{R}
+```{r}
 #| eval: false
+mk_event_poisson(type = "TYPE",
+                 name = "NAME",
+                 intensity = "CONSTANT", ...)
 ```
 
 The following example creates a death event, where individuals die at a constant intensity `lambda` (which has to be in the list of model parameters):
+```{r}
+#| eval: false
+mk_event_poisson(type = "death,
+                 intensity = "lambda")
+```
 
-TODO
+When the intensity $(\mu^e(t))$ depends on time, the event can be created similarly by using the function
+```{r}
+#| eval: false
+mk_event_inhomogeneous_poisson(type = "TYPE",
+                               name = "NAME",intensity = "CONSTANT", ...)
+```
+
+### Event kernel code {#sec-event-kernel-code}
+
+When an event occurs, the events kernels $k^e$ specify how the event modifies the population. The events kernels are defined in the `kernel_code` parameter of the `mk_event_CLASS(type = "TYPE", name ="NAME", ...)` function. The `kernel_code` is `NULL` by default and doesn't have to be specified for death, exit events and birth events, but mandatory for entry and swap events. Recall that the `kernel_code` argument is a string composed of a few lines of `C++` code, characterizing the individual characteristics following the event.
+@tbl-events-variables summarizes the list of available variables that can be used in the `kernel_code`.
+
+- **Death/Exit event** If the user defines a death event, the death date of the current individual `I` is set automatically to the current time `t`. Similarly, when an individual `I` exits the population,`I.out` is set automatically to `TRUE` and his exit time is recorded as a \"death\" date. For these events types, the `kernel_code` doesn't have to be specified by the user.
+
+- **Birth event** The default generated event kernel is that an individual `I` gives birth to a new individual `newI` of age 0 at the current time `t`, with same characteristics than the parent `I`. If no kernel is specified, the default generated `C++` code for a birth event is:
+```{r}
+#| eval: false
+individual newI = I;
+newI.birth_date = t;
+pop.add(newI);
+```
+The user can modify the birth kernel, by specify the argument `kernel_code` of `mk_event_CLASS`. In this case, the generated code is
+```{r}
+#| eval: false
+individual newI = I;
+newI.birth_date = t;
+_KERNEL_CODE_
+pop.add(newI);
+```
+where `_KERNEL_CODE_` is replaced by the content of the `kernel_code` argument.
+
+- **Entry event** When an individual `I` enters the population, `I.entry` is set automatically as the date at which the individual enters the population. When an entry occurs the individual entering the population is not of age $0$. In this case, the user must specify the `kernel_code` argument indicating how the age and characteristics of the new individual are chosen. For instance, the code below creates an event of type `entry`, named `ev_example`, where individuals enter the population at a Poisson constant intensity. When an individual `newI` enters the population at time `t`, his age is chosen as a normally distributed random variable, with mean 20 and variance 4.
+```{r}
+#| eval: false
+mk_event_poisson(
+    type = "entry", 
+    name = "ev_example", 
+    intensity = "lambda", 
+    kernel_code = "
+        double a_I = max(CNorm(20, 2), 0.); 
+        newI.set_age(a_I, t);
+    ")
+```
+
+- **Swap event** The user must specify the `kernel_code` argument indicating how the characteristics of an individual are modified following a swap.
+
+::: {#tbl-events-variables}
+
+Variable           Description
+------------------ -------------------------------------------------------------
+Variable           Description
+`I`                Current individual
+`J`                Another individual in the population (only for interaction)
+`t`                Current time
+`pop`              Current population (vector)
+`newI`             Available only for birth and entry events.   
+Model parameters   Depends on the model
+
+`C++` variables available for events kernel code
+:::
+
+::: {#rem}
+When there are several events of the same type, the user can identify which events generated a particular event by adding a characteristic to the population recording the event name/id when it occurs. See e.g. `vignette(IBMPopSim_human_pop)` for an example with different causes of death.
+:::
+
+## Model creation {#sec-model-creation}
+
+Once the population, the events, and model parameters are defined, the IBM model is created using the function `mk_model`.
+
+```{r}
+#| eval: false
+model <- mk_model(characteristics = get_characteristics(pop_init),
+                  event = events_list,
+                  parameters = model_params)
+```
+During this step which can take a few seconds, the model is created and compiled using the `Rcpp` package. The model structure in `IBMPopSim` is that the model depends only on the population characteristics' and parameters names and types, rather than their values. This means that once the model has been created, various simulations can be done with different initial populations and different parameters values.
+
+::: {#exm-model-creation}
+Here is an example of model with a population structured by age and gender, with birth and death events. The death intensity of an individual of age $a$ is $d(a) = \alpha \exp(\beta a),$ and females between 15 and 40 can give birth with birth intensity $b(a) = \bar \lambda^b \mathbf{1}_{[15,40]}.$ The newborn is a male with probability $p_{male}$.
+```{r}
+#| eval: false
+params <- list("p_male"= 0.51,
+               "birth_rate" = stepfun(c(15,40),c(0,0.05,0)),
+               "death_rate" = gompertz(0.008,0.02))
+
+
+death_event <- mk_event_individual(type = "death", name= "my_death_event",
+                  intensity_code = "result = death_rate(age(I,t));")
+
+birth_event <- mk_event_individual( type = "birth",
+                  intensity_code = "if (I.male)
+                                        result = 0;
+                                    else
+                                        result=birth_rate(age(I,t));",
+                  kernel_code = "newI.male = CUnif(0, 1) < p_male;")
+pop <- population(EW_pop_14$sample)
+
+model <- mk_model(characteristics = get_characteristics(pop),
+                  events = list(death_event,birth_event),
+                  parameters = params)
+```
+:::
+
+## Simulation {#sec-package-simulation}
+
+The simulation of the IBM is based on the algorithms presented in @sec-simulation-algo and @sec-simulation-randomized.
+The user has first to specify bounds for the intensity or interaction functions of each event type. The random evolution of the population can then be simulated over a period of time $[0,T]$ by calling the function `popsim`.
+
+### Events bounds
+
+Since the IBM simulation algorithm is based on an acceptance-rejection method for simulating random times, the user has to specify bounds for the intensity (or interaction) functions of each event (see @cnj-intensity1 and @cnj-intensity2).
+These bounds should be stored in a named vector, where for event $e$, the name corresponding to the event bound $\bar{\mu}^e$, $\bar{\lambda}^e$ or $\bar{W}^e$ is the event `name` defined during the event creation step.
+
+In @exm-model-creation from previous section the intensity bound for birth events is $\bar\lambda_b$. Since the death intensity function is not bounded, the user will have to specify a maximum age $a_{\max}$ in `popsim` (all individuals above $a_{\max}$ die automatically). Then, the bound for death events is $\bar \lambda_d = \alpha\exp(\beta a_{\max}).$ 
+In the example, the death event has been named `my_death_event`. No name has been specified for the birth event which thus has the default name `birth`. Then,
+```{r}
+#| eval: false
+a_max <- 120 # maximum age
+events_bounds <- c("my_death_event" = params$death_rate(a_max),
+                   "birth" = max(params$birth_rate))
+```
+
+Once the model and events bounds have been defined, a random trajectory of the population can be simulated by calling
+```{r}
+#| eval: false
+sim_out <- popsim(model, pop, events_bounds, params,
+                  age_max = a_max, time = 30)
+```
+
+_Optional parameters_  
 
 
 
 # Insurance portfolio {#sec-insurance-portfolio}
 
 
-This section provides an example of how to use the `IBMPopSim` package
-to simulate a heterogeneous life insurance portfolio (see
-also `vignette(IBMPopSim_insurance_portfolio)`).
+This section provides an example of how to use the `IBMPopSim` package to simulate a heterogeneous life insurance portfolio (see also [`vignette(IBMPopSim_insurance_portfolio)`](https://daphnegiorgi.github.io/IBMPopSim/articles/IBMPopSim_insurance_portfolio.html)).
 
-We consider an insurance portfolio consisting of male policyholders, of
-age greater than 65. These policyholders are characterized by their age,
-assumed to be less than $a_{max} = 110$, and risk class
-$x\in \mathcal X =\{1,2\}$.
+We consider an insurance portfolio consisting of male policyholders, of age greater than 65. These policyholders are characterized by their age, assumed to be less than $a_{\max} = 110$, and risk class $x \in \mathcal X = \{1, 2\}$.
 
-**Entries in the portfolio** New policyholders enter the population at a
-constant Poisson rate $\mu^{en}=\lambda$, which means that on average,
-$\lambda$ individuals enter the portfolio each year. A new individual
-enters the population at an age a that is uniformly distributed between
-65 and 70, and is in risk class 1 with probability $p$.
+**Entries in the portfolio** New policyholders enter the population at a constant Poisson rate $\mu^{en}=\lambda$, which means that on average, $\lambda$ individuals enter the portfolio each year. A new individual enters the population at an age a that is uniformly distributed between 65 and 70, and is in risk class 1 with probability $p$.
 
 **Death events** A baseline age and time specific death rate is first
 calibrated on "England and Wales (EW)" males mortality historic
@@ -932,7 +1060,7 @@ data[^1], and projected for 30 years using the Lee-Carter model with the
 package `StMoMo` (see [@stmomo]). The forecasted baseline death
 intensity is denoted by $d(t,a)$, defined by:
 $$
-d(t,a) = \sum_{k=0}^{29}\mathbf{1}_{\{k\leq t < k+1\}} d_k(a), \quad \forall \; t\in [0,30] \text{ and } a \in [65, a_{max}],
+d(t,a) = \sum_{k=0}^{29}\mathbf{1}_{\{k\leq t < k+1\}} d_k(a), \quad \forall \; t\in [0,30] \text{ and } a \in [65, a_{\max}],
 $$ {#eq-insurance-baseline}
 with $d_k(a)$ the point estimate of the forecasted mortality rate for
 age $a$ and year $k$.\
@@ -948,7 +1076,7 @@ In particular, the death intensity verifies Assumption TODO
 [2](#AssumptionIntensity1){reference-type="ref"
 reference="AssumptionIntensity1"} since:
 $$
-\lambda^d(t,I) \leq \bar d : = \alpha_1 \sup_{t \in [0,30]} d(t,a_{max}).
+\lambda^d(t,I) \leq \bar d : = \alpha_1 \sup_{t \in [0,30]} d(t,a_{\max}).
 $$ {#eq-insurance-bound-deathrates}
 
 **Exits from the portfolio** Individuals exit the portfolio at a
