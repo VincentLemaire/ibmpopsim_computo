@@ -1056,7 +1056,7 @@ We consider an insurance portfolio consisting of male policyholders, of age grea
 
 **Death events** A baseline age and time specific death rate is first
 calibrated on "England and Wales (EW)" males mortality historic
-data[^1], and projected for 30 years using the Lee-Carter model with the
+data (source: Human Mortality Database <https://www.mortality.org/>), and projected for 30 years using the Lee-Carter model with the
 package `StMoMo` (see [@stmomo]). The forecasted baseline death
 intensity is denoted by $d(t,a)$, defined by:
 $$
@@ -1264,11 +1264,11 @@ reduction (see also [@KAAKAI201916]).
 #| fig-cap: "Portfolio age pyramid at t = 30 for individuals in risk class 1 (blue) and 2 (red)."
 #| fig-pos: 'h'
 
-dim(population_alive(sim_out$population,t = 30))
+print(paste("Number of alive individuals in the population at final time T=30 : " ,dim(population_alive(sim_out$population,t = 30))[1], sep="")) 
 
-sim_out$logs[["duration_ns"]]/1e9
+print(paste("Execution time : ", sim_out$logs[["duration_ns"]]/1e9, "s", sep="")) 
 
-sim_out$logs[["effective_events"]] / sim_out$logs[["proposed_events"]]
+print(paste("Proportion of effective events and proposed events : ", sim_out$logs[["effective_events"]] / sim_out$logs[["proposed_events"]], sep="")) 
 
 # Age pyramid (Figure 2(a))
 
