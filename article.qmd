@@ -1266,9 +1266,9 @@ reduction (see also [@KAAKAI201916]).
 
 print(paste("Number of alive individuals in the population at final time T=30 : " ,dim(population_alive(sim_out$population,t = 30))[1], sep="")) 
 
-print(paste("Execution time : ", sim_out$logs[["duration_ns"]]/1e9, "s", sep="")) 
+print(paste("Execution time : ", format(sim_out$logs[["duration_ns"]]/1e9,digits = 2), "s", sep="")) 
 
-print(paste("Proportion of effective events and proposed events : ", sim_out$logs[["effective_events"]] / sim_out$logs[["proposed_events"]], sep="")) 
+print(paste("Proportion of effective events and proposed events : ", format(sim_out$logs[["effective_events"]] / sim_out$logs[["proposed_events"]], digits=2), sep="")) 
 
 # Age pyramid (Figure 2(a))
 
