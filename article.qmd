@@ -424,7 +424,7 @@ SDE driven by the Poisson measure $Q$:
 $$
     \begin{aligned}
     Z_t = Z_0 &+ \int_0^t \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{s^-}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-})\}} Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ) \\
-    \nonumber &+   \int_0^t \int_{\mathcal{P} \times \mathbb R^+}  \phi^e(s, I_{s^-}) \mathbf{1}_{\{\theta \leq \mu^e(s) \}} Q^{\mathcal{P}} (\mathrm{d}s ,\mathrm{d}e,  \mathrm{d}\theta),  \qquad \forall  0 \leq t \leq T,
+    &+   \int_0^t \int_{\mathcal{P} \times \mathbb R^+}  \phi^e(s, I_{s^-}) \mathbf{1}_{\{\theta \leq \mu^e(s) \}} Q^{\mathcal{P}} (\mathrm{d}s ,\mathrm{d}e,  \mathrm{d}\theta),  \qquad \forall  0 \leq t \leq T,
 \end{aligned}
 $$ {#eq-sde-eq-Z}
 and where $I_{s^-}$ is an individual, chosen uniformly among alive individuals in the population $Z_{s^-}$.
@@ -1626,6 +1626,30 @@ When the transition probability kernel $K$ does not depend on the time: $K(t, A)
 The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on $[0,T]\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c>0$. The procedure is described in @alg-marked-poisson.
 
 
+```pseudocode
+#| label: alg-marked-poisson
+#| html-indent-size: "1.2em"
+#| html-comment-delimiter: "//"
+#| html-line-number: true
+#| html-line-number-punc: ":"
+#| html-no-end: false
+#| pdf-placement: "htb!"
+#| pdf-line-number: true
+
+\begin{algorithm}
+\caption{Simulation of Marked Poisson measure}
+\begin{algorithmic}
+    \State \textbf{Input:} Constant $c$, simulatable kernel $K$ and final time $T$ 
+    \State \textbf{Output:} Times $(T_1,\dots,T_n)$  and Marks $(Y_1, \dots, Y_n)$ of the Marked Poisson measure of mean $\mu(\mathrm{d} t, \mathrm{d} y) = c \mathrm{d} t K(t, \mathrm{d} y)$ in $[0,T]\times F$.
+    \State Initialization draw $T_1 \sim \mathcal{E}(c)$ and draw $Y_1 \sim K(T_1, \mathrm{d} y)$ 
+    \While{condition}
+        \State increment iterative variable $k \longleftarrow k+1$
+        \State compute next jump time compute next jump time $T_k \longleftarrow T_{k-1} + \mathcal{E}(c)$
+        \State draw a conditional mark $Y_k \sim K(T_k, \mathrm{d} y)$    
+    \EndWhile
+\end{algorithmic}
+\end{algorithm}
+``` 
 
 
 
@@ -1676,11 +1700,128 @@ By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus
 The proof is obtained using pathwise comparison result, generalizing those obtained in [@KaaElK20].
 
 ::: {.proof}
-TODO
+Let $Z$ be a solution of @eq-sde-eq-Z. For
+all $e \in \mathcal{P} \cup \mathcal{E} \cup  \mathcal{E}_W$, let $N^e$
+be the process counting the occurrence of events of type $e$ in the
+population. $N^e$ is a counting process of $\{\mathcal{F}_t\}$-intensity
+$(\Lambda_t^e(Z_{t^-}))$, solution of 
+$$
+\begin{aligned}
+  & N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \boldsymbol{1}_{\{k\leq N_{s^-}\}}  \boldsymbol{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta), & \quad  \textit{ if } e \in \mathcal{E}\cup \mathcal{E}_W, \\
+& N_t^e = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \mu^e_s \}} Q^{\mathcal{P}}(\mathrm{d}s, \{e\}, \mathrm{d}\theta), & \quad  \textit{ if } e \in \cal P. \\
+\end{aligned}
+$$ {#eq-Ne} 
+By definition, the jump times of the multivariate
+counting process
+$(N^e)_{e \in \mathcal{P} \cup \mathcal{E}\cup \mathcal{E}_W}$ are the
+population event times $(T_n)_{n\geq 0}$. The idea of the proof is to
+show that $(N^e)_{e \in \mathcal{P} \cup \mathcal{E}\cup \mathcal{E}_W}$
+does not explode in finite time, by pathwise domination with a simpler
+multivariate counting process. The first steps are to control the
+population size $N_t = N_0 + N^b_t + N^{en}_t$.\
+
+**Step 1** Let $(\bar N^b, \bar N^{en})$ be the 2-dimensional counting
+process defined as follows: for $e \in \{b,en\}$, $\bar N^e_0 = 0$ and
+$$
+\begin{aligned}
+& \bar N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \boldsymbol{1}_{\{k\leq N_0 + \bar N_{s^-} \}}  \boldsymbol{1}_{\{\theta \leq f^e(N_0 + \bar N_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta),  \quad  \textit{ if } e \in \mathcal{E}\cup \mathcal{E}_W, \\
+&   \bar N_t^e = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \bar \mu^e\}} Q^{\mathcal{P}}(\mathrm{d}s, \{e\}, \mathrm{d}\theta)  \quad  \textit{ if } e \in \cal P,
+\end{aligned}
+$$ {#eq-dominatingprocess}
+with $\bar N := \bar N^b + \bar N^{en}$ and $f^e$ the
+function introduced in @cnj-non-explosion.\
+- If $b,en \in \cal P$, then $\bar N$ is a inhomogeneous Poisson
+process.\
+- If $b,en \in \mathcal{E}\cup \mathcal{E}_W$, then it is
+straightforward to show that conditionally to $N_0$, $\bar N$ is a pure
+birth Markov process with birth intensity function
+$g(n) = n\big(f^b(N_0+n) + f^{en}(N_0+n)\big)$. In particular, by @cnj-non-explosion, 
+$g$ verifies the standard Feller
+condition for pure birth Markov processes (see e.g. [@BanMel15]):
+$$\sum_{n=1}^\infty \frac{1}{g(n)}.$$ - Finally, if $b \in \mathcal{E}$
+and $en \in \cal P$ (or equivalently if $b \in \cal P$ and
+$en \in \mathcal{E}$), then one can show easily that $\bar N$ is a pure
+birth Markov process with immigration, of birth intensity function
+$g(n)= \bar  \mu^{en} + n f^b(N_0 + n)$ (resp.
+$g(n)= \bar  \mu^b+ n f^{en}(N_0 + n)$), also verifying the Feller
+condition.
+Therefore, there exists a non-exploding solution of @eq-dominatingprocess, 
+by Proposition 3.3 in [@KaaElK20].\
+
+**Step 2** The second step consists in showing that $(N^b, N^{en})$ is
+strongly dominated by $(\bar N^b, \bar N^{en})$, i.e that all jumps of
+$(N^b, N^{en})$ are jumps of $(\bar N^b, \bar N^{en})$. Without loss of
+generality, we can assume that $f^e:\mathbb{N} \to (0,+\infty)$ is
+increasing since $f^e(n)$ can be replaced by
+$\sup_{\{m\leq n \} } f^e(m)$.\
+Let $e\in \{b, en\}$. If $e \in \mathcal{P}$, then for all $s\in [0,T]$
+$$\{\theta \leq \mu_s^e\} \subset \{ \theta \leq \bar \mu^e\},$$ which
+yields that all jumps of $N^e$ are jumps of $\bar N^e$.\
+If $e \in  \mathcal{E}\cup \mathcal{E}_W$, the proof by induction is
+analogous to the proof of Proposition 2.1 in [@KaaElK20]. Let $T_1^e$ be
+first jump time of $N^e$, associated with the marks $(K_1^e,\Theta_1^e)$
+of $Q$ (or $Q^{\mathcal{P}}$). Then, by Definition of @eq-Ne, $K_1^e \leq N_0$ and
+$\Theta_1^e \leq \lambda_{T_1^e}^e (I_{K_1^e}, Z_0)$.\
+By @cnj-non-explosion, we have also
+$$\Theta_1^e \leq \lambda_{T_1^e}^e (I_{K_1^e}, Z_0) \leq f^e(N_0) \leq f^e(N_0 +\bar N_{T_1^{e,-}}), \quad K_1^e \leq N_0 +  \bar N_{T_1^{e,-}}.$$
+Thus, $T_1^e$ is also a jump time of $\bar N^e$. By iterating this
+argument, we obtain that all jump times of $N^e$ are jump times of
+$\bar N^e$.\
+Thus, $(N^b, N^{en})$ does not explode in finite time.\
+
+**Step 3** It remains to show that for $e \notin \{b, en\}$, $N^e$ does
+not explode.\
+Let $e \neq b, en$. If $e\in \mathcal P$, the proof is the same than in
+Step 2. Otherwise, let:
+$$h^e_t(n) = \sup_{I \in \mathcal{I},  m \leq n } \lambda^e_t \biggl(I, \sum_{k=1}^{m} \delta_{I_k}\biggr), \quad \forall \; t \in [0,T] \;  n \in {\mathbb{N}}^*.$$
+By @cnj-intensity1 and @cnj-intensity2, $h^e_t(n) <\infty$, and we can
+introduce the non exploding counting process $\bar{N}^e$, defined by the
+thinning equation :
+$$\bar N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \boldsymbol{1}_{\{k\leq N_0 + \bar N_{s^-} \}}  \boldsymbol{1}_{\{\theta \leq h^e_s (N_0 + \bar N_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta),$$
+with $\bar N_s = \bar N^b_s + \bar N^{en}_s$.\
+Finally, by Step 2, for $s\in [0,T]$ the population size
+$N_s = N_0 + N^b_s+ N^{en}_s$ is bounded a.s. by $N_0 + \bar N_s$, since
+all jumps of $(N^b,N^{en})$ are jumps of $(\bar N^b, \bar N^{en})$.
+Thus, for all $s\in [0,T]$,
+$$\{k \leq N_{s^-} \}\subset  \{k\leq N_0 + \bar N_{s^-} \}, \text{ and }  \{\theta \leq \lambda_s^e(I_k, Z_{s^-})\} \subset \{\theta \leq h_s^e(N_0 + \bar N_{s^-})\}.$$
+This proves that all jumps of $N^e$ are jumps $\bar N^e$, and thus $N^e$
+does not explode in finite time.
 :::
 
+
 ### Alternative pathwise representation 
-TODO
+
+::: {#thm-EqZrandomized}
+Let
+$\mathcal{J}_{\mathcal{E}} = \mathbb N \times \mathcal{E}$ and
+$\mathcal{J}_W  = \mathbb N \times \mathcal{E}_W$.\
+Let $Q^{\mathcal{E}}$ be a random Poisson measure on
+$\mathbb R^+ \times \mathcal{J}_{\mathcal{E}}\times \mathbb{R}^+$, of
+intensity
+$\mathrm{d}t \delta_{\mathcal{J}_{\mathcal{E}}}(\mathrm{d}k, \mathrm{d}e)  \mathbf{1}_{[0,\bar \lambda^e]} (\theta) \mathrm{d}\theta$,
+and $Q^{W}$ a random Poisson measure on
+$\mathbb R^+ \times \mathcal{J}_W \times \mathbb{N} \times  \mathbb{R}^+$,
+of intensity
+$\mathrm{d}t \delta_{\mathcal{J}_{\mathcal{E}}}(\mathrm{d}k,\mathrm{d}e)) \delta_{\mathbb{N}} (\mathrm{d}j) \mathbf{1}_{[0,\bar W^e]} (\theta)\mathrm{d}\theta$.
+Finally, let $Q^{\mathcal P}$ be a random Poisson measure on
+$\mathbb R^+ \times \mathcal{P}  \times \mathbb{R}^+$, of intensity
+$\mathrm{d}t \delta_{\cal P}(\mathrm{d}e)  \mathbf{1}_{[0,\bar \mu^e]} (\theta)\mathrm{d}\theta$.\
+There exists a unique measure-valued process $Z$, strong solution on the
+following SDE driven by Poisson measure: $$\begin{aligned}
+Z_t  = Z_0 &  + \int_0^t \int_{\mathcal{J}_{\mathcal{E}}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{s^-}\} }\mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-})\}} Q^{\mathcal{E}}(\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ) \\
+&  + \int_0^t \int_{\mathcal{J}_W  \times {\mathbb{N}}\times  \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{k \leq N_{s^-}\} } \mathbf{1}_{\{j \leq N_{s^-}\} }\mathbf{1}_{\{\theta \leq W^e(s, I_k , I_j) \}} Q^W (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e,  \mathrm{d}j ,\mathrm{d}\theta ),\\
+& +   \int_0^t \int_{\mathcal{P} \times \mathbb R^+}  \phi^e(s, I_{s^-}) \mathbf{1}_{\{\theta \leq \mu_s^e \}} Q^{\mathcal{P}} (\mathrm{d}s ,\mathrm{d}e , \mathrm{d}\theta),
+\end{aligned}$$ {#eq-SDE_pop_randomized}
+with $I_{s^-}$ an individual taken uniformly in
+$Z_{s^-}$.\
+Furthermore, the solution of
+@eq-SDE_pop_randomized has the same law than the solution of
+@eq-sde-eq-Z. 
+:::
+
+The proof @thm-EqZrandomized  follows the same steps than the proof of
+@thm-eq-Z.
+
 
 ## Proof of @thm-interaction {#sec-prf-thm-interaction}
 
