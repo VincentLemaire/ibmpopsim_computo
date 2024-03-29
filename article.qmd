@@ -29,7 +29,7 @@ author:
 date: last-modified
 date-modified: last-modified
 description: |
-    TODO
+    This document provides a full description of the Stochastic Individual-Based Models (IBMs) that can be implemented in the IBMPopSim package. A unified mathematical and simulation framework is given, with a detailed description of the simulation algorithm. Examples of applications for the package are also provided, showing the performance and flexibility of IBMPopSim. 
 abstract: >+
     The `R` Package `IBMPopSim` aims to simulate the random evolution of heterogeneous populations using stochastic Individual-Based Models (IBMs). The package enables users to simulate population evolution, in which individuals are characterized by their age and some characteristics, and the population is modified by different types of events, including births/arrivals, death/exit events, or changes of characteristics. The frequency at which an event can occur to an individual can depend on their age and characteristics, but also on the characteristics of other individuals (interactions). Such models have a wide range of applications in fields including  actuarial science, biology, ecology or epidemiology. `IBMPopSim` overcomes the limitations of time-consuming IBMs simulations by implementing new efficient algorithms  based on thinning methods, which are compiled using the `Rcpp` package while providing a user-friendly interface.
 keywords: [Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation]
@@ -195,7 +195,7 @@ $$
 composed of all individuals (alive or dead) who have lived in the population before time $t$. As a random set, $Z_t$ can be represented by a random counting measure on $\mathcal{I}$ , that is an integer-valued measure $Z: \Omega \times \mathcal{I}\to \bar {\mathbb{N}}$ where for $A \in \mathcal{I}$, $Z(A)$ is the (random) number of individuals $I$ in the subset $A$. With this representation: 
 $$
 \begin{aligned}
-    Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &= \sum_{k=1}^{N_t} \delta_{I_k} (\tau^b, \tau^d,x), \nonumber \\
+    Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &= \sum_{k=1}^{N_t} \delta_{I_k} (\tau^b, \tau^d,x),  \\
     \text{ with }  \int_{\mathcal{I}} f(\tau^b, \tau^d, x) Z_t (\mathrm{d}\tau^b, \mathrm{d}\tau^d , \mathrm{d}x) &= \sum_{k=1}^{N_t} f(I_k).
 \end{aligned}
 $$ {#eq-popZ}
@@ -275,7 +275,7 @@ In a given model, the set of events $e\in E$ with Poisson intensities will be de
 $$
 \begin{aligned}
     &\Lambda^e_t (Z_t) = \sum_{k=1}^{N_t} \lambda^e_t ( I_k,Z_t),  \\
-    & \nonumber \text{with } \mathbb P\big( \text{event } e \text { occurs to an individual } I \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \lambda^e_t (I,Z_t)\mathrm{d}t.
+    &  \text{with } \mathbb P\big( \text{event } e \text { occurs to an individual } I \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \lambda^e_t (I,Z_t)\mathrm{d}t.
 \end{aligned}
 $$ {#eq-global-intensity}
 
@@ -1859,7 +1859,7 @@ $[T_n, \infty) \times \mathcal J_n \times \mathbb R^+$, of intensity:
 $$
 \begin{aligned}
 \bar \mu^n(\mathrm{d}t, \mathrm{d}k, \mathrm{d}e , \mathrm{d}\theta ) & := \mathbf{1}_{\{t > T_n \}}\bar \Lambda (N_{T_n})\mathrm{d}t  \frac{\bar \lambda^e }{\bar \Lambda(N_{T_n})} \delta_{\mathcal J_n}(\mathrm{d}k, \mathrm{d}e) \frac{1}{\bar \lambda^e} \mathbf{1}_{[0,\bar \lambda^e]} (\theta)\mathrm{d}\theta,\\
-\nonumber&  = \mathbf{1}_{\{t > T_n \}}\mathrm{d}t  \delta_{\mathcal J_n}(\mathrm{d}k, \mathrm{d}e) \mathbf{1}_{[0,\bar \lambda^e]}(\theta)\mathrm{d}\theta .
+&  = \mathbf{1}_{\{t > T_n \}}\mathrm{d}t  \delta_{\mathcal J_n}(\mathrm{d}k, \mathrm{d}e) \mathbf{1}_{[0,\bar \lambda^e]}(\theta)\mathrm{d}\theta .
 \end{aligned}
 $$ {#eq-barmun}
 By definition, $\bar Q^n$ has no jumps before $T_n$.\
@@ -1871,7 +1871,7 @@ composition is constant on $[T_n, T_{n+1}[$, $Z_t = Z_{T_n}$, the
 population on $[0,T_{n+1}]$ is defined by: 
 $$
 \begin{aligned}
-\nonumber Z_{t\wedge T_{n+1}}  &  = Z_{t \wedge T_n }  + \mathbf{1}_{\{t\geq T_{n+1}\}}\phi^{E_{n+1}}(T_{n+1}, I_{n+1}), \\
+ Z_{t\wedge T_{n+1}}  &  = Z_{t \wedge T_n }  + \mathbf{1}_{\{t\geq T_{n+1}\}}\phi^{E_{n+1}}(T_{n+1}, I_{n+1}), \\
 & = Z_{t \wedge T_n } + \int_{t \wedge T_n}^{t \wedge T_{n+1}} \int_{\mathcal{J}_n
 \times \mathbb R^+} \phi^e (s , I_k)  \mathbf{1}_{\{\theta\leq \lambda_s^e(I_k, Z_{s^-})\}}\bar Q^n (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).
 \end{aligned}
