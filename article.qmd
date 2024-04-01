@@ -65,18 +65,18 @@ library(ggplot2)
 
 In various fields, advances in probability have contributed to the development of a new mathematical framework for so-called individual-based stochastic population dynamics, also called stochastic Individual-Based Models (IBMs).
 
-Stochastic IBMs allow the modeling in continuous time of populations dynamics structured by age and/or characteristics. In the field of mathematical biology and ecology, a large community has used this formalism for the study of the evolution of structured populations (see e.g. [@FerTra09; @collet2013rigorous; @BanMel15; @costa2016stochastic; @billiard2016effect; @lavallee2019stochastic; @meleard2019birth; @calvez2020horizontal]), after the pioneer works [@FouMel04;@tran_2008;@meleard2009trait].
+Stochastic IBMs allow the modeling in continuous time of populations dynamics structured by age and/or characteristics. In the field of mathematical biology and ecology, a large community has used this formalism for the study of the evolution of structured populations (see e.g. @FerTra09; @collet2013rigorous; @BanMel15; @costa2016stochastic; @billiard2016effect; @lavallee2019stochastic; @meleard2019birth; @calvez2020horizontal), after the pioneer works [@FouMel04;@tran_2008;@meleard2009trait].
 
-IBMs are also useful in demography and actuarial sciences, for the modeling of human populations dynamics (see e.g. [@Ben10; @Bou16; @karoui2021simulating]). They allow the modeling of heterogeneous and complex population dynamics, which can be used to compute demographic indicators or simulate the evolution of insurance portfolios in order to study the basis risk, compute cash flows for annuity products or pension schemes, or for a fine assessment of mortality models [@barrieu2012understanding]. There are other domains in which stochastic IBMs can be used, for example in epidemiology with stochastic compartmental models, neurosciences, cyber risk, or Agent-Based Models (ABMs) in economy and social sciences, which can be seen as IBMs.
-Many mathematical results have been obtained in the literature cited above, for quantifying the limit behaviors of IBMs in long time or in large population. In particular, pathwise representations of IBMs have been introduced in [@FouMel04] (and extended to age-structured populations in [@tran_2008;@meleard2009trait]), as measure-valued pure jumps Markov processes, solutions of SDEs driven by Poisson measures. These pathwise representations are based on the *thinning* and projection of Poisson random measures defined on extended spaces. However, the simulation of large and interacting populations is often referred as computationally expensive.
+IBMs are also useful in demography and actuarial sciences, for the modeling of human populations dynamics (see e.g. @Ben10; @Bou16; @karoui2021simulating). They allow the modeling of heterogeneous and complex population dynamics, which can be used to compute demographic indicators or simulate the evolution of insurance portfolios in order to study the basis risk, compute cash flows for annuity products or pension schemes, or for a fine assessment of mortality models [@barrieu2012understanding]. There are other domains in which stochastic IBMs can be used, for example in epidemiology with stochastic compartmental models, neurosciences, cyber risk, or Agent-Based Models (ABMs) in economy and social sciences, which can be seen as IBMs.
+Many mathematical results have been obtained in the literature cited above, for quantifying the limit behaviors of IBMs in long time or in large population. In particular, pathwise representations of IBMs have been introduced in @FouMel04 (and extended to age-structured populations in @tran_2008;@meleard2009trait), as measure-valued pure jumps Markov processes, solutions of SDEs driven by Poisson measures. These pathwise representations are based on the *thinning* and projection of Poisson random measures defined on extended spaces. However, the simulation of large and interacting populations is often referred as computationally expensive.
 
 The aim of the `R` package `IBMPopSim` is to meet the needs of the various communities for efficient tools in order to simulate the evolution of stochastic IBMs. `IBMPopSim` provides a general framework for the simulation of a wide class of IBMs, where individuals are characterized by their age and/or a set of characteristics. Different types of events can be included in the modeling by users, depending on their needs: births, deaths, entry or exit in/to the population and changes of characteristics (swap events). Furthermore, the various events that can happen to individuals in the population can occur at a non-stationary frequency, depending on the individuals' characteristics and time, and also including potential interactions between individuals.
 
 We introduce a unified mathematical and simulation framework for this class of IBMs, generalizing the pathwise representation of IBMs by thinning of Poisson measures, as well as the associated population simulation algorithm, based on an acceptance/rejection procedure. In particular, we provide general sufficient conditions on the event intensities under which the simulation of a particular model is possible.
 
-We opted to implement the algorithms of the `IBMPopSim` package using the `Rcpp` package, a tool facilitating the seamless integration of high-performance `C++` code into easily callable `R` functions [@JSSv040i08]. With just a few lines of `C++` code, `IBMPopSim` offers user-friendly R functions for defining IBMs. Once events and their associated intensities are specified, an automated procedure creates the model. This involves integrating the user's source code into the primary `C++` code using a template mechanism. Subsequently, `Rcpp` is invoked to compile the model and integrate it into the `R` session. Following this process, the model becomes callable with varying parameters, enabling the generation of diverse population evolution scenarios. Combined with the design of the simulation algorithms, the package structure yields very competitive simulation runtimes for IBMs, while staying user-friendly for `R` users. Several outputs function are also implemented in `IBMPopSim`. For instance the package allows the construction and visualization of age pyramids, as well as the construction of death and exposures table from the censored individual data, compatible with `R` packages concerned with mortality modelling, such as [@Rdemography] or [@Rstmomo]. Several examples are provided in the form of `R` vignettes on the [website](https://daphnegiorgi.github.io/IBMPopSim/), and in recent works of [@karoui2021simulating] and [@roget2022positive].
+We opted to implement the algorithms of the `IBMPopSim` package using the `Rcpp` package, a tool facilitating the seamless integration of high-performance `C++` code into easily callable `R` functions [@JSSv040i08]. With just a few lines of `C++` code, `IBMPopSim` offers user-friendly R functions for defining IBMs. Once events and their associated intensities are specified, an automated procedure creates the model. This involves integrating the user's source code into the primary `C++` code using a template mechanism. Subsequently, `Rcpp` is invoked to compile the model and integrate it into the `R` session. Following this process, the model becomes callable with varying parameters, enabling the generation of diverse population evolution scenarios. Combined with the design of the simulation algorithms, the package structure yields very competitive simulation runtimes for IBMs, while staying user-friendly for `R` users. Several outputs function are also implemented in `IBMPopSim`. For instance the package allows the construction and visualization of age pyramids, as well as the construction of death and exposures table from the censored individual data, compatible with `R` packages concerned with mortality modelling, such as @Rdemography or @Rstmomo. Several examples are provided in the form of `R` vignettes on the [website](https://daphnegiorgi.github.io/IBMPopSim/), and in recent works of @karoui2021simulating and @roget2022positive.
 
-Designed for applications in social sciences, the `R` package `MicSim` [@Zin14] can be used for continuous time microsimulation. In continuous-time microsimulation, individual life-courses are usually specified by sequences of state transitions (events) and the time spans between these transitions. The state space is usually discrete and finite, which is no necessarily the case in `IBMPopSim`, where individuals can have continuous characteristics. But most importantly, microsimulation does not allow for interactions between individuals. Indeed, microsimulation produces separately the life courses of all individuals in the populations, based on the computation of the distribution functions of the waiting times in the distinct states of the state space, for each individual [@Zin14]. This can be slow in comparison to the simulation by thinning of event times occurring in the population, which is based on selecting event times among some competing proposed event times. Finally, `MicSim` simplifies the Mic-Core microsimulation tool implemented in Java [@zinn2009mic]. However, the implementation in `R` of simulation algorithms yields longer simulation run times than when using `Rcpp`. To the best of our knowledge, there are no other `R` packages currently available addressing the issue of IBMs efficient simulation.
+Designed for applications in social sciences, the `R` package `MicSim` [@Zin14] can be used for continuous time microsimulation. In continuous-time microsimulation, individual life-courses are usually specified by sequences of state transitions (events) and the time spans between these transitions. The state space is usually discrete and finite, which is no necessarily the case in `IBMPopSim`, where individuals can have continuous characteristics. But most importantly, microsimulation does not allow for interactions between individuals. Indeed, microsimulation produces separately the life courses of all individuals in the populations, based on the computation of the distribution functions of the waiting times in the distinct states of the state space, for each individual [@Zin14]. This can be slow in comparison to the simulation by thinning of event times occurring in the population, which is based on selecting event times among some competing proposed event times. Finally, `MicSim` simplifies the Mic-Core microsimulation tool implemented in Java [@zinn2009mic]. However, the implementation in `R` of simulation algorithms yields longer simulation run times than when using `Rcpp`. To the best of our knowledge, there are no other `R` packages currently available addressing the issue of stochastic IBMs efficient simulation.
 
 In @sec-ibm, we introduce the mathematical framework that characterizes the class of Stochastic Individual-Based Models (IBMs) that can be implemented in the `IBMPopSim` package. In particular, a general pathwise representation of IBMs is presented. The population dynamics is obtained as the solution of an SDE driven by Poisson measures, for which we obtain existence and uniqueness results in @thm-eq-Z. Additionally, a succinct overview of the package is provided. 
 In @sec-simulation the two main algorithms for simulating the population evolution of an IBM across the interval $[0, T]$ are detailed. 
@@ -202,15 +202,15 @@ $$ {#eq-popZ}
 
 The number of individuals present in the population *before time* $t$ is obtained by taking $f\equiv 1$:
 $$
-    N_t =  \int_{\mathcal{I}}  Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \boldsymbol{1}_{\mathcal{I}} (I_k).
+    N_t =  \int_{\mathcal{I}}  Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \mathbf{1}_{\mathcal{I}} (I_k).
 $$
 Note that $(N_t)_{t\geq 0}$ is an increasing process since dead/exited individuals are kept in the population $Z$. The number of alive individuals in the population at time $t$ is: 
 $$
-    N_t^a =  \int_{\mathcal{I}}  \mathsf{1}_{\{\tau^d > t \} }Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \mathsf{1}_{\{\tau^d_k > t \} }.
+    N_t^a =  \int_{\mathcal{I}}  \mathbf{1}_{\{\tau^d > t \} }Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t} \mathbf{1}_{\{\tau^d_k > t \} }.
 $$ {#eq-Nta}
 Another example is the number of alive individuals of age over $a$ is
 $$
-    N_t([a,+\infty)) :=  \int_{\mathcal{I}}  \boldsymbol{1}_{[a,+\infty)}(t-\tau^b)\mathsf{1}_{]t,\infty]}(\tau^d) Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t}  \boldsymbol{1}_{\{ t -\tau_k^b \geq a \}}\mathsf{1}_{\{\tau^d_k \geq t \} }.
+    N_t([a,+\infty)) :=  \int_{\mathcal{I}}  \mathbf{1}_{[a,+\infty)}(t-\tau^b)\mathbf{1}_{]t,\infty]}(\tau^d) Z_t(\mathrm{d}\tau^b, \mathrm{d}\tau^d, \mathrm{d}x) = \sum_{k=1}^{N_t}  \mathbf{1}_{\{ t -\tau_k^b \geq a \}}\mathbf{1}_{\{\tau^d_k \geq t \} }.
 $$
 
 
@@ -243,14 +243,14 @@ Birth | $b$ | $\delta_{(t, \infty,  X)}$ | $\tau^b =t, \; X \sim k^b(t,I,\mathrm
 Entry | $en$ | $\delta_{(\tau^b, \infty,  X)}$ | $(\tau^b, X) \sim k^{en}(t,\mathrm{d}s, \mathrm{d}x)$ 
 Death/Exit | $d$ | $\delta_{(\tau^b, t,x)} - \delta_{(\tau^b, \infty, x)}$ | $\tau^d = t$
 Swap | $s$ | $\delta_{(\tau^b, \infty , X)} - \delta_{(\tau^b, \infty, x)}$ | $X \sim k^s(t,I,\mathrm{d}x)$
-: Action in the population for a given event name {#tbl-event-action}
+: Action in the population for a given event type {#tbl-event-action}
 
 ::: {#rem-popfinale}
 
 ## Composition of the population 
 
 - At time $T$, the population $Z_T$ contains all individuals who lived in the population before $T$, including dead/exited individuals. If there are no swap events, or entries,the population state $Z_t$ for any time $t\leq T$ can be obtained from $Z_T$. Indeed, if $Z_T = \sum_{k=1}^{N_T}  \delta_{I_k}$, then the population at time $t\leq T$ is simply composed of the individuals born before $t$: $$
-    Z_t = \sum_{k=1}^{N_T} \boldsymbol{1}_{\{\tau^b_k \leq t \}} \delta_{I_k}.
+    Z_t = \sum_{k=1}^{N_T} \mathbf{1}_{\{\tau^b_k \leq t \}} \delta_{I_k}.
 $$
 - In the presence of entries (open population), a characteristic $x$ can track the individuals' entry dates. Then, the previous equation can be easily modified in order to obtain the population $Z_t$ at time $t\leq T$ from $Z_T$.
 
@@ -263,7 +263,7 @@ Informally, the intensity $\Lambda^e_t(Z_t)$ at which an event $e$ can occur is 
 $$
     \mathbb P\big( \text{event } e \text { occurs in the population }  Z_t  \in (t,t+\mathrm{d}t] | \mathcal{F}_t \big) \simeq  \Lambda^e_t (Z_t)\mathrm{d}t.
 $$
-For a more formal definition of stochastic intensities, we refer to [@bremaud1981point] or [@KaaElK20]. The form of the intensity function $(\Lambda^e_t (Z_t))$ determines the population simulation algorithm in `IBMPopSim`:
+For a more formal definition of stochastic intensities, we refer to @bremaud1981point or @KaaElK20. The form of the intensity function $(\Lambda^e_t (Z_t))$ determines the population simulation algorithm in `IBMPopSim`:
 
 - When the event intensity does not depend on the population state, 
 $$
@@ -415,8 +415,8 @@ The last variable $\theta$ is used to accept/reject this proposed event, dependi
 ::: {#thm-eq-Z} 
 ## Pathwise representation
 Let $T\in {\mathbb{R}}^+$ and $\mathcal{J}= \mathbb N \times(\mathcal E \cup \mathcal{E}_W)$. 
-Let $Q$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{J}\times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\mathcal{J}}(\mathrm{d}k,\mathrm{d}e)  \mathbf{1}_{[0,\bar \lambda^e]} (\theta)\mathrm{d}\theta$, with $\delta_{\mathcal{J}}$ the counting measure on $\mathcal{J}$. 
-Finally, let $Q^{\mathcal P}$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{P}  \times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\cal P}(\mathrm{d}e)  \mathbf{1}_{[0,\bar \mu^e]} (\theta)\mathrm{d}\theta$, and $Z_0= \sum_{k=1}^{N_0} \delta_{I_k}$ an initial population.
+Let $Q$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{J}\times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\mathcal{J}}(\mathrm{d}k,\mathrm{d}e)  (\theta)\mathrm{d}\theta$, with $\delta_{\mathcal{J}}$ the counting measure on $\mathcal{J}$. 
+Finally, let $Q^{\mathcal P}$ be a random Poisson measure on $\mathbb R^+ \times \mathcal{P}  \times \mathbb{R}^+$, of intensity $\mathrm{d}t \delta_{\cal P}(\mathrm{d}e)\mathrm{d}\theta$, and $Z_0= \sum_{k=1}^{N_0} \delta_{I_k}$ an initial population.
 Then, under @cnj-non-explosion
 , there exists a unique
 measure-valued population process $Z$, strong solution on the following
@@ -476,9 +476,9 @@ $$
 $$
 In particular, the average number of atoms $(\bar T_\ell, \bar \Theta_\ell)$ in $[0,t]\times [0,h]$ is
 $$
-    \mathbb{E}[Q([0,t]\times [0,h])]={\mathbb{E}}[\sum_{\ell} \boldsymbol{1}_{[0,t]\times [0,h]} (\bar T_\ell, \bar \Theta_{\ell})]  = \int_{(\mathbb{R}^+)^2}  \bar \mu(\mathrm{d}t, \mathrm{d}\theta)  = t (\bar \Lambda \wedge h).
+    \mathbb{E}[Q([0,t]\times [0,h])]={\mathbb{E}}[\sum_{\ell} \mathbf{1}_{[0,t]\times [0,h]} (\bar T_\ell, \bar \Theta_{\ell})]  = \int_{(\mathbb{R}^+)^2}  \bar \mu(\mathrm{d}t, \mathrm{d}\theta)  = t (\bar \Lambda \wedge h).
 $$
-The thinning is based on the restriction property for Poisson measure: for a measurable set $\Delta\subset {\mathbb{R}}^+\times {\mathbb{R}}^+$, the restriction $Q^\Delta:= \boldsymbol{1}_{\Delta}\bar Q$ of $\bar Q$ to $\Delta$ (by taking only atoms in $\Delta$) is also a Poisson random measure of mean measure $\mu^{\Delta}(\mathrm{d}t, \mathrm{d}\theta)  = \boldsymbol{1}_{\Delta}(t,\theta) \bar \mu(\mathrm{d}t, \mathrm{d}\theta).$
+The thinning is based on the restriction property for Poisson measure: for a measurable set $\Delta\subset {\mathbb{R}}^+\times {\mathbb{R}}^+$, the restriction $Q^\Delta:= \mathbf{1}_{\Delta}\bar Q$ of $\bar Q$ to $\Delta$ (by taking only atoms in $\Delta$) is also a Poisson random measure of mean measure $\mu^{\Delta}(\mathrm{d}t, \mathrm{d}\theta)  = \mathbf{1}_{\Delta}(t,\theta) \bar \mu(\mathrm{d}t, \mathrm{d}\theta).$
 
 In order to obtain an inhomogeneous Poisson measure of intensity $(\Lambda(t))$, the "good" choice of $\Delta$ is the hypograph of $\Lambda$:
 $\Delta =\{ (t,\theta) \in [0,T]\times [0,\bar \Lambda] ; \; \theta \leq \Lambda(t)\}$ 
@@ -489,8 +489,8 @@ $$
 and since $\Lambda(t) \leq \bar \Lambda$, on $[0,T]$:
 $$
 \begin{aligned}
-    \mu^{\Delta}(\mathrm{d}t, \mathrm{d}\theta) & = \boldsymbol{1}_{\{ \theta \leq \Lambda(t)\}}  \mathrm{d}t
-\mathbf{1}_{[0, \bar \Lambda]}(\theta)\mathrm{d}\theta = \boldsymbol{1}_{\{\theta \leq \Lambda(t)\}} \mathrm{d}t \mathrm{d}\theta.
+    \mu^{\Delta}(\mathrm{d}t, \mathrm{d}\theta) & = \mathbf{1}_{\{ \theta \leq \Lambda(t)\}}  \mathrm{d}t
+\mathbf{1}_{[0, \bar \Lambda]}(\theta)\mathrm{d}\theta = \mathbf{1}_{\{\theta \leq \Lambda(t)\}} \mathrm{d}t \mathrm{d}\theta.
 \end{aligned}
 $$
 
@@ -501,7 +501,7 @@ Finally, the inhomogeneous Poisson process is obtained by the projection @prp-pr
 ::: {#prp-thinning}
 The counting process $N^\Lambda$, projection of $Q^{\Delta}$ on the time component and defined by,
 $$
-    N^{\Lambda}_t := Q^{\Delta}( [0,t] \times {\mathbb{R}}^+) = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \Lambda(s)\}} \bar Q(\mathrm{d}s, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{ \bar T_\ell \leq t \}} \mathsf{1}_{\{\bar \Theta_\ell \leq  \Lambda(\bar T_\ell) \}},  \quad \forall t \in [0,T],
+    N^{\Lambda}_t := Q^{\Delta}( [0,t] \times {\mathbb{R}}^+) = \int_0^t \int_{{\mathbb{R}}^+} \mathbf{1}_{\{\theta \leq \Lambda(s)\}} \bar Q(\mathrm{d}s, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathbf{1}_{\{ \bar T_\ell \leq t \}} \mathbf{1}_{\{\bar \Theta_\ell \leq  \Lambda(\bar T_\ell) \}},  \quad \forall t \in [0,T],
 $$ {#eq-thinning-inhomogeneous-poisson}
 is an inhomogeneous Poisson process on $[0,T]$ of intensity function $(\Lambda(t))_{t\in [0,T]}$. The thinning @eq-thinning-inhomogeneous-poisson is a pathwise representation of $N^\Lambda$ by *restriction and projection* of the Poisson measure $Q$ on $[0,T]$.
 :::
@@ -526,16 +526,16 @@ Thus, we introduce the Marked Poisson measure $\bar Q = \sum \delta_{(\bar T_\el
 - The variables $(\bar J_\ell)$ are *i.i.d.* random variables on $\mathcal{J}$, with $\displaystyle p_j= {\mathbb{P}}(\bar J_1 = j)= \bar \lambda_j/\bar \Lambda$ and representing the component of the vector which jumps.
 - The marks $(\bar \Theta_\ell)$ are independent variables with $\bar \Theta_\ell$ a uniform random variable on $[0,\bar \lambda_{{\bar J}_\ell}]$, $\forall \ell \geq 1$.
 
-By @prp-marked-poisson and @prp-proj-poisson-measure, each measure $\bar Q_j (\mathrm{d}t, \mathrm{d}\theta) = \bar Q(\mathrm{d}t, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{\bar J_\ell=j \}} \delta_{(\bar T_\ell, \bar \Theta_\ell)}$ is a marked Poisson measure of intensity
+By @prp-marked-poisson and @prp-proj-poisson-measure, each measure $\bar Q_j (\mathrm{d}t, \mathrm{d}\theta) = \bar Q(\mathrm{d}t, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathbf{1}_{\{\bar J_\ell=j \}} \delta_{(\bar T_\ell, \bar \Theta_\ell)}$ is a marked Poisson measure of intensity
 $$
-    \bar \mu_j ( \mathrm{d}t  ,\mathrm{d}\theta) = \bar{\Lambda}p_j \mathrm{d}t  \frac{\mathsf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta)}{\bar \lambda_{j}} \mathrm{d}\theta = \mathrm{d}t  \mathsf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta) \mathrm{d}\theta.
+    \bar \mu_j ( \mathrm{d}t  ,\mathrm{d}\theta) = \bar{\Lambda}p_j \mathrm{d}t  \frac{\mathbf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta)}{\bar \lambda_{j}} \mathrm{d}\theta = \mathrm{d}t  \mathbf{1}_{\{\theta \leq \bar \lambda_{j}\}}(\theta) \mathrm{d}\theta.
 $$
 As a direct application of @prp-thinning , the inhomogeneous multivariate Poisson process is obtained by restriction of each measures $\bar Q_j$ to $\Delta_j = \{ (t, \theta) \in [0,T] \times [0,\bar \lambda_j] ;\; \theta \leq \lambda_j(t) \}$ and projection.
 
 ::: {#prp-thinning-vector}
 The multivariate counting process $(N^j)_{j \in \mathcal{J}}$, defined for all $j \in \mathcal{J}$ and $t \in [0,T]$ by thinning and projection of $\bar Q$:
 $$
-    N^j_t  := \int_0^t \int_{ {\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \lambda_j(s)\}} \bar{Q}(\mathrm{d}s, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathsf{1}_{\{ \bar T_\ell \leq t \}}\mathsf{1}_{\{\bar J_\ell = j\}} \mathsf{1}_{\{\bar \Theta_\ell \leq  \lambda_j (\bar T_\ell ) \}},
+    N^j_t  := \int_0^t \int_{ {\mathbb{R}}^+} \mathbf{1}_{\{\theta \leq \lambda_j(s)\}} \bar{Q}(\mathrm{d}s, \{j\}, \mathrm{d}\theta) = \sum_{\ell \geq 1} \mathbf{1}_{\{ \bar T_\ell \leq t \}}\mathbf{1}_{\{\bar J_\ell = j\}} \mathbf{1}_{\{\bar \Theta_\ell \leq  \lambda_j (\bar T_\ell ) \}},
 $$
 is an inhomogeneous Poisson process of intensity vector $(\lambda_j(t))_{j\in\mathcal{J}}$ on $[0,T]$.
 :::
@@ -623,7 +623,7 @@ Since the first event is the first jump of $N^0$, by @prp-thinning-vector and @a
 At $T_1 =\bar T_{\ell}$, the event $\bar E_\ell$ occurs to the individual $I_{\bar K_\ell} = (\tau^b, \infty, x)$. For instance, if $\bar E_\ell =d$, a death/exit event occurs, so that $Z_{T_1} = Z_{0} + \delta_{(\tau^b, T_1, x)} - \delta_{I_{\bar K_\ell}}$ and $N_{T_1} = N_{0}$. If $\bar E_\ell =b$ or $en$, a birth or entry event occurs, so that $N_{T_1} = N_{0} + 1$, and a new individual $I_{N_0+1}$ is added to the population, chosen as described in @tbl-event-action. 
 Finally, if $\bar E_\ell=s$, a swap event occurs, the population size stays constant and $I_{\bar K_\ell}$ is replaced by an individual $I_{\bar K_\ell}'$, chosen as described in @tbl-event-action.
 
-The steps for simulating the first event in the population can be iterated in order to simulate the population. At the $k$th step, the same procedure is repeated to simulate the $k$th event, starting from a population $Z_{T_{k-1}}$ of size $N_{T_{k-1}}$.
+The steps for simulating the first event in the population can be iterated in order to simulate the population. At the $k$th step, the same procedure is repeated to simulate the $k$th event, starting from a population $Z_{T_{k-1}}$ of size $N_{T_{k-1}}$. The algorithm is summarized in @alg-interaction.
 
 ```pseudocode
 #| label: alg-interaction
@@ -699,7 +699,7 @@ Equivalently, we can write this probability as $\mathbb{P}\big(\tilde \Theta_\el
 The efficiency of the randomization procedure increases with the population homogeneity. If the function $W^e$ varies little according to the individuals in the population, the randomization approach is very efficient in practice, especially when the population is large.
 :::
 
-We now present the main algorithm implemented in the `popsim` function of the `IBMPopSim` package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, $\bar \Lambda(n)$ is defined by @eq-def-bar-Lambda.
+We now present the main @alg-randomized implemented in the `popsim` function of the `IBMPopSim` package in the case where events arrive with individual intensities, but also with interactions (using randomization) and Poisson intensities. In this general case, $\bar \Lambda(n)$ is defined by @eq-def-bar-Lambda.
 
 ```pseudocode
 #| label: alg-randomized
@@ -708,7 +708,7 @@ We now present the main algorithm implemented in the `popsim` function of the `I
 #| html-line-number: true
 #| html-line-number-punc: ":"
 #| html-no-end: false
-#| pdf-placement: "htb!"
+#| pdf-placement: "H"
 #| pdf-line-number: true
 
 \begin{algorithm}
@@ -782,9 +782,7 @@ pop_init <- population(EW_pop_14$sample, entry=TRUE)
 str(pop_init)
 ```
 
-### Individual
-
-In the `C++` model which is automatically generated and compiled, an individual `I` is an object of an internal class containing some attributes (`birth_date`, `death_date` and the characteristics), and some methods including:
+_Individual_ In the `C++` model which is automatically generated and compiled, an individual `I` is an object of an internal class containing some attributes (`birth_date`, `death_date` and the characteristics), and some methods including:
 
 - `I.age(t)`: a `const` method returning the age of an individual `I` at time `t`,
 - `I.set_age(a, t)`: a method to set the age `a` at time `t` of an individual `I` (set `birth_date` at `t-a`),
@@ -1020,7 +1018,7 @@ model <- mk_model(characteristics = get_characteristics(pop),
 The simulation of the IBM is based on the algorithms presented in @sec-simulation-algo and @sec-simulation-randomized.
 The user has first to specify bounds for the intensity or interaction functions of each event type. The random evolution of the population can then be simulated over a period of time $[0,T]$ by calling the function `popsim`.
 
-### Events bounds
+_Events bounds_
 
 Since the IBM simulation algorithm is based on an acceptance-rejection method for simulating random times, the user has to specify bounds for the intensity (or interaction) functions of each event (see @cnj-intensity1 and @cnj-intensity2).
 These bounds should be stored in a named vector, where for event $e$, the name corresponding to the event bound $\bar{\mu}^e$, $\bar{\lambda}^e$ or $\bar{W}^e$ is the event `name` defined during the event creation step.
@@ -1041,8 +1039,63 @@ sim_out <- popsim(model, pop, events_bounds, params,
                   age_max = a_max, time = 30)
 ```
 
-_Optional parameters_  
+_Optional parameters_ 
 
+If there are no events with intensity of class `interaction`, then the
+simulation can be parallelized easily by setting the optional parameter
+`multithreading` (`FALSE` by default) to `TRUE`. By default, the number
+of threads is the number of concurrent threads supported by the
+available hardware implementation. The number of threads can be set
+manually with the optional argument `num_threads`. By default, when the
+proportion of dead individuals in the population exceeds $10\%$, dead
+individuals are removed from the current population used in the
+algorithm (see @rem-remvoval-dead). The user can modify this
+ratio using the optional argument `clean_ratio`, or by removing dead
+individuals from the population with a certain frequency, given by the
+`clean_step` argument. Finally, the user can also define the seed of the
+random number generator stored in the argument `seed`.
+
+_Outputs and treatment of swap events_
+
+The output of the `popsim` function is a list containing three elements:
+a data frame `population` containing the output population $Z_T$ (or a
+list of populations $(Z_{t_1}, \dots Z_{t_n})$ if `time` is a vector of
+times), a numeric vector `logs` of variables related to the simulation
+algorithm (including the simulation time and number of proposed/accepted
+events), and the list `arguments` of the simulation inputs, including
+the initial population, parameters and event bounds used for the
+simulation.
+
+When there are no swap events (individuals don't change of
+characteristics), the evolution of the population over the period
+$[0,T]$ is recorded in a single data frame `sim_out$population` where
+each line contains the information of an individual who lived in the
+population over the period $[0,T]$ (see @rem-popfinale).
+
+When there are swap events (individuals can change of characteristics),
+recording the dates of swap events and changes of characteristics
+following each swap event and for each individual in the population is a
+memory intensive and computationally costly process. To maintain
+efficient simulations in the presence of swap events, the argument
+`time` of `popsim` can be defined as a vector of dates
+$(t_0,\dots, t_n)$. In this case, `popsim` returns in the object
+`population` a list of $n$ populations representing the population at
+time $t_1,\dots t_n$, simulated from the initial time $t_0$. For
+$i=1\dots n$, the $i$th data frame is the population $Z_{t_i}$, i.e.
+individuals who lived in the population during the period $[t_0,t_i]$,
+with their characteristics at time $t_i$.
+
+It is also possible to isolate the individuals' life course, by adding
+an `id` column to the population, which can be done by setting `id=TRUE`
+in the population construction, or by calling the `add_characteristic`
+function to an existing population, in order to identify each individual
+with a unique integer.
+
+Base functions to study the simulation outputs are provided in the
+package. For instance, the population age pyramid can computed at a give
+time, as well as death and exposure tables. Several illustrations of the
+outputs functions are given in the example @sec-insurance-portfolio and
+@sec-example-interaction.
 
 
 # Insurance portfolio {#sec-insurance-portfolio}
@@ -1057,7 +1110,7 @@ We consider an insurance portfolio consisting of male policyholders, of age grea
 **Death events** A baseline age and time specific death rate is first
 calibrated on "England and Wales (EW)" males mortality historic
 data (source: Human Mortality Database <https://www.mortality.org/>), and projected for 30 years using the Lee-Carter model with the
-package `StMoMo` (see [@stmomo]). The forecasted baseline death
+package `StMoMo` (see @stmomo). The forecasted baseline death
 intensity is denoted by $d(t,a)$, defined by:
 $$
 d(t,a) = \sum_{k=0}^{29}\mathbf{1}_{\{k\leq t < k+1\}} d_k(a), \quad \forall \; t\in [0,30] \text{ and } a \in [65, a_{\max}],
@@ -1101,9 +1154,7 @@ pop_init <- population(pop_df, entry=TRUE, out=TRUE)
 
 ## Events {#insurance-events}
 
-#### Entry events
-
-The age of the new individual is determined by the `kernel_code`
+**Entry events** The age of the new individual is determined by the `kernel_code`
 argument in the `mk_event_poisson` function.
 
 ```{r}
@@ -1127,13 +1178,11 @@ Here we use a constant $\lambda$ as the event intensity, but we could
 also use a rate $\lambda(t)$ that depends on time, using the function
 `mk_event_poisson_inhomogeneous`.
 
-#### Death and exit events
-
-The baseline death intensity defined
+**Death and exit events** The baseline death intensity defined
 in @eq-insurance-baseline and obtained with the package
 `StMoMo` is stored in the variable `death_male`.
 
-```{r}
+```{r, results='hide'}
 # StMoMo death rates
 library('StMoMo')
 library('reshape2')
@@ -1147,13 +1196,6 @@ LCforecastMale <- forecast(LCfitMale, h = t)
 d_k <- apply(LCforecastMale$rates, 2, function(x) stepfun(66:100, x))
 breaks <- 1:29
 death_male <- piecewise_xy(breaks,d_k)
-
-death_max <- max(sapply(d_k, function(x) { max(x) }))
-
-death_params <- list("death_male" = death_male, "alpha" = c(1.2, 0.8))
-death_event <- mk_event_individual(
-    type = "death",
-    intensity_code = "result = alpha[I.risk_cls-1] * death_male(t, I.age(t));")
 ```
 
 The death and exit intensities are of class `individual` (see
@@ -1195,6 +1237,7 @@ For death events, the bound is given by $\bar{d}$ defined in
 `death_max` variable.
 
 ```{r}
+death_max <- max(sapply(d_k, function(x) { max(x) }))
 bounds <- c("entry" = entry_params$lambda,
             "death" = death_max,
             "exit" = max(exit_params$mu))
@@ -1223,10 +1266,17 @@ set to `TRUE` for individuals who left the portfolio due to an exit
 event.
 
 In this example, the simulation time over 30 years, starting from an
-initial population of 30 000 individuals is of $2\times 10^{-4}$
-seconds, for an acceptance rate of proposed event of approximately 25%.
+initial population of 30 000 individuals is very fast (see below), for an acceptance rate of proposed event of approximately 25%.
 At the end of the simulation, the number of alive individuals is
 approximately 430 000.
+
+```{r, echo=FALSE}
+print(paste("Number of alive individuals in the population at final time T=30 : " ,dim(population_alive(sim_out$population,t = 30))[1], sep="")) 
+
+print(paste("Execution time : ", format(sim_out$logs[["duration_ns"]]/1e9,digits = 2), "s", sep="")) 
+
+print(paste("Proportion of effective events and proposed events : ", format(sim_out$logs[["effective_events"]] / sim_out$logs[["proposed_events"]], digits=2), sep="")) 
+```
 
 Initially in the portfolio (at $t=0$), there is the same number of 65
 years old policyholders in each risk class. However, policyholders in
@@ -1240,11 +1290,33 @@ the composition of the total population at the end of the simulation
 the portfolio obtained with the `age_pyramid` and `plot` function of the
 `pyramid` class.
 
+```{r, echo=FALSE, fig.width=8}
+#| label: fig-insur-a
+#| fig-cap: "Portfolio age pyramid at t = 30 for individuals in risk class 1 (blue) and 2 (red)."
+#| fig-pos: 'H'
+
+# Age pyramid (Figure 2(a))
+
+age_grp <- 65:98
+pyr = age_pyramid(sim_out$population, time = 30, ages=age_grp)
+colnames(pyr)[2]<- "group_name"
+pyr$group_name <- as.character(pyr$group_name)
+colors <- c("1"="#00AFBB","2"="#FC4E07")
+plot(pyr,colors,age_breaks = as.integer(seq(1,length(age_grp)-1,by=2)))
+```
+
 `IBMPopSim` also allows the fast computation of exact life tables from
 truncated and censored individual data (due to entry and exit events),
 using the functions `death_table` and `exposure_table`. These function
 are particularly efficient, since the computations are made using the
 `Rccp` library.
+
+```{r}
+age_grp <- 65:95
+Dx_pop <- death_table(sim_out$population, ages = age_grp, period = 0:30)
+Ex_pop <- exposure_table(sim_out$population, ages = age_grp, period = 0:30)
+mx_pop <- Dx_pop/Ex_pop
+```
 
 In @fig-insur-b, we illustrate the central death rates in the
 simulated portfolio at final time. Due to the mortality differential
@@ -1259,41 +1331,11 @@ composition changes in the portfolio can impact aggregated mortality
 rates and potentially compensate or reduce an overall mortality
 reduction (see also [@KAAKAI201916]).
 
-```{r, echo=FALSE, fig.width=10}
-#| label: fig-insur-a
-#| fig-cap: "Portfolio age pyramid at t = 30 for individuals in risk class 1 (blue) and 2 (red)."
-#| fig-pos: 'h'
 
-print(paste("Number of alive individuals in the population at final time T=30 : " ,dim(population_alive(sim_out$population,t = 30))[1], sep="")) 
-
-print(paste("Execution time : ", format(sim_out$logs[["duration_ns"]]/1e9,digits = 2), "s", sep="")) 
-
-print(paste("Proportion of effective events and proposed events : ", format(sim_out$logs[["effective_events"]] / sim_out$logs[["proposed_events"]], digits=2), sep="")) 
-
-# Age pyramid (Figure 2(a))
-
-age_grp <- 65:98
-pyr = age_pyramid(sim_out$population, time = 30, ages=age_grp)
-colnames(pyr)[2]<- "group_name"
-pyr$group_name <- as.character(pyr$group_name)
-colors <- c("1"="#00AFBB","2"="#FC4E07")
-plot(pyr,colors,age_breaks = as.integer(seq(1,length(age_grp)-1,by=2)))
-```
-
-```{r, echo=FALSE, fig.width=10}
-#| label: fig-insur-b
-#| fig-cap: "Portfolio central death rates at t = 30 (black)."
-#| fig-pos: 'h'
-
+```{r, echo=FALSE, results=FALSE, fig.width=8}
 
 # Portofolio death rates
 
-age_grp <- 65:95
-Dx_pop <- death_table(sim_out$population, ages = age_grp, period = 0:30)
-Ex_pop <- exposure_table(sim_out$population, ages = age_grp, period = 0:30)
-mx_pop <- Dx_pop/Ex_pop
-
-# Figure 2(b)
 
 Dx <- death_table(sim_out$population[sim_out$population$risk_cls==1,],
                   ages = age_grp, period = 0:30)
@@ -1314,6 +1356,15 @@ portfolio <- log((mx_pop)[,time])
 df <- data.frame(age=age, portfolio=portfolio, forecast_1=forecast_1, forecast_1=forecast_2)
 colnames(df) <- c("Age", "Portfolio", "Risk class 1", "Risk class 2")
 df_melt <- melt(df, id="Age")
+
+```
+
+```{r, echo=FALSE}
+#| label: fig-insur-b
+#| fig-cap: "Portfolio central death rates at t = 30 (black)."
+#| fig-pos: 'h'
+
+# Figure 2(b)
 
 ggplot(data=df_melt, aes(x=Age, y=value)) +
   geom_point(aes(color=variable, shape=variable)) +
@@ -1445,9 +1496,6 @@ death_event <- mk_event_interaction(
 
 The model is created using the `mk_model` function.
 
-The simulation of one scenario can then be launched with the call of the
-`popsim` function, after computing the events bounds
-$\bar \lambda^b=4 \alpha$ and $\bar W= \beta$.
 
 ```{r}
 model <- mk_model(
@@ -1473,7 +1521,7 @@ sim_out <- popsim(model = model,
 Based on the results of a simulation, we can reproduce the numerical
 results of @FerTra09. In @fig-birth-size, we draw a line for each individual in the population to represent their birth size during their lifetime. 
 
-```{r, echo=FALSE, fig.width=10}
+```{r, echo=FALSE, fig.width=8}
 #| label: fig-birth-size
 #| fig-cap: "Evolution of birth size"
 #| fig-pos: 'h'
@@ -1516,7 +1564,8 @@ sim_out_full <- popsim(model = model_full,
 
 ```{r echo=FALSE}
 
-print(paste("The full algorithm is " ,sim_out_full$logs["duration_ns"]/sim_out$logs["duration_ns"], " times slower than the randomized version", sep=""))
+print(paste("The full algorithm is " ,format(sim_out_full$logs["duration_ns"]/sim_out$logs["duration_ns"], digits=2), " times slower than the randomized version", sep=""))
+
 ```
 
 
@@ -1570,7 +1619,7 @@ Let us briefly recall here some simple but useful operations on Poisson measures
 ## Restricted Poisson measure
 If $B \in \mathcal{E}$, then, the restriction of $Q$ to $B$ defined by 
 $$
-    Q^B = \boldsymbol{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}
+    Q^B = \mathbf{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}
 $$
 is also a Poisson random measure, of mean measure $\mu^B = \mu(\cdot \cap B)$.
 :::
@@ -1590,7 +1639,7 @@ Let $Q= \sum_{k\geq 1} \delta_{T_k}$ a Poisson random measure on $E={\mathbb{R}}
 The counting process
 $(N_t)_{t \ge 0}$ defined by 
 $$
-    N_t = Q([0,t]) = \sum_{k \geq 1} \boldsymbol{1}_{\{T_k \leq t\}}, \quad \forall \; t\geq 0,
+    N_t = Q([0,t]) = \sum_{k \geq 1} \mathbf{1}_{\{T_k \leq t\}}, \quad \forall \; t\geq 0,
 $$ {#eq-inhomogeneous-pp}
 is an inhomogeneous Poisson process with intensity function (or rate) $t \mapsto \Lambda(t)$. In particular, when $\Lambda(t) \equiv c$ is a constant, $N$ is a homogeneous Poisson process with rate $c$. Assuming that the atoms are ordered $T_1< T_2< \dots$, we recall that the sequence $(T_{k+1}-T_k)_{k\geq 1}$ is a sequence of *i.i.d.* exponential variables of parameter $c$.
 
@@ -1603,7 +1652,7 @@ We recall in this special case the Theorem VI.3.2 in [@Cin11].
 ::: {#prp-marked-poisson}
 ## Marked Poisson measure 
 Let $m$ be a $\sigma$--finite diffuse measure on ${\mathbb{R}}^+$, and $K$ a transition probability kernel from $({\mathbb{R}}^+,\mathcal{B}({\mathbb{R}}^+))$ into $(F, \mathcal{F})$. 
-Assume that the collection $(T_k)_{k \ge 1}$ forms a Poisson process $(N_t) =(\sum_{k\geq 1} \mathsf{1}_{\{T_k \leq t\}})$ with mean $m(\mathrm{d}t) =\Lambda(t) \mathrm{d}t$, and that given $(T_k)_{k \ge 1}$, the variables $\Theta_k$ are conditionally independent and have the respective distributions $K(T_k, \cdot)$.
+Assume that the collection $(T_k)_{k \ge 1}$ forms a Poisson process $(N_t) =(\sum_{k\geq 1} \mathbf{1}_{\{T_k \leq t\}})$ with mean $m(\mathrm{d}t) =\Lambda(t) \mathrm{d}t$, and that given $(T_k)_{k \ge 1}$, the variables $\Theta_k$ are conditionally independent and have the respective distributions $K(T_k, \cdot)$.
 
 1. Then, $\{ (T_k, \Theta_k) ;\; k \ge 1\}$ forms a Poisson random measure $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ on $({\mathbb{R}}^+ \times F, \mathcal{B}({\mathbb{R}}^+) \otimes \mathcal{F})$, called a *Marked point process* , with mean $\mu$ defined by 
 $$
@@ -1614,7 +1663,7 @@ $$
 Let $K(t, \mathrm{d}y) = \dfrac{\nu(t,\mathrm{d}y) }{\nu(t, F) }$ and $\Lambda(t) = \nu(t, F)\tilde  \Lambda(t)$. Then, $Q = \sum_{k\ge 1} \delta_{(T_k, \Theta_k)}$ is a marked Poisson measure with $(T_k,\Theta_k)_{k\in {\mathbb{N}}^*}$ defined as above. 
 In particular, the projection $N= (N_t)_{t\geq0}$ of the Poisson measure on the first coordinate,
 $$
-    N_t = Q([0,t] \times F) = \sum_{k\geq 1} \boldsymbol{1}_{[0,t] \times F} (T_k, \Theta_k)  = \sum_{k\geq 1} \boldsymbol{1}_{\{T_k \leq t\}}, \quad \forall \; t \geq 0,
+    N_t = Q([0,t] \times F) = \sum_{k\geq 1} \mathbf{1}_{[0,t] \times F} (T_k, \Theta_k)  = \sum_{k\geq 1} \mathbf{1}_{\{T_k \leq t\}}, \quad \forall \; t \geq 0,
 $$
 is an inhomogeneous Poisson process of rate $\Lambda(t)= \nu(t, F)\tilde  \Lambda(t)$.
 :::
@@ -1660,9 +1709,7 @@ The mean measure is then $\mu(\mathrm{d} t, \mathrm{d} y) = \mathrm{d} t {1}_{[0
 
 ## Pathwise representation of IBMs {#sec-pathwise-representation}
 
-### Notation reminder
-
-The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. In an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. 
+**Notation reminder** The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. In an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. 
 If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. 
 If $e \in \mathcal{P}$, then events of type $e$ occur in the population at a Poisson intensity of $(\mu^e_t)$.
 
@@ -1707,8 +1754,8 @@ population. $N^e$ is a counting process of $\{\mathcal{F}_t\}$-intensity
 $(\Lambda_t^e(Z_{t^-}))$, solution of 
 $$
 \begin{aligned}
-  & N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \boldsymbol{1}_{\{k\leq N_{s^-}\}}  \boldsymbol{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta), & \quad  \textit{ if } e \in \mathcal{E}\cup \mathcal{E}_W, \\
-& N_t^e = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \mu^e_s \}} Q^{\mathcal{P}}(\mathrm{d}s, \{e\}, \mathrm{d}\theta), & \quad  \textit{ if } e \in \cal P. \\
+  & N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \mathbf{1}_{\{k\leq N_{s^-}\}}  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta), & \quad  \textit{ if } e \in \mathcal{E}\cup \mathcal{E}_W, \\
+& N_t^e = \int_0^t \int_{{\mathbb{R}}^+} \mathbf{1}_{\{\theta \leq \mu^e_s \}} Q^{\mathcal{P}}(\mathrm{d}s, \{e\}, \mathrm{d}\theta), & \quad  \textit{ if } e \in \cal P. \\
 \end{aligned}
 $$ {#eq-Ne} 
 By definition, the jump times of the multivariate
@@ -1724,8 +1771,8 @@ population size $N_t = N_0 + N^b_t + N^{en}_t$.\
 process defined as follows: for $e \in \{b,en\}$, $\bar N^e_0 = 0$ and
 $$
 \begin{aligned}
-& \bar N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \boldsymbol{1}_{\{k\leq N_0 + \bar N_{s^-} \}}  \boldsymbol{1}_{\{\theta \leq f^e(N_0 + \bar N_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta),  \quad  \textit{ if } e \in \mathcal{E}\cup \mathcal{E}_W, \\
-&   \bar N_t^e = \int_0^t \int_{{\mathbb{R}}^+} \boldsymbol{1}_{\{\theta \leq \bar \mu^e\}} Q^{\mathcal{P}}(\mathrm{d}s, \{e\}, \mathrm{d}\theta)  \quad  \textit{ if } e \in \cal P,
+& \bar N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \mathbf{1}_{\{k\leq N_0 + \bar N_{s^-} \}}  \mathbf{1}_{\{\theta \leq f^e(N_0 + \bar N_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta),  \quad  \textit{ if } e \in \mathcal{E}\cup \mathcal{E}_W, \\
+&   \bar N_t^e = \int_0^t \int_{{\mathbb{R}}^+} \mathbf{1}_{\{\theta \leq \bar \mu^e\}} Q^{\mathcal{P}}(\mathrm{d}s, \{e\}, \mathrm{d}\theta)  \quad  \textit{ if } e \in \cal P,
 \end{aligned}
 $$ {#eq-dominatingprocess}
 with $\bar N := \bar N^b + \bar N^{en}$ and $f^e$ the
@@ -1777,7 +1824,7 @@ $$h^e_t(n) = \sup_{I \in \mathcal{I},  m \leq n } \lambda^e_t \biggl(I, \sum_{k=
 By @cnj-intensity1 and @cnj-intensity2, $h^e_t(n) <\infty$, and we can
 introduce the non exploding counting process $\bar{N}^e$, defined by the
 thinning equation :
-$$\bar N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \boldsymbol{1}_{\{k\leq N_0 + \bar N_{s^-} \}}  \boldsymbol{1}_{\{\theta \leq h^e_s (N_0 + \bar N_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta),$$
+$$\bar N_t^e = \int_0^t \int_{{\mathbb{N}}\times {\mathbb{R}}^+} \mathbf{1}_{\{k\leq N_0 + \bar N_{s^-} \}}  \mathbf{1}_{\{\theta \leq h^e_s (N_0 + \bar N_{s^-})\}} Q(\mathrm{d}s, \mathrm{d}k, \{e\}, \mathrm{d}\theta),$$
 with $\bar N_s = \bar N^b_s + \bar N^{en}_s$.\
 Finally, by Step 2, for $s\in [0,T]$ the population size
 $N_s = N_0 + N^b_s+ N^{en}_s$ is bounded a.s. by $N_0 + \bar N_s$, since
@@ -1858,10 +1905,12 @@ Poisson measure $\bar Q^n$ on
 $[T_n, \infty) \times \mathcal J_n \times \mathbb R^+$, of intensity:
 $$
 \begin{aligned}
-\bar \mu^n(\mathrm{d}t, \mathrm{d}k, \mathrm{d}e , \mathrm{d}\theta ) & := \mathbf{1}_{\{t > T_n \}}\bar \Lambda (N_{T_n})\mathrm{d}t  \frac{\bar \lambda^e }{\bar \Lambda(N_{T_n})} \delta_{\mathcal J_n}(\mathrm{d}k, \mathrm{d}e) \frac{1}{\bar \lambda^e} \mathbf{1}_{[0,\bar \lambda^e]} (\theta)\mathrm{d}\theta,\\
-&  = \mathbf{1}_{\{t > T_n \}}\mathrm{d}t  \delta_{\mathcal J_n}(\mathrm{d}k, \mathrm{d}e) \mathbf{1}_{[0,\bar \lambda^e]}(\theta)\mathrm{d}\theta .
+\bar \mu^n(\mathrm{d}t, \mathrm{d}k, \mathrm{d}e , \mathrm{d}\theta ) & := \mathbf{1}_{\{t > T_n \}}\bar \Lambda (N_{T_n})\mathrm{d}t  \frac{\bar \lambda^e_n }{\bar \Lambda(N_{T_n})} \delta_{\mathcal J_n}(\mathrm{d}k, \mathrm{d}e) \frac{1}{\bar \lambda^e_n} \mathbf{1}_{[0,\bar \lambda^e_n]} (\theta)\mathrm{d}\theta,\\
+&  = \mathbf{1}_{\{t > T_n \}}\mathrm{d}t  \delta_{\mathcal J_n}(\mathrm{d}k, \mathrm{d}e) \mathbf{1}_{[0,\bar \lambda^e_n]}(\theta)\mathrm{d}\theta,
 \end{aligned}
 $$ {#eq-barmun}
+with $\lambda^e_n = \bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_{T_n} \mathbf{1}_{e \in \mathcal{E}_W}$.
+
 By definition, $\bar Q^n$ has no jumps before $T_n$.\
 As for the first event, the triplet $(T_{n+1}, E_{n+1}, I_{n+1})$ is
 determined by the first jump of the measure
@@ -1887,19 +1936,18 @@ $$
 with $(\tilde T_n)_{n\geq 0}$ the sequence of its event times. Then, we
 can write similarly for all $n\geq 0$: $$\begin{aligned}
  \tilde Z_{t\wedge \tilde T_{n+1}} & = Z_0  + \sum_{l=0}^n \int_{t \wedge \tilde  T_l}^{t \wedge \tilde T_{l+1}} \int_{\mathcal{J}\times \mathbb R^+} \phi^e (s , I_k)  \mathbf{1}_{\{\theta\leq \lambda_s^e(I_k,  \tilde Z_{s^-})\}}\mathbf{1}_{ \{k \leq \tilde N_{s^-} \}}   Q(\mathrm{d}s, \mathrm{d}k , \mathrm{d}e , \mathrm{d}\theta ), \\
-& = Z_0  + \sum_{l=0}^n \int_{t \wedge \tilde  T_l}^{t \wedge \tilde T_{l+1}} \int_{\mathcal{J}\times \mathbb R^+} \phi^e (s , I_k)  \mathbf{1}_{\{\theta\leq \lambda_s^e(I_k,  \tilde Z_{s^-})\}}\mathbf{1}_{ \{k \leq \tilde N_{\tilde T_l} \}}   Q(\mathrm{d}s, \mathrm{d}k , \mathrm{d}e , \mathrm{d}\theta ),
-\end{aligned}$$ since $\tilde  N_{s^-} = \tilde N_{T_l}$ on
-$\tilde [T_l, \tilde T_{l+1}]$.\
+& = Z_0  + \sum_{l=0}^n \int_{t \wedge \tilde  T_l}^{t \wedge \tilde T_{l+1}} \int_{\mathcal{J}\times \mathbb R^+} \phi^e (s , I_k)  \mathbf{1}_{\{\theta\leq \lambda_s^e(I_k,  \tilde Z_{s^-})\}} \mathbf{1}_{ \{\theta \leq \tilde \lambda^e_n \}}\mathbf{1}_{ \{k \leq \tilde N_{\tilde T_l} \}}  Q(\mathrm{d}s, \mathrm{d}k , \mathrm{d}e , \mathrm{d}\theta ),
+\end{aligned}$$ since $\tilde  Z_{s^-} = \tilde Z_{T_l}$ on
+$\tilde [T_l, \tilde T_{l+1}]$, and 
+$$\lambda_s^e(I_k,  \tilde Z_{s^-}) \leq \tilde \lambda^e_n:=  \bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e \tilde N_{\tilde T_n} \mathbf{1}_{e \in \mathcal{E}_W}$$
 For each $l \geq 0$, let
-$$\tilde Q^l(\mathrm{d}t, \mathrm{d}k , \mathrm{d}e , \mathrm{d}\theta )  = \mathbf{1}_{\{t >  \tilde T_l\}} \mathbf{1}_{ \{1, \dots , \tilde N_{\tilde T_l} \}}(k)   Q(\mathrm{d}t, \mathrm{d}k , \mathrm{d}e , \mathrm{d}\theta ).$$
+$$\tilde Q^l(\mathrm{d}t, \mathrm{d}k , \mathrm{d}e , \mathrm{d}\theta )  = \mathbf{1}_{\{t >  \tilde T_l\}} \mathbf{1}_{ \{1, \dots , \tilde N_{\tilde T_l} \}}(k)  \mathbf{1}_{[0, \tilde \lambda^e_n]}(\theta) Q(\mathrm{d}t, \mathrm{d}k , \mathrm{d}e , \mathrm{d}\theta ).$$
 By @prp-restriction-poisson-measure, $\tilde Q^l$ is,
 conditionally to $\mathcal{F}_{T_l}$, a Poisson measure of intensity
-$$\mathbf{1}_{\{t >  \tilde T_l\}}   \mathrm{d}t \mathbf{1}_{ \{1, \dots , \tilde N_{\tilde T_l} \}}(k) \delta_{\mathcal{J}}(\mathrm{d}k, \mathrm{d}e) \mathrm{d}\theta.$$
-Noticing that
-$\mathbf{1}_{ \{1, \dots , \tilde N_{\tilde T_l} \}}(k) \delta_{\mathcal{J}}(\mathrm{d}k, \mathrm{d}e)  =\delta_{\mathcal{J}_l}( \mathrm{d}k , \mathrm{d}e)$,
-this shows that $\tilde{Q}^l$ has the conditional intensity $\bar \mu^l$
-defined in @eq-barmun and has thus the same distribution than
-$\bar Q^l$. Thus, $Z$ in an exact simulation of @eq-sde-eq-Z.
+$$\mathbf{1}_{\{t >  \tilde T_l\}}   \mathrm{d}t \mathbf{1}_{ \{1, \dots , \tilde N_{\tilde T_l} \}}(k) \delta_{\mathcal{J}}(\mathrm{d}k, \mathrm{d}e)\mathbf{1}_{[0, \tilde \lambda^e_n]}(\theta) \mathrm{d}\theta.$$
+It follows easily by induction that $\tilde{Q}^l$  has thus the same distribution than
+$\bar Q^l$, the Poisson measure with the conditional intensity $\bar \mu^l$
+defined in @eq-barmun. Thus, $Z$ in an exact simulation of @eq-sde-eq-Z.
 
 # References {.unnumbered}
 
