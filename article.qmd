@@ -1504,10 +1504,7 @@ model <- mk_model(
     parameters = c(params_birth, params_death))
 ```
 
-
-The simulation of one scenario can then be launched with the call of the
-`popsim` function, after computing the events bounds
-$\bar \lambda^b=4 \alpha$ and $\bar W= \beta$.
+The simulation of one scenario can then be launched with the call of the `popsim` function, after computing the events bounds $\bar \lambda^b=4 \alpha$ and $\bar W= \beta$.
 
 ```{r}
 sim_out <- popsim(model = model,
@@ -1518,8 +1515,7 @@ sim_out <- popsim(model = model,
     age_max = 2,
     time = 500)
 ```
-Based on the results of a simulation, we can reproduce the numerical
-results of @FerTra09. In @fig-birth-size, we draw a line for each individual in the population to represent their birth size during their lifetime. 
+Based on the results of a simulation, we can reproduce the numerical results of @FerTra09. In @fig-birth-size, we draw a line for each individual in the population to represent their birth size during their lifetime. 
 
 ```{r, echo=FALSE, fig.width=8}
 #| label: fig-birth-size
@@ -1542,58 +1538,30 @@ times than the model implemented below with
 
 ```{r}
 death_event_full <- mk_event_interaction(type = "death",
-                             interaction_type= "full",
-                             interaction_code = "double x_I = I.birth_size + g * age(I,t);
-                                                 double x_J = J.birth_size + g * age(J,t);
-                                result = beta * ( 1.- 1./(1. + c * exp(-4. * (x_I-x_J))));"
+    interaction_type= "full",
+    interaction_code = "double x_I = I.birth_size + g * age(I,t);
+                        double x_J = J.birth_size + g * age(J,t);
+                        result = beta * ( 1.- 1./(1. + c * exp(-4. * (x_I-x_J))));"
 )
 
 model_full <- mk_model(characteristics = get_characteristics(pop_init),
-                       events = list(birth_event, death_event_full),
-                       parameters = c(params_birth, params_death))
+    events = list(birth_event, death_event_full),
+    parameters = c(params_birth, params_death))
 
 sim_out_full <- popsim(model = model_full,
-                       initial_population = pop_init,
-                       events_bounds =c("birth" = 4 * params_birth$alpha,
-                                        "death" = params_death$beta),
-                       parameters = c(params_birth, params_death),
-                       age_max = 2,
-                       time = 500)
-
+    initial_population = pop_init,
+    events_bounds =c("birth" = 4 * params_birth$alpha, "death" = params_death$beta),
+    parameters = c(params_birth, params_death),
+    age_max = 2,
+    time = 500)
 ```
 
 ```{r echo=FALSE}
-
 print(paste("The full algorithm is " ,format(sim_out_full$logs["duration_ns"]/sim_out$logs["duration_ns"], digits=2), " times slower than the randomized version", sep=""))
-
 ```
 
-
-
-In @fig-fullvsrandom, the two algorithms are compared for different population sizes.  
-We progressively decrease the value of the mortality rate parameter $\beta$ and increase the birth
-rate parameter $\alpha$. Starting with the values provided
-in @FerTra09, $\alpha=1$ and $\beta=2/300$, resulting in a stationary
-population size of approximately $N=360$ individuals for a sample of 50
-simulations, we can easily increase the stationary population size to
-approximately $N=2600$ individuals with $\alpha=2$ and $\beta=1/300$
-.^[The choices
-    $(\alpha, \beta) \in \{(1,2/300),(1, 1/300), (1.5, 1/300), (2, 1/300)\}$
-    lead to the stationary population sizes
-    $N \in \{360, 900, 1800, 2600\}$. For each set of parameters, we
-    generated a new initial population, which was used for a benchmark
-    of 50 simulations with both randomized and full algorithm. The
-    simulations run on a Intel Core i7-8550U CPU 1.80GHz × 8 processor,
-    with 15.3 GiB of RAM, under Debian GNU/Linux 11.] In the log-scaled figure, we can observe the trend of computation
-time as a function of the population size $N$, which is linear for the
-randomized algorithm and quadratic for the full one (
- @alg-interaction). We can also see that the
-randomized version of the algorithm is between 17 to 100 times faster
-than the full one in this example, taking only 2 seconds in average for
-the randomized version versus 211 seconds for 
-@alg-interaction for the biggest population size
-($N=2600$) and $T=500$.
-
+In @fig-fullvsrandom, the two algorithms are compared for different population sizes.  We progressively decrease the value of the mortality rate parameter $\beta$ and increase the birth rate parameter $\alpha$. Starting with the values provided in @FerTra09, $\alpha=1$ and $\beta=2/300$, resulting in a stationary population size of approximately $N=360$ individuals for a sample of 50 simulations, we can easily increase the stationary population size to approximately $N=2600$ individuals with $\alpha=2$ and $\beta=1/300$.^[The choices $(\alpha, \beta) \in \{(1,2/300),(1, 1/300), (1.5, 1/300), (2, 1/300)\}$ lead to the stationary population sizes $N \in \{360, 900, 1800, 2600\}$. For each set of parameters, we generated a new initial population, which was used for a benchmark of 50 simulations with both randomized and full algorithm. The simulations run on a Intel Core i7-8550U CPU 1.80GHz × 8 processor, with 15.3 GiB of RAM, under Debian GNU/Linux 11.] 
+In the log-scaled figure, we can observe the trend of computation time as a function of the population size $N$, which is linear for the randomized algorithm and quadratic for the full one ( @alg-interaction). We can also see that the randomized version of the algorithm is between 17 to 100 times faster than the full one in this example, taking only 2 seconds in average for the randomized version versus 211 seconds for @alg-interaction for the biggest population size ($N=2600$) and $T=500$.
 
 ![Full vs random algorithm computation time](img/time_pop_size.png){#fig-fullvsrandom width=80%}
 
@@ -1601,9 +1569,7 @@ the randomized version versus 211 seconds for
 
 ## Recall on Poisson random measures {#sec-recall-poisson} 
 
-We recall below some useful properties of Poisson random measures,
-mainly following Chapter 6 of [@Cin11]. We also refer to [@Kal17] for a
-more comprehensive presentation of random counting measures.
+We recall below some useful properties of Poisson random measures, mainly following Chapter 6 of [@Cin11]. We also refer to [@Kal17] for a more comprehensive presentation of random counting measures.
 
 ::: {#def-poisson-random-measure} 
 ## Poisson Random Measures
