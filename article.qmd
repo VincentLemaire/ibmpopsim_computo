@@ -3,17 +3,9 @@ title: "Efficient simulation of individual-based population models"
 subtitle: "The `R` package `IBMPopSim`"
 author:
   - name: Daphné Giorgi 
+    corresponding: true
     email: daphne.giorgi@sorbonne-universite.fr
     url: https://perso.lpsm.paris/~giorgi/
-    affiliations:
-      - name: Sorbonne Université, CNRS
-        department: Laboratoire de Probabilités, Statistique et Modélisation
-        url: https://www.lpsm.paris/
-  - name: Vincent Lemaire 
-    corresponding: true
-    email: vincent.lemaire@sorbonne-universite.fr
-    url: https://perso.lpsm.paris/~vlemaire/
-    orcid: 0000-0002-0433-7722
     affiliations:
       - name: Sorbonne Université, CNRS
         department: Laboratoire de Probabilités, Statistique et Modélisation
@@ -29,6 +21,15 @@ author:
       - name: Ecole Polytechnique, CNRS
         department: Centre de Mathématiques Appliquées
         url: https://cmap.ip-paris.fr/ 
+  - name: Vincent Lemaire 
+    corresponding: true
+    email: vincent.lemaire@sorbonne-universite.fr
+    url: https://perso.lpsm.paris/~vlemaire/
+    orcid: 0000-0002-0433-7722
+    affiliations:
+      - name: Sorbonne Université, CNRS
+        department: Laboratoire de Probabilités, Statistique et Modélisation
+        url: https://www.lpsm.paris/
 date: last-modified
 date-modified: last-modified
 description: |
