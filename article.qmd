@@ -49,8 +49,8 @@ repo: "ibmpopsim_computo"
 draft: true # set to false once the build is running
 published: false # will be set to true once accepted
 format:
-  computo-html: default
-  computo-pdf: default
+    computo-html: default
+    computo-pdf: default
 crossref:
     cnj-title: Assumption
     cnj-prefix: Assumption 
@@ -1524,6 +1524,7 @@ Based on the results of a simulation, we can reproduce the numerical results of 
 #| label: fig-birth-size
 #| fig-cap: "Evolution of birth size"
 #| fig-pos: 'h'
+#| fig-format: png
 
 pop_out <- sim_out$population
 
