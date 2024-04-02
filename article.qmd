@@ -23,9 +23,12 @@ author:
     email: sarah.kaakai@univ-lemans.fr
     url: https://perso.univ-lemans.fr/~skaakai/
     affiliations:
-      - name: Le Mans Université, CNRS, Institut du Risque et de l'Assurance 
+      - name: Le Mans Université
         department: Laboratoire Manceau de Mathématiques
         url: https://lmm.univ-lemans.fr/fr/
+      - name: Ecole Polytechnique, CNRS
+        department: Centre de Mathématiques Appliquées
+        url: https://cmap.ip-paris.fr/ 
 date: last-modified
 date-modified: last-modified
 description: |
@@ -1565,9 +1568,9 @@ In the log-scaled figure, we can observe the trend of computation time as a func
 
 ![Full vs random algorithm computation time](img/time_pop_size.png){#fig-fullvsrandom width=80%}
 
-# Appendix {.appendix} 
+# Appendix {.appendix}
 
-## Recall on Poisson random measures {#sec-recall-poisson} 
+## Recall on Poisson random measures {#sec-recall-poisson .appendix} 
 
 We recall below some useful properties of Poisson random measures, mainly following Chapter 6 of [@Cin11]. We also refer to [@Kal17] for a more comprehensive presentation of random counting measures.
 
@@ -1914,6 +1917,10 @@ $$\mathbf{1}_{\{t >  \tilde T_l\}}   \mathrm{d}t \mathbf{1}_{ \{1, \dots , \tild
 It follows easily by induction that $\tilde{Q}^l$  has thus the same distribution than
 $\bar Q^l$, the Poisson measure with the conditional intensity $\bar \mu^l$
 defined in @eq-barmun. Thus, $Z$ in an exact simulation of @eq-sde-eq-Z.
+
+## Acknowledgements {.appendix}
+
+The research of Sarah Kaakai is funded by the European Union (ERC, SINGER, 101054787). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Council. Neither the European Union nor the granting authority can be held responsible for them.
 
 # References {.unnumbered}
 
