@@ -35,7 +35,7 @@ date-modified: last-modified
 description: |
     This document provides a full description of the Stochastic Individual-Based Models (IBMs) that can be implemented in the IBMPopSim package. A unified mathematical and simulation framework is given, with a detailed description of the simulation algorithm. Examples of applications for the package are also provided, showing the performance and flexibility of IBMPopSim. 
 abstract: >+
-    The `R` Package `IBMPopSim` aims to simulate the random evolution of heterogeneous populations using stochastic Individual-Based Models (IBMs). The package enables users to simulate population evolution, in which individuals are characterized by their age and some characteristics, and the population is modified by different types of events, including births/arrivals, death/exit events, or changes of characteristics. The frequency at which an event can occur to an individual can depend on their age and characteristics, but also on the characteristics of other individuals (interactions). Such models have a wide range of applications in fields including  actuarial science, biology, ecology or epidemiology. `IBMPopSim` overcomes the limitations of time-consuming IBMs simulations by implementing new efficient algorithms  based on thinning methods, which are compiled using the `Rcpp` package while providing a user-friendly interface.
+    The `R` Package `IBMPopSim` facilitates the simulation of the random evolution of heterogeneous populations using stochastic Individual-Based Models (IBMs). The package enables users to simulate population evolution, in which individuals are characterized by their age and some characteristics, and the population is modified by different types of events, including births/arrivals, death/exit events, or changes of characteristics. The frequency at which an event can occur to an individual can depend on their age and characteristics, but also on the characteristics of other individuals (interactions). Such models have a wide range of applications in fields including  actuarial science, biology, ecology or epidemiology. `IBMPopSim` overcomes the limitations of time-consuming IBMs simulations by implementing new efficient algorithms  based on thinning methods, which are compiled using the `Rcpp` package while providing a user-friendly interface.
 keywords: [Individual-based models, stochastic simulation, population dynamics, Poisson measures, thinning method, actuarial science, insurance portfolio simulation]
 citation:
   type: article-journal
@@ -186,7 +186,7 @@ In the remainder of the paper, the filtered probability space is denoted by $(\O
 
 ## Population {#sec-population}
 
-As mentioned in Section @sec-overview a population is a collection of individuals whose evolution defines the population process. 
+As mentioned in @sec-overview a population is a collection of individuals whose evolution defines the population process. 
 
 ### Individuals
 
@@ -261,7 +261,7 @@ Swap | $s$ | $\delta_{(\tau^b, \infty , X)} - \delta_{(\tau^b, \infty, x)}$ | $X
 
 ## Composition of the population 
 
-- At time $T$, the population $Z_T$ contains all individuals who lived in the population before $T$, including dead/exited individuals. If there are no swap events, or entries,the population state $Z_t$ for any time $t\leq T$ can be obtained from $Z_T$. Indeed, if $Z_T = \sum_{k=1}^{N_T}  \delta_{I_k}$, then the population at time $t\leq T$ is simply composed of the individuals born before $t$: $$
+- At time $T$, the population $Z_T$ contains all individuals who lived in the population before $T$, including dead/exited individuals. If there are no swap events, or entries, the population state $Z_t$ for any time $t\leq T$ can be obtained from $Z_T$. Indeed, if $Z_T = \sum_{k=1}^{N_T}  \delta_{I_k}$, then the population at time $t\leq T$ is simply composed of the individuals born before $t$: $$
     Z_t = \sum_{k=1}^{N_T} \mathbf{1}_{\{\tau^b_k \leq t \}} \delta_{I_k}.
 $$
 - In the presence of entries (open population), a characteristic $x$ can track the individuals' entry dates. Then, the previous equation can be easily modified in order to obtain the population $Z_t$ at time $t\leq T$ from $Z_T$.
@@ -281,7 +281,9 @@ For a more formal definition of stochastic intensities, we refer to @bremaud1981
 $$
     \big(\Lambda^e_t (Z_t)\big)_{t\in [0,T]} = \big(\mu^e(t)\big)_{t \in [0,T]},
 $$ {#eq-poisson-intensity}
-with $\mu^e$ a deterministic function, the events of type $e$ occur at the jump times of an inhomogeneous Poisson process of intensity function $(\mu^e(t))_{t \in [0,T]}$. When such an event occurs, the individual to whom the event happens to is drawn uniformly among alive individuals in the population.
+with $\mu^e$ a deterministic function, the events of type $e$ occur at the jump times of an inhomogeneous Poisson process of intensity function $(\mu^e(t))_{t \in [0,T]}$. 
+This is particularly useful when entry events occur with intensities influenced by environmental processes and/or exhibit seasonal variations.
+When such an event occurs, the individual to whom the event happens is drawn uniformly from the living individuals in the population.
 In a given model, the set of events $e\in E$ with Poisson intensities will be denoted by $\mathcal{P}$.
 - Otherwise, we assume that the global intensity $\Lambda^e_t(Z_t)$ at which the events of type $e$ occur in the population can be written as the sum of individual intensities $\lambda^e_t(I,Z_t)$:
 $$
@@ -299,7 +301,7 @@ with $N^a_t$ the number of alive individuals at time $t$.
 
 The event's individual intensity $\lambda^e_t (I,Z_t)$ can depend on time (for instance when there is a mortality reduction over time), on the individual's age $t-\tau^b$ and characteristics, but also on the population composition $Z_t$. The dependence of $\lambda^e$ on the population $Z$ models interactions between individuals in the populations. Hence, two types of individual intensity functions can be implemented in `IBMPopSim`:
 
-1. *No interactions:* The intensity function $\lambda^e$ does not depend on the population composition. The intensity at which the event of type $e$ occur to an individual $I$ only depends on its date of birth and characteristics: 
+1. *No interactions:* The intensity function $\lambda^e$ does not depend on the population composition. The intensity at which an event of type $e$ occurs to an individual $I$ only depends on its date of birth and characteristics: 
 $$
     \lambda^e_t (I,Z_t) = \lambda^e(t, I),
 $$ {#eq-intensity-no-interaction}
@@ -324,11 +326,11 @@ $$
 $$
 is the age of the individual $I$ at time $t$. In this standard case, the death rate of an individual $I$ is an exponential (Gompertz) function of the individual's age, with coefficients depending on the individual's characteristics $x$.
 
-2. In the presence of competition between individuals, the death intensity of an individual $I$ also depend on other individuals $J$ in the population. For example, if $I=(\tau^b,\tau^d, x)$, with its size $x$, then we have: 
+2. In the presence of competition between individuals, the death intensity of an individual $I$ also depends on other individuals $J$ in the population. For example, if $I=(\tau^b,\tau^d, x)$, with its size $x$, then we have: 
 $$
     W^d(t,I,J) = (x_J - x)^+ \mathbf{1}_{\{\tau^d_J > t\}}, \quad \forall \; J=(\tau^b_J,\tau^d_J , x_J).
 $$ {#eq-ex-interaction}
-This can be interpreted as follows: if the individual $I$ meets randomly an individual $J$ alive at time $t$, and of bigger size $x_J > x$, then he can die at the intensity $x_J-x$. If $J$ is smaller than $I$, then he cannot kill $I$. The bigger is the size $x$ of $I$, the lower is his death intensity $\lambda^d_t(I,Z_t)$ defined by 
+This can be interpreted as follows: if the individual $I$ meets randomly an individual $J$ alive at time $t$, and of bigger size $x_J > x$, then he can die at the intensity $x_J-x$. If $J$ is smaller than $I$, then it cannot kill $I$. The bigger is the size $x$ of $I$, the lower is its death intensity $\lambda^d_t(I,Z_t)$ defined by 
 $$
     \lambda^d_t(I,Z_t) = \sum_{\genfrac{}{}{0pt}{2}{J\in Z_t,}{x_J > x}} (x_J -x)\mathbf{1}_{\{\tau^d_J > t\}}.
 $$
@@ -345,12 +347,12 @@ Informally, this means that when the population size increases, events with inte
 
 :::
 
-### Events intensity bounds
+### Events intensity bounds {.unnumbered}
 
 The simulation algorithms implemented in `IBMPopSim` are based on an acceptance/rejection procedure, which requires the user to specify bounds for the various events intensities $\Lambda^e_t(Z_t)$. These bounds are defined differently depending on the expression of the intensity.
 
 ::: {#cnj-intensity-poisson} 
-For all events $e \in \mathcal{P}$ with Poisson intensity @eq-poisson-intensity, the intensity is assumed to be bounded on $[0,T]$:
+For all events $e \in \mathcal{P}$ with Poisson intensity (@eq-poisson-intensity), the intensity is assumed to be bounded on $[0,T]$:
 $$
     \forall t \in [0,T], \quad \Lambda^e_t(Z_t) = \mu^e(t) \leq \bar \mu^e.
 $$
@@ -359,7 +361,7 @@ $$
 When $e \in \mathcal{E} \cup \mathcal{E}_W$, $\Lambda^e_t(Z_t) =\sum_{k=1}^{N_t} \lambda^e_t(I_k,Z_t)$, assuming that $\Lambda^e_t(Z_t)$ is uniformly bounded is too restrictive since the event intensity depends on the population size. In this case, the assumption is made on the individual intensity $\lambda^e$ or on the interaction function $W^e$, depending on the situation.
 
 ::: {#cnj-intensity1}
-For all event types $e \in \mathcal{E}$, the associated individual event intensity $\lambda^e$ with no interactions, _i.e._ $\lambda^e$ verifies @eq-intensity-no-interaction, is assumed to be uniformly bounded:
+For all event types $e \in \mathcal{E}$, the associated individual event intensity $\lambda^e$ with no interactions (@eq-intensity-no-interaction) is assumed to be uniformly bounded:
 $$
     \lambda^e(t, I) \leq \bar \lambda^e, \quad \forall \;  t\in [0, T],  \;   I \in \mathcal{I}.
 $$
@@ -389,14 +391,14 @@ This bound is linear in the population size if there are no interactions, and qu
 ## Pathwise representation of stochastic IBM
 
 Since the seminal paper of @FouMel04, it has been shown in many examples that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. In the following, we introduce a unified framework for the pathwise representation of the class of stochastic IBMs introduced above. 
-Some recalls on Poisson random measures are presented in the Appendix @sec-recall-poisson, and for more details on these representations of particular examples, we refer to the abundant literature on the subject.
+Some recalls on Poisson random measures are presented in the Appendix @sec-recall-poisson, and for more details on these representations of particular examples, we refer to the abundant literature on the subject (see [@bremaud1981point, @Cin11] and the references therein).
 
 In the following we consider an individual-based stochastic population $(Z_t)_{t\in [0,T]}$, keeping the notations introduced in @sec-events and @sec-event-intensity for the events and their intensities.
-In particular, the set of events types that define the population evolution is denoted by $\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E$, with $\mathcal{P}$ the set of events types with Poisson intensity verifying @cnj-intensity-poisson, $\mathcal{E}$ the set of events types with individual intensity and no interaction, verifying @cnj-intensity1 and finally $\mathcal{E}_W$ the set of event types with interactions, verifying @cnj-intensity2.
+In particular, the set of events types that define the population evolution is denoted by $\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E$, with $\mathcal{P}\,$ the set of events types with Poisson intensity verifying @cnj-intensity-poisson, $\mathcal{E}$ the set of events types with individual intensity and no interaction, verifying @cnj-intensity1 and finally $\mathcal{E}_W$ the set of event types with interactions, verifying @cnj-intensity2.
 
-### Non-explosion criterion
+### Non-explosion criterion {.unnumbered}
 
-First, one has to ensure that the number of events occurring in the population will not explode in finite time, leading to an infinite simulation time. @cnj-intensity1 and @cnj-intensity2 are not sufficient to guarantee the non explosion of the event number, due to the potential explosion of the population size in the presence of interactions. An example is the case when only birth events occur, with an intensity $\Lambda^b_t(Z_t) = C_b (N_t^a)^2$ ($W^b(t, I,J) =C_b$). Then, the number of alive individuals $(N_t^a)_{t\geq 0}$ is a well-known pure birth process of intensity function $g(n) = C_b n^2$ (intensity of moving from state $n$ to $n+1$). This process explodes in finite time, since $g$ does not verify the necessary and sufficient non explosion criterion for pure birth Markov processes: $\sum_{n=1}^\infty \frac{1}{g(n)} = \infty$ (see e.g. Theorem 2.2 in [@BanMel15]). There is thus an explosion in finite time of birth events.
+First, one has to ensure that the number of events occurring in the population will not explode in finite time, leading to an infinite simulation time. @cnj-intensity1 and @cnj-intensity2 are not sufficient to guarantee the non explosion of the event number, due to the potential explosion of the population size in the presence of interactions. An example is the case when only birth events occur, with an intensity $\Lambda^b_t(Z_t) = C_b (N_t^a)^2$ (i.e. when $W^b(t, I,J) =C_b$). Then, the number of alive individuals $(N_t^a)_{t\geq 0}$ is a well-known pure birth process of intensity function $g(n) = C_b n^2$ (intensity of moving from state $n$ to $n+1$). This process explodes in finite time, since $g$ does not verify the necessary and sufficient non explosion criterion for pure birth Markov processes: $\sum_{n=1}^\infty \frac{1}{g(n)} = \infty$ (see e.g. Theorem 2.2 in [@BanMel15]). There is thus an explosion in finite time of birth events.
 
 This example shows that the important point for non explosion is to control the population size. We give below a general sufficient condition on birth and entry event intensities, in order for the population size to stay finite in finite time. This ensures that the number of events does not explode in finite time. Informally, the idea is to control the intensities by a pure birth intensity function verifying the non-explosion criterion.
 
@@ -419,7 +421,7 @@ If $e \in \mathcal{E}$, $\lambda_t^e(I,Z) = \lambda^e(t,I) \leq \bar{\lambda}^e$
 $$
     \Lambda_t^e (Z) \leq g^e(n) := nf^e(n), \quad \text{with }\sum_{n=1}^{\infty} \frac{1}{g^e(n)} = \infty.
 $$
-If $e\in \mathcal{P}$ has a Poisson intensity, then $\Lambda_t^e(Z) =\mu^e_t$ always verifies the previous equation with $g^e(n) = \bar \mu^e$.
+If $e\in \mathcal{P}\,$ has a Poisson intensity, then $\Lambda_t^e(Z) =\mu^e_t$ always verifies the previous equation with $g^e(n) = \bar \mu^e$.
 
 Before introducing the IBM SDE, let us give an idea of the equation construction. Between two successive events, the population composition $Z_t$ stays constant, since the population process $(Z_t)_{t \geq 0}$ is a pure jump process.
 Furthermore, since each event type is characterized by an intensity function, the jumps occurring in the population can be represented by restriction and projection of a Poisson measure defined on a larger state space. 
@@ -454,17 +456,17 @@ $$
 $$
 :::
 
-The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion is more technical and rely on pathwise comparison result, generalizing those obtained in [@KaaElK20]. An alternative pathwise representation of the population process, inspired by the randomized @alg-randomized is given as well in @prp-randomized.
+The proof of @lem-non-explosion, detailed in Appendix @sec-prf-lem-non-explosion is more technical and relies on a pathwise comparison result, generalizing those obtained in [@KaaElK20]. An alternative pathwise representation of the population process, inspired by the randomized @alg-randomized is given as well in @prp-randomized.
 
 # Population simulation {#sec-simulation}
 
-We now present the main algorithm for simulating the evolution of an IBM over $[0,T]$.The algorithm implemented in `IBMPopSim` allows the exact simulation of @eq-sde-eq-Z, based on an acceptance/reject algorithm for simulating random times called *thinning*. The exact simulation of event times with this acceptance/reject procedure is closely related to the simulations of inhomogeneous Poisson processes by the so-called thinning algorithm, often attributed to @LewShe79. 
+We now present the main algorithm for simulating the evolution of an IBM over $[0,T]$. The algorithm implemented in `IBMPopSim` allows the exact simulation of @eq-sde-eq-Z, based on an acceptance/reject algorithm for simulating random times called *thinning*. The exact simulation of event times with this acceptance/reject procedure is closely related to the simulations of inhomogeneous Poisson processes by the so-called thinning algorithm, often attributed to @LewShe79. 
 The simulation methods for inhomogeneous Poisson processes can be adapted to IBMs, and we introduce in this section a general algorithm extending those by @FouMel04 (see also @FerTra09, @Ben10).
 
 The algorithm is based on exponential "candidate" event times, chosen with a (constant) intensity which must be greater than the global event intensity $\Lambda_t(Z_t)$ (@eq-global-intensity). Starting from time $t$, once a candidate event time $t + \bar T_\ell$ has been proposed, a candidate event type $e$ (birth, death,\...) is chosen with a probability $p^e$ depending on the event intensity bounds $\bar \mu^e$, $\bar \lambda^e$ and $\bar W^e$, as defined in @cnj-intensity1 and @cnj-intensity2. 
 An individual $I$ is then drawn from the population. 
 Finally, it remains to accept or reject the candidate event with a probability $q^e(t,I,Z_t)$ depending on the true event intensity. 
-If the candidate event time is accepted, then the event $e$ occurs at time $t + \bar T_\ell$ to the individual $I$. The main idea of the algorithm implemented can be summarized as follows:
+If the candidate event time is accepted, then the event $e$ occurs at time $t + \bar T_\ell$ to the individual $I$. The main idea of the implemented algorithm can be summarized as follows:
 
 1. Draw a candidate time $t + \bar T_\ell$ and candidate event type $e$.
 2. Draw a uniform variable $\theta \sim \mathcal{U}([0, 1])$ and individual $I$.
@@ -531,7 +533,7 @@ $$
     \sup_{t\in[0,T]} \lambda_j(t) \le \bar \lambda_j, \text{ and let }
     \bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j.
 $$ 
-Recall that such multivariate counting process can be rewritten as a Poisson random measure $N= \sum_{k\geq 1} \delta_{(T_k,J_k)}$ on ${\mathbb{R}}^+\times \mathcal{J}$ (see e.g. Sec. 2 of Chapter 6 in [@Cin11]), where $T_k$ is the $k$th jump time of $\sum_{j\in \mathcal{J}} N^j$ and $J_k$ corresponds to the component of the the vector which jumps. In particular, $N^j_t = N([0,t]\times \{j\})$.
+Recall that such multivariate counting process can be rewritten as a Poisson random measure $N= \sum_{k\geq 1} \delta_{(T_k,J_k)}$ on ${\mathbb{R}}^+\times \mathcal{J}$ (see e.g. Sec. 2 of Chapter 6 in [@Cin11]), where $T_k$ is $k$th jump time of $\sum_{j\in \mathcal{J}} N^j$ and $J_k$ corresponds to the component of the the vector which jumps. In particular, $N^j_t = N([0,t]\times \{j\})$.
 
 Once again the simulation of such process can be obtained from the simulation of a (homogeneous) multivariate Poisson process of intensity vector $(\bar{\lambda}_j)_{j \in \mathcal{J}}$, extended into a Poisson measures by adding marks on ${\mathbb{R}}^+$. 
 Thus, we introduce the Marked Poisson measure $\bar Q = \sum \delta_{(\bar T_\ell, \bar J_\ell, \bar \Theta_\ell)}$ on ${\mathbb{R}}^+  \times \mathcal{J}\times {\mathbb{R}}^+$, such that:
@@ -569,7 +571,7 @@ is an inhomogeneous Poisson process of intensity vector $(\lambda_j(t))_{j\in\ma
 \begin{algorithm}
 \caption{Thinning algorithm for multivariate inhomogeneous Poisson processes.}
 \begin{algorithmic}
-    \State \textbf{Input:} Functions $\lambda_j: [0,T] \to [0,\bar \lambda]$ and $\bar \lambda_j$, $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$
+    \State \textbf{Input:} Functions and bounds $(\lambda_j, \bar \lambda_j)$, $\lambda_j: [0,T] \to [0,\bar \lambda_j]$ and $\bar \Lambda = \sum_{j \in \mathcal{J}} \bar \lambda_j$
     \State \textbf{Output:} Points $(T_k, J_k)$ of Poisson measure $N$ on $[0,T] \times \mathcal{J}$
     \State Initialization $T_0 \longleftarrow 0$, $\bar T_0 \longleftarrow 0$
     \While{$T_k < T$}
@@ -604,11 +606,11 @@ One of the main difficulty is that the intensity of events is not deterministic 
 
 We first present the construction of the first event at time $T_1$.
 
-### First event simulation
+### First event simulation {.unnumbered}
 
 Before the first event time, on $\{ t < T_1 \}$, the population composition is constant : $Z_t = Z_0 = \{ I_1, \dots, I_{N_0}\}$. For each type of event $e$ and individual $I_k$, $k \in \{1,\dots N_0\}$, we denote by $N^{k,e}$ the counting process of intensity $\lambda_t^e (I_k,Z_t)$, counting the occurrences of the events of type $e$ happening to the individual $I_k$. Then, the first event $T_1$ is the first jump time of the multivariate counting vector $(N^{(k,e)})_{ (k,e) \in \mathcal{J}_0}$, with $\mathcal{J}_0 = \{1,\dots , N_0\}\times \big(\mathcal{E} \cup \mathcal{E}_W \big)$.
 
-Since the population composition is constant before the first event time, each counting process $N^{j}$ coincides on $[0,T_1[$ with an inhomogeneous Poisson process, of intensity $\lambda_t^e (I_k,Z_0)$. Thus (conditionally to $Z_0$), $T_1$ is also the first jump time of an inhomogeneous multivariate Poisson process $N^0 = (N^{0,j})_{j \in \mathcal{J}_0}$ of intensity function $(\lambda_j)_{j\in \mathcal J_0}$, defined for all $j = (k,e) \in \mathcal{J}_0$ by:
+Since the population composition is constant before the first event time, each counting process $N^{j}$ with $j=(k,e) \in \mathcal{J}_0$ coincides on $[0,T_1[$ with an inhomogeneous Poisson process, of intensity $\lambda_t^e (I_k,Z_0)$. Thus (conditionally to $Z_0$), $T_1$ is also the first jump time of an inhomogeneous multivariate Poisson process $N^0 = (N^{0,j})_{j \in \mathcal{J}_0}$ of intensity function $(\lambda_j)_{j\in \mathcal J_0}$, defined for all $j = (k,e) \in \mathcal{J}_0$ by:
 $$
     \lambda_j(t) = \lambda^e_t(I_k,Z_0) \le \bar \lambda^e_0 \quad \text{with} \quad \bar \lambda^e_0 = \bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_0 \mathbf{1}_{e \in \mathcal{E}_W},
 $$
@@ -766,7 +768,7 @@ The population processes $(Z_t)_{t\in [0,T]}$ simulated by the @alg-interaction 
 
 ::: {.proof}
 The only difference between @alg-interaction and @alg-randomized is in the acceptance/rejection step of proposed events, in the presence of interactions.
-In @alg-randomized , a proposed event $(\bar T_\ell, \bar E_\ell, \bar K_\ell)$, with $\bar E_l \in \mathcal{E}_W$ an event with interaction, is accepted as a true event in the population if
+In @alg-randomized , a proposed event $(\bar T_\ell, \bar E_\ell, \bar K_\ell)$, with $\bar E_l \in \mathcal{E}_W$ (an event with interaction), is accepted as a true event in the population if
 $$
     \bar \Theta_\ell \le W^{\bar E_\ell}(\bar T_\ell, I_{\bar K_\ell}, I_{\bar J_\ell}), \text{ with } (\bar \Theta_\ell, \bar J_\ell) \sim  \mathcal{U}\big([0, \bar W^{\bar E_\ell}] \times \{1, \dots, N_{T_k}\} \big).
 $$
@@ -813,7 +815,7 @@ The most important step of the model creation is the events creation. The call t
 #| eval: false 
 mk_event_CLASS(type="TYPE", name="NAME", ...)
 ```
-where `CLASS` is replaced by the class of the event intensity, described in @sec-event-intensity , and `type` corresponds to the event type, described in Section @sec-events.
+where `CLASS` is replaced by the class of the event intensity, described in @sec-event-intensity , and `type` corresponds to the event type, described in @sec-events.
 @tbl-intensity-classes and @tbl-event-types summarize the different possible choices for intensity classes and types of event. The optional argument `name` gives a name to the event. If not specified, the name of the event is its type, for instance `death`. However, a name must be specified if the model is composed of several events with the same type (for instance when there are multiple death events corresponding to different causes of death). The other arguments depend on the intensity class and on the event type.
 
 ::: {#tbl-panel layout-ncol=2}
@@ -907,7 +909,7 @@ In most cases, the `random` algorithm is much faster than the `full` algorithm. 
 
 _Events creation with Poisson and Inhomogeneous Poisson intensity_  
 
-For events $e\in \mathcal{P}$ with an intensity $\mu^e(t)$ which does not depend on the population, the event intensity is of class `inhomogeneous_poisson` or `poisson` depending on whether or not the intensity depends on time (in the second case the intensity is constant).
+For events $e\in \mathcal{P}\,$ with an intensity $\mu^e(t)$ which does not depend on the population, the event intensity is of class `inhomogeneous_poisson` or `poisson` depending on whether or not the intensity depends on time (in the second case the intensity is constant).
 
 For Poisson (constant) intensities the events are created with the function
 ```{r}
@@ -928,7 +930,8 @@ When the intensity $(\mu^e(t))$ depends on time, the event can be created simila
 ```{r}
 #| eval: false
 mk_event_inhomogeneous_poisson(type = "TYPE",
-                               name = "NAME",intensity = "CONSTANT", ...)
+                               name = "NAME",
+                               intensity = "INTENSITY", ...)
 ```
 
 ### Event kernel code {#sec-event-kernel-code}
@@ -945,7 +948,7 @@ individual newI = I;
 newI.birth_date = t;
 pop.add(newI);
 ```
-The user can modify the birth kernel, by specify the argument `kernel_code` of `mk_event_CLASS`. In this case, the generated code is
+The user can modify the birth kernel, by specifying the argument `kernel_code` of `mk_event_CLASS`. In this case, the generated code is
 ```{r}
 #| eval: false
 individual newI = I;
@@ -955,7 +958,7 @@ pop.add(newI);
 ```
 where `_KERNEL_CODE_` is replaced by the content of the `kernel_code` argument.
 
-- **Entry event** When an individual `I` enters the population, `I.entry` is set automatically as the date at which the individual enters the population. When an entry occurs the individual entering the population is not of age $0$. In this case, the user must specify the `kernel_code` argument indicating how the age and characteristics of the new individual are chosen. For instance, the code below creates an event of type `entry`, named `ev_example`, where individuals enter the population at a Poisson constant intensity. When an individual `newI` enters the population at time `t`, his age is chosen as a normally distributed random variable, with mean 20 and variance 4.
+- **Entry event** When an individual `I` enters the population, `I.entry` is set automatically as the date at which the individual enters the population. When an entry occurs the individual entering the population is not of age $0$. In this case, the user must specify the `kernel_code` argument indicating how the age and characteristics of the new individual are chosen. For instance, the code below creates an event of type `entry`, named `ev_example`, where individuals enter the population at a Poisson constant intensity. When an individual `newI` enters the population at time `t`, its age is chosen as a normally distributed random variable, with mean 20 and variance 4.
 ```{r}
 #| eval: false
 mk_event_poisson(
@@ -1106,7 +1109,7 @@ function to an existing population, in order to identify each individual
 with a unique integer.
 
 Base functions to study the simulation outputs are provided in the
-package. For instance, the population age pyramid can computed at a give
+package. For instance, the population age pyramid can computed at a given
 time, as well as death and exposure tables. Several illustrations of the
 outputs functions are given in the example @sec-insurance-portfolio and
 @sec-example-interaction.
@@ -1301,7 +1304,7 @@ including more and more individuals in risk class 1 with higher
 mortality rates, but with variations across age classes. To illustrate
 the composition of the total population at the end of the simulation
 ($t=30$), we present in @fig-insur-a the age pyramid of the final composition of
-the portfolio obtained with the `age_pyramid` and `plot` function of the
+the portfolio obtained with the `age_pyramid` and `plot` functions of the
 `pyramid` class.
 
 ```{r, echo=FALSE, fig.width=8}
@@ -1414,7 +1417,7 @@ $$
 $${#eq-interaction-birth-intensity}
 Thus,
 smaller individuals have a higher birth intensity. When a birth occurs,
-the new individual inherit the same birth size $x_0$ as its parent with
+the new individual inherits the same birth size $x_0$ as its parent with
 high probability $1-p$, or a mutation can occur with probability $p$,
 resulting in a birth size given by
 $$
@@ -1653,7 +1656,7 @@ is an inhomogeneous Poisson process of rate $\Lambda(t)= \nu(t, F)\tilde  \Lambd
 When the transition probability kernel $K$ does not depend on the time: $K(t, A) = \nu(A)$ for some probability measure $\nu$, then the marks $(\Theta_k)_{k \ge 1}$ form an *i.i.d.* sequence with distribution $\nu$, independent of $(T_k)_{k \ge 1}$.
 :::
 
-The preceding proposition thus yields a straight forward iterative simulation procedure for a Marked Poisson process on $[0,T]\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c>0$. The procedure is described in @alg-marked-poisson.
+The preceding proposition thus yields a straightforward iterative simulation procedure for a Marked Poisson process on $[0,T]\times F$ with mean measure $\mu(\mathrm{d}t, \mathrm{d}y) = c \mathrm{d}t K(t, \mathrm{d}y)$ and $c>0$. The procedure is described in @alg-marked-poisson.
 
 
 ```pseudocode
@@ -1690,7 +1693,7 @@ The mean measure is then $\mu(\mathrm{d} t, \mathrm{d} y) = \mathrm{d} t {1}_{[0
 
 ## Pathwise representation of IBMs {#sec-pathwise-representation}
 
-**Notation reminder** The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. In an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. 
+**Notation reminder** The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. If an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. 
 If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. 
 If $e \in \mathcal{P}$, then events of type $e$ occur in the population at a Poisson intensity of $(\mu^e_t)$.
 
@@ -1715,12 +1718,12 @@ $$
     Z^{n+1}_t  =  Z_{t\wedge T_n}^n +\int_{t\wedge T_n}^{t} \int_{ \mathcal{J}\times \mathbb R^+ }\phi^e (s , I_k)  \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{s^-}^{n+1} )\}} \mathbf{1}_{\{k \leq N_{s^-}^{n+1} \} }Q (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta ).
 \end{aligned}
 $$ 
-Since, $Z^n$ is a solution of @eq-sde-eq-Z on $[0,T_n]$ coinciding with $Z^{n+1}$, this achieves to prove that $Z^{n+1}$ is solution of @eq-sde-eq-Z on $[0,T_{n+1}]$.
+Since, $Z^n$ is a solution of @eq-sde-eq-Z on $[0,T_n]$ coinciding with $Z^{n+1}$ this achieves to prove that $Z^{n+1}$ is solution of @eq-sde-eq-Z on $[0,T_{n+1}]$.
 Finally, let $Z =\lim_{n\to \infty } Z^n$. For all $n\geq 1$, $T_n$ is the $n$--th event time of $Z$, and $Z$ is solution of @eq-sde-eq-Z on all time intervals $[0,T_n\wedge T]$ by construction.
 
 By @lem-non-explosion $T_n \underset{n\to \infty}{\longrightarrow} \infty$. Thus, by letting $n\to \infty$ we can conclude that $Z$ is a solution of @eq-sde-eq-Z on $[0,T]$.
 
-- Step 2. Let $\tilde Z$ be a solution of @eq-sde-eq-Z. Using the same arguments than in Step 1, it is straight forward to show that $\tilde Z$ coincides with $Z^n$ on $[0,T_n]$, for all $n \geq 1$. Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.
+- Step 2. Let $\tilde Z$ be a solution of @eq-sde-eq-Z. Using the same arguments than in Step 1, it is straightforward to show that $\tilde Z$ coincides with $Z^n$ on $[0,T_n]$, for all $n \geq 1$. Thus, $\tilde{Z} = Z$, with achieves to prove uniqueness.
 :::
 
 ### Proof of @lem-non-explosion {#sec-prf-lem-non-explosion} 
@@ -1847,7 +1850,7 @@ Furthermore, the solution of
 @eq-sde-eq-Z. 
 :::
 
-The proof @thm-EqZrandomized  follows the same steps than the proof of
+The proof of @thm-EqZrandomized  follows the same steps than the proof of
 @thm-eq-Z.
 
 
@@ -1892,7 +1895,7 @@ $$
 $$ {#eq-barmun}
 with $\lambda^e_n = \bar \lambda^e \mathbf{1}_{e \in \mathcal{E}} + \bar W^e N_{T_n} \mathbf{1}_{e \in \mathcal{E}_W}$.
 
-By definition, $\bar Q^n$ has no jumps before $T_n$.\
+By definition, $\bar Q^n$ has no jump before $T_n$.\
 As for the first event, the triplet $(T_{n+1}, E_{n+1}, I_{n+1})$ is
 determined by the first jump of the measure
 $Q^n (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e) := \int_{\mathbb R^+} \mathbf{1}_{\{\theta \leq \lambda_s^e(I_k, Z_{T_n})\}}\bar Q^n (\mathrm{d}s ,\mathrm{d}k , \mathrm{d}e, \mathrm{d}\theta)$,
@@ -1928,7 +1931,7 @@ conditionally to $\mathcal{F}_{T_l}$, a Poisson measure of intensity
 $$\mathbf{1}_{\{t >  \tilde T_l\}}   \mathrm{d}t \mathbf{1}_{ \{1, \dots , \tilde N_{\tilde T_l} \}}(k) \delta_{\mathcal{J}}(\mathrm{d}k, \mathrm{d}e)\mathbf{1}_{[0, \tilde \lambda^e_n]}(\theta) \mathrm{d}\theta.$$
 It follows easily by induction that $\tilde{Q}^l$  has thus the same distribution than
 $\bar Q^l$, the Poisson measure with the conditional intensity $\bar \mu^l$
-defined in @eq-barmun. Thus, $Z$ in an exact simulation of @eq-sde-eq-Z.
+defined in @eq-barmun. Thus, $Z$ is an exact simulation of @eq-sde-eq-Z.
 
 ## Acknowledgements {.appendix}
 
