@@ -390,7 +390,7 @@ This bound is linear in the population size if there are no interactions, and qu
 
 ## Pathwise representation of stochastic IBM
 
-Since the seminal paper of @FouMel04, it has been shown in many examples that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. In the following, we introduce a unified framework for the pathwise representation of the class of stochastic IBMs introduced above. 
+Since the seminal paper of @FouMel04, it has been shown that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. This representation has actually been proved only in particular case, for various models. We provide here a general mathematical framework.  
 Some recalls on Poisson random measures are presented in the Appendix @sec-recall-poisson, and for more details on these representations of particular examples, we refer to the abundant literature on the subject (see [@bremaud1981point, @Cin11] and the references therein).
 
 In the following we consider an individual-based stochastic population $(Z_t)_{t\in [0,T]}$, keeping the notations introduced in @sec-events and @sec-event-intensity for the events and their intensities.
