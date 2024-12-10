@@ -12,12 +12,12 @@ author:
         url: https://www.lpsm.paris/
   - name: Sarah Kaakai
     corresponding: true
-    email: sarah.kaakai@univ-lemans.fr
-    url: https://perso.univ-lemans.fr/~skaakai/
+    email: kaakai@math.univ-paris13.fr
+    url: https://www.math.univ-paris13.fr/~kaakai/
     affiliations:
-      - name: Le Mans Université
-        department: Laboratoire Manceau de Mathématiques
-        url: https://lmm.univ-lemans.fr/fr/
+      - name: Université Sorbonne Paris Nord, CNRS
+        department: Laboratoire Analyse, Géométrie et Applications
+        url: https://www.math.univ-paris13.fr/
       - name: Ecole Polytechnique, CNRS
         department: Centre de Mathématiques Appliquées
         url: https://cmap.ip-paris.fr/ 
@@ -391,7 +391,7 @@ This bound is linear in the population size if there are no interactions, and qu
 ## Pathwise representation of stochastic IBM
 
 Since the seminal paper of @FouMel04, it has been shown that a stochastic IBM dynamics can be defined rigorously as the unique solution of an SDE driven by Poisson measures, under reasonable non explosion conditions. This representation has actually been proved only in particular case, for various models. We provide here a general mathematical framework.  
-Some recalls on Poisson random measures are presented in the Appendix @sec-recall-poisson, and for more details on these representations of particular examples, we refer to the abundant literature on the subject (see [@bremaud1981point, @Cin11] and the references therein).
+Some recalls on Poisson random measures are presented in the Appendix @sec-recall-poisson, and for more details on these representations of particular examples, we refer to the abundant literature on the subject (see [@bremaud1981point; @Cin11] and the references therein).
 
 In the following we consider an individual-based stochastic population $(Z_t)_{t\in [0,T]}$, keeping the notations introduced in @sec-events and @sec-event-intensity for the events and their intensities.
 In particular, the set of events types that define the population evolution is denoted by $\mathcal{P} \cup \mathcal{E} \cup \mathcal{E}_W \subset E$, with $\mathcal{P}\,$ the set of events types with Poisson intensity verifying @cnj-intensity-poisson, $\mathcal{E}$ the set of events types with individual intensity and no interaction, verifying @cnj-intensity1 and finally $\mathcal{E}_W$ the set of event types with interactions, verifying @cnj-intensity2.
@@ -512,7 +512,7 @@ $$
 \end{aligned}
 $$
 
-![Realization of a Marked Poisson measure $\bar Q$ on $[0,T]$ with mean measure $\bar \mu(\mathrm{d} t, \mathrm{d} \theta) = \mathrm{d} t \mathbf{1}_{[0, \bar \Lambda]}(\theta) \mathrm{d} \theta$ (red crosses), and realization of the restriction $\bar Q^\Delta$ where $\Delta = \{ (t,\theta)\in [0,T]\times[0, \bar \Lambda], \theta \leq \Lambda(t) \}$ (blue circles). The projection of $\bar Q^\Delta$ on first component is an inhomogeneous Poisson process on $[0,T]$ of intensity $(\Lambda(t))$ and jump times $(T_k)_{k \ge 1}$.](img/plot_thinning.tex){#fig-thinning}
+![Realization of a Marked Poisson measure $\bar Q$ on $[0,T]$ with mean measure $\bar \mu(\mathrm{d} t, \mathrm{d} \theta) = \mathrm{d} t \mathbf{1}_{[0, \bar \Lambda]}(\theta) \mathrm{d} \theta$ (red crosses), and realization of the restriction $\bar Q^\Delta$ where $\Delta = \{ (t,\theta)\in [0,T]\times[0, \bar \Lambda], \theta \leq \Lambda(t) \}$ (blue circles). The projection of $\bar Q^\Delta$ on first component is an inhomogeneous Poisson process on $[0,T]$ of intensity $(\Lambda(t))$ and jump times $(T_k)_{k \ge 1}$.](img/plot_thinning.png){#fig-thinning}
 
 Finally, the inhomogeneous Poisson process is obtained by the projection @prp-proj-poisson-measure, which states that the jump times of $Q^\Delta$ are the jump times of an inhomogeneous Poisson process of intensity $(\Lambda(t))$.
 
@@ -726,7 +726,7 @@ We now present the main @alg-randomized implemented in the `popsim` function of 
 #| html-line-number: true
 #| html-line-number-punc: ":"
 #| html-no-end: false
-#| pdf-placement: "H"
+#| pdf-placement: "htb!"
 #| pdf-line-number: true
 
 \begin{algorithm}
@@ -1585,14 +1585,14 @@ In the log-scaled figure, we can observe the trend of computation time as a func
 
 ![Full vs random algorithm computation time](img/time_pop_size.png){#fig-fullvsrandom width=80%}
 
-# Appendix {.appendix}
+# Appendix 
 
-## Recall on Poisson random measures {#sec-recall-poisson .appendix} 
+## Recall on Poisson random measures {#sec-recall-poisson } 
 
 We recall below some useful properties of Poisson random measures, mainly following Chapter 6 of [@Cin11]. We also refer to [@Kal17] for a more comprehensive presentation of random counting measures.
 
 ::: {#def-poisson-random-measure} 
-## Poisson Random Measures
+## Poisson Random Measures 
 Let $\mu$ be a $\sigma$-finite diffuse measure on a Borel subspace $(E,\mathcal{E})$ of $({\mathbb{R}}^d, \mathcal{B}({\mathbb{R}}^d))$. A random counting measure $Q= \sum_{k\geq 1} \delta_{X_k}$ is a Poisson (counting) random measure of *mean measure* $\mu$ if
 
 1. $\forall A \in \mathcal{E}$, $Q(A)$ is a Poisson random variable with ${\mathbb{E}}[Q(A)]= \mu(A)$. 
@@ -1602,7 +1602,7 @@ Let $\mu$ be a $\sigma$-finite diffuse measure on a Borel subspace $(E,\mathcal{
 Let us briefly recall here some simple but useful operations on Poisson measures. In the following, $Q$ is a Poisson measure of mean measure $\mu$, unless stated otherwise.
 
 ::: {#prp-restriction-poisson-measure}
-## Restricted Poisson measure
+## Restricted Poisson measure 
 If $B \in \mathcal{E}$, then, the restriction of $Q$ to $B$ defined by 
 $$
     Q^B = \mathbf{1}_B Q = \sum_{k \ge 1} \mathbf{1}_{B}(X_k) \delta_{X_k}
@@ -1611,7 +1611,7 @@ is also a Poisson random measure, of mean measure $\mu^B = \mu(\cdot \cap B)$.
 :::
 
 ::: {#prp-proj-poisson-measure}
-## Projection of Poisson measure
+## Projection of Poisson measure 
 If $E = F_1 \times F_2$ is a product space, then the projection
 $$
     Q_1(\mathrm{d}x) = \int_{F_2} Q(\mathrm{d}x , \mathrm{d}y)
@@ -1691,9 +1691,9 @@ The preceding proposition thus yields a straightforward iterative simulation pro
 
 
 ![Example of Marked Poisson measure on $[0,T]$ with $m(\mathrm{d} t) = L \mathrm{d} t$ (jump times occur at Poisson arrival times of rate $L$) and with $\nu(\mathrm{d} y) = \frac{1}{L} \mathbf{1}_{[0, L]}(y) \mathrm{d} y$ (marks are drawn uniformly on $[0,L]$).
-The mean measure is then $\mu(\mathrm{d} t, \mathrm{d} y) = \mathrm{d} t {1}_{[0,L]}(y) \mathrm{d} y$.](img/plot_poisson.tex){#fig-poisson}
+The mean measure is then $\mu(\mathrm{d} t, \mathrm{d} y) = \mathrm{d} t {1}_{[0,L]}(y) \mathrm{d} y$.](img/plot_poisson.png){#fig-poisson}
 
-## Pathwise representation of IBMs {#sec-pathwise-representation}
+## Pathwise representation of IBMs {#sec-pathwise-representation  }
 
 **Notation reminder** The population's evolution is described by the measure valued process $(Z_t)_{t\geq 0}$. Several types of events $e$ can occur to individuals denoted by $I$. If an event of type $e$ occur to the individual $I$ at time $t$, then the population state $Z_{t^-}$ is modified by $\phi^e(t,I)$. 
 If $e\in \mathcal{E} \cup \mathcal{E}_W$, then events of type $e$ occur with an intensity $\sum_{k=1}^{N_t} \lambda_t^e(I,Z_t)$, with $\lambda_t^e(I,Z_t)$ defined by @eq-individual-intensity. 
@@ -1856,7 +1856,7 @@ The proof of @thm-EqZrandomized  follows the same steps than the proof of
 @thm-eq-Z.
 
 
-## Proof of @thm-interaction {#sec-prf-thm-interaction}
+## Proof of @thm-interaction {#sec-prf-thm-interaction  }
 
 For ease of notation, we prove
 the case when $\mathcal{P} =\emptyset$ (there are no events with Poisson
@@ -1935,7 +1935,7 @@ It follows easily by induction that $\tilde{Q}^l$  has thus the same distributio
 $\bar Q^l$, the Poisson measure with the conditional intensity $\bar \mu^l$
 defined in @eq-barmun. Thus, $Z$ is an exact simulation of @eq-sde-eq-Z.
 
-## Acknowledgements {.appendix}
+## Acknowledgements
 
 The research of Sarah Kaakai is funded by the European Union (ERC, SINGER, 101054787). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Council. Neither the European Union nor the granting authority can be held responsible for them.
 
@@ -1943,6 +1943,7 @@ The research of Sarah Kaakai is funded by the European Union (ERC, SINGER, 10105
 
 ::: {#refs}
 :::
+
 
 # Session information {.appendix .unnumbered}
 
