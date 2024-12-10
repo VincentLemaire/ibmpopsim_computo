@@ -1679,7 +1679,7 @@ The preceding proposition thus yields a straightforward iterative simulation pro
     \State Initialization draw $T_1 \sim \mathcal{E}(c)$ and draw $Y_1 \sim K(T_1, \mathrm{d} y)$ 
     \While{condition}
         \State increment iterative variable $k \longleftarrow k+1$
-        \State compute next jump time compute next jump time $T_k \longleftarrow T_{k-1} + \mathcal{E}(c)$
+        \State compute next jump time $T_k \longleftarrow T_{k-1} + \mathcal{E}(c)$
         \State draw a conditional mark $Y_k \sim K(T_k, \mathrm{d} y)$    
     \EndWhile
 \end{algorithmic}
